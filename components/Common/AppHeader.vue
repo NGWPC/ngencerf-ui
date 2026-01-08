@@ -243,6 +243,7 @@ onMounted(() => {
         sizeLogWindow();
         sizeAboutWindow();
     });
+    document.addEventListener('keydown', handleGlobalHotkey);
     document.getElementById("userMenu")?.addEventListener("mouseout", function () { hideUserMenu() });
 
     setTimeout(() => {
@@ -260,6 +261,7 @@ onUnmounted(() => {
     window.removeEventListener('resize', function (event) {
         //
     });
+    document.removeEventListener('keydown', handleGlobalHotkey);
 });
 
 // Handle submitTimeDate changes
@@ -404,6 +406,14 @@ const MenuChanged = (e: MouseEvent) => {
             }
         }
     });
+}
+
+const handleGlobalHotkey = (e: KeyboardEvent) => {
+  // Check for Ctrl + H
+  if (e.ctrlKey && e.key === 'h') {
+    displayHelp();
+    e.preventDefault();
+  }
 }
 
 </script>
