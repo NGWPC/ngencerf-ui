@@ -464,8 +464,13 @@ const saveFormulationData = () => {
             toast.add(tMsg); addToastRecord(tMsg);
           });
         }
-        const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Formulation Data Saved', detail: response?._data?.message, life: ToastTimeout.timeoutInfo };
-        toast.add(tMsg); addToastRecord(tMsg);
+        if (response._data.formulation_errors) {
+          const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Formulation Data Saved with Errors', detail: response?._data?.message, life: ToastTimeout.timeoutInfo };
+          toast.add(tMsg); addToastRecord(tMsg);
+        } else {
+          const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Formulation Data Saved', detail: response?._data?.message, life: ToastTimeout.timeoutSuccess };
+          toast.add(tMsg); addToastRecord(tMsg);
+        }
         isLoading.value = false;
         formulationNameHasChanged.value = false;
         modulesHaveChanged.value = false;
@@ -473,22 +478,8 @@ const saveFormulationData = () => {
         updateJobData();
       } else {
         isLoading.value = false;
-        useApiErrorResponsePreprocess(response).forEach(message => {
-          let msgSummary = '';
-          switch(useApiResponseToastSeverityCode(response?.status)) {
-            case 'error':
-              msgSummary = 'Save Formulation Data Failed';
-              break;
-            case 'warn':
-              msgSummary = 'Formulation Accepted with Notices';
-              break;
-            case 'success':
-              msgSummary = 'Formulation Accepted';
-              break;
-          }
-          const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: msgSummary, detail: message, life: useApiResponseToastSeverityLife(response?.status) };
-          toast.add(tMsg); addToastRecord(tMsg);
-        });
+        const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Save Formulation Data Failed', detail: response?._data?.message, life: ToastTimeout.timeoutError };
+        toast.add(tMsg); addToastRecord(tMsg);
       }
     });
   }
