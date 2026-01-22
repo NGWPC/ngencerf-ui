@@ -66,6 +66,8 @@ const {
   selectedLogStatus
 } = storeToRefs(useLogStore());
 const {
+  populateLogListOptions,
+  resetUserLogRefs,
   updateLogRefs
 } = useLogStore();
 

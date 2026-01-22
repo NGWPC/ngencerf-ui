@@ -57,7 +57,7 @@
             <div class="col-span-1">
               <div>
                 <span class="font-medium">Status: </span>
-                {{ overallColdStartForecastStatus ?? 'Unknown' }}
+                {{ overallColdStartForecastStatus }}
               </div>
               <div>
                 <span class="font-medium">Submit Time: </span>
@@ -200,8 +200,7 @@ const {
 
 const {
   selectedLogCategory,
-  logList,
-  logListOptions
+  logList
 } = storeToRefs(useLogStore());
 const {
   populateLogListOptions,
