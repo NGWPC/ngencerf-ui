@@ -163,17 +163,17 @@ export const useLogStore = defineStore('LogStore', () => {
       }
     }
 
-    if (currentJobStatus.value && currentJobStatus.value.includes('Failed') && logListOptions.value.length > 0) {
-      // Skip directly to first available log if status is Failed
-      selectedLogCategory.value = (logListOptions.value.at(-1)).name;
+    if ((!selectedLogCategory.value || (currentJobStatus.value && currentJobStatus.value.includes('Failed'))) && logListOptions.value.length > 0) {
+      // Skip directly to first available log if status is Failed or no option has been picked
+      selectedLogCategory.value = logListOptions.value[0].name;
       nextTick(() => {
-        if (selectedtempLogList.length > 1) {
-            selectedLogName.value = selectedtempLogList.at(-1).name;
+        if (!selectedLogList.value || selectedLogList.value.length === 0) {
+          selectedLogList.value = logLists.value[selectedLogCategory.value];
+        }
+        if (selectedLogList.value && selectedLogList.value.length > 0) {
+          selectedLogName.value = selectedLogList.value.at(-1).name;
         }
       });
-    } else if (!selectedLogCategory.value) {
-      // Start with first option
-      selectedLogCategory.value = logListOptions.value[0].name;
     }
 
     logLists.value = logLists.value;
