@@ -9,7 +9,7 @@
           <span @mouseenter="showServerInfo" @mouseleave="hideServerInfo">Version:
             {{ serverInfo?.ngenCerf_version }}</span>
         </div>
-        <div class="copyright">Copyright {{ serverInfo?.ngenCerf_copyright}}</div>
+        <div class="copyright" @click="testTimeout()">Copyright {{ serverInfo?.ngenCerf_copyright}}</div>
       </div>
     </div>
   </div>
@@ -17,8 +17,17 @@
 
 <script lang="ts" setup>
 import { generalStore } from "@/stores/common/GeneralStore";
+import { useUserDataStore } from "@/stores/common/UserDataStore";
+
+import { useToast } from "primevue/usetoast";
+import type { ToastMessageOptions } from "primevue/toast";
+import { ToastTimeout } from "@/composables/NgencerfEnums";
+
+const toast = useToast();
 
 const { serverInfo } = storeToRefs(generalStore());
+const { addToastRecord } = generalStore();
+const { testServerTimeout } = useUserDataStore();
 
 const showServerInfo = () => {
   const e = document.getElementById('FloatingInfo');
@@ -28,6 +37,18 @@ const showServerInfo = () => {
 const hideServerInfo = () => {
   const e = document.getElementById('FloatingInfo');
   (e as HTMLElement).style.display = "none"
+}
+
+const testTimeout = async() => {
+  await testServerTimeout(40).then(response => {
+    if (response?.message) {
+      const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Timeout test successful', detail: response.message, life: ToastTimeout.timeoutInfo };
+      toast.add(tMsg); addToastRecord(tMsg);
+    } else {
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Timeout test unsuccessful', detail: 'Server timed out before it could return a response.', life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    }
+  });
 }
 
 

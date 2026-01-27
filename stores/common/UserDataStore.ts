@@ -532,6 +532,24 @@ export const useUserDataStore = defineStore(
       selectedBulkJobActionScope.value = false;
     };
 
+    /**
+     * Test server timeout
+     */
+    const testServerTimeout = async (seconds: number): Promise<any> => {
+      const serverTimeoutResponse: any = await makeProtectedApiCall<any>(
+        `${ngencerfBaseUrl}/calibration/timeout/?seconds=${seconds.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getAccessToken()}`,
+            "Content-Type": "application/json",
+          }
+        }
+      );
+
+      return serverTimeoutResponse?._data ?? ({});
+    };
+
     return {
       userSelectedCalibrationIterationId,
       uiGageId,
@@ -596,7 +614,8 @@ export const useUserDataStore = defineStore(
       fetchUserCalibrationRunData,
       hardResetUserDataStore,
       clearUserCalibrationRunData,
-      resetFilters
+      resetFilters,
+      testServerTimeout
     };
   },
   {
