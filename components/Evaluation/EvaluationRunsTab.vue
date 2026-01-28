@@ -68,7 +68,7 @@
       <!-- Show a list of calibration jobs from the same gage if user has chosen to Compare -->
       <div v-else-if="userEvaluationRunListDataByGage.length > 1">
         <div id="FilterDialog">
-          <label class="block text-left w-[90%]" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
+          <label class="block text-left w-[90%] required-label" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
             title="Headwater Basin Gage">Headwater Basin Gage</label>
             <div class="inline-block w-1/6 pb-3">
                 <Select id="HeadwaterBasinGageCompare" class="mt-2 basin-gage-filter text-left" v-model="uiCompareGageId"
@@ -173,17 +173,17 @@
                 </span>
               </template>
             </Column>
-            <Column :pt="ptColumn" field="formulation_name" sortable>
+            <Column :pt="ptColumn" field="job_name" sortable>
               <template #header>
                 <div class="column-header">
-                  <span>Formulation Name</span>
+                  <span>Job Name</span>
                 </div>
               </template>
               <template #body="slotProps">
-                <span v-if="slotProps.data.formulation_name"
-                  :aria-label="'Formulation Name ' + slotProps.data.formulation_name"
-                  :title="'Formulation Name ' + slotProps.data.formulation_name">
-                  {{ slotProps.data.formulation_name }}
+                <span v-if="slotProps.data.job_name"
+                  :aria-label="'Job Name ' + slotProps.data.job_name"
+                  :title="'Job Name ' + slotProps.data.job_name">
+                  {{ slotProps.data.job_name }}
                 </span>
               </template>
             </Column>
@@ -354,7 +354,7 @@ const ptColumn = ref({
 
 const ptValColumns = ref({
   columnHeaderContent: { style: { "justify-content": "center" } },
-  bodyCell: { style: { "text-align": "right", "padding-right": "10px" } }
+  bodyCell: { style: { "text-align": "center", "padding-right": "10px" } }
 });
 
 const { fetchUserCalibrationRunData } = userDataStore;
@@ -384,7 +384,7 @@ const {
   evaluateValidationRunStatus,
 } = storeToRefs(evaluationCalibrationRunStore);
 
-const { calibrationDownloadJobID, calibrationDownloadFileName } = storeToRefs(useCalibrationJobStore());
+const { calibrationDownloadJobID } = storeToRefs(useCalibrationJobStore());
 
 const {
   fetchUserSelectedCalibrationValidationRunList,
@@ -414,7 +414,7 @@ const toast = useToast();
 const selectedCalibrationRun = ref<ValidatedCalibrationRunListItem>();
 const selectedCalibrationValidationRun = ref<CalibrationValidationJobData>();
 
-const formulationName = "Formulation Name";
+const jobName = "Job Name";
 
 onMounted(async() => {
   hilightTab(EvaluationTabs.tab_calibrationRuns);
@@ -459,7 +459,7 @@ onMounted(async() => {
     gageevaluationRunListHeaders.value.push({ field: 'calibration_run_id', header: "Job ID" });
     gageevaluationRunListHeaders.value.push({ field: 'status', header: "Status" });
     gageevaluationRunListHeaders.value.push({ field: 'submit_date', header: "Submit Date" });
-    gageevaluationRunListHeaders.value.push({ field: 'formulation_name', header: "Formulation Name" });
+    gageevaluationRunListHeaders.value.push({ field: 'job_name', header: "Job Name" });
     gageevaluationRunListHeaders.value.push({ field: 'gage_id', header: "Headwater Basin Gage" });
     gageevaluationRunListHeaders.value.push({ field: 'period', header: "Calibration Period" });
     gageevaluationRunListHeaders.value.push({ field: 'objective_function', header: "Objective Function" });
@@ -654,7 +654,7 @@ const viewSelectedGageCalibrationRuns = async (calibration_run_id: number, gage_
         rowData['calibration_run_id'] = calibration_job.calibration_run_id;
         rowData['status'] = calibration_job.status;
         rowData['submit_date'] = formatISOStringOrDateToYYYYMMDDHHMM(calibration_job.submit_date);
-        rowData['formulation_name'] = calibration_job.formulation_name;
+        rowData['job_name'] = calibration_job.job_name;
         rowData['gage_id'] = calibration_job.gage_id;
         rowData['period'] = formatISOStringOrDateToYYYYMMDD(calibration_job.calibration_start_period) + ' to ' + formatISOStringOrDateToYYYYMMDD(calibration_job.calibration_end_period);
         rowData['objective_function'] = calibration_job.objective_function;
@@ -858,7 +858,7 @@ const downloadSelectedCalibrationData = async () => {
     toast.add(tMsg); addToastRecord(tMsg);
     nextTick(async () => {
       try {
-        // If successful, this job will update calibrationDownloadFileName, and watch function will trigger a Toast message
+        // If successful, this job will update calibrationDownloadJobID, and watch function will trigger a Toast message
         await getCalibrationJobZip(selectedRunId);
       } catch (error) {
         const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Download Results Error for Calibration Job ID ' + selectedRunId, detail: error, life: ToastTimeout.timeoutError };
@@ -877,13 +877,9 @@ watch(calibrationDownloadJobID, () => {
     // Display Toast message saying download was successful and then clear the Job ID/filename refs
     // to avoid interfering with next download
     let tDetail = 'Download Results zip file successfully created.'
-    if (calibrationDownloadFileName.value) {
-      tDetail = 'Download Results zip file "' + calibrationDownloadFileName.value + '" successfully created.'
-    }
     const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Download Results Successful for Calibration Job ID ' + calibrationDownloadJobID.value, detail: tDetail, life: ToastTimeout.timeoutInfo };
     toast.add(tMsg); addToastRecord(tMsg);
     calibrationDownloadJobID.value = null;
-    calibrationDownloadFileName.value = null;
   }
 });
 
@@ -976,6 +972,10 @@ const rowStyle = (data: any) => {
 #EvalRunTable,
 #JobFilterDialog {
   width: 1325px;
+}
+
+#compare-list .p-datatable-tbody > tr > td {
+  text-align: center !important;
 }
 
 #MessagesGroupWindow {

@@ -105,17 +105,17 @@
                   </span>
                 </template>
               </Column>
-              <Column :pt="ptColumn" field="formulation_name" sortable>
+              <Column :pt="ptColumn" field="job_name" sortable>
                 <template #header>
                   <div class="column-header">
-                    <span>Formulation Name</span>
+                    <span>Job Name</span>
                   </div>
                 </template>
                 <template #body="slotProps">
-                  <span v-if="slotProps.data.formulation_name"
-                    :aria-label="'Formulation Name ' + slotProps.data.formulation_name"
-                    :title="'Formulation Name ' + slotProps.data.formulation_name">
-                    {{ slotProps.data.formulation_name }}
+                  <span v-if="slotProps.data.job_name"
+                    :aria-label="'Job Name ' + slotProps.data.job_name"
+                    :title="'Job Name ' + slotProps.data.job_name">
+                    {{ slotProps.data.job_name }}
                   </span>
                 </template>
               </Column>
@@ -271,7 +271,7 @@ const { hardResetRunStatusStore } = useRunStatusStore();
 const { elapsedTimeIntervalId, calibrationStatusIntervalId, validationsStatusIntervalId } = storeToRefs(useRunStatusStore());
 
 const { calibrationJobId } = storeToRefs(generalStore());
-const { calibrationDownloadJobID, calibrationDownloadFileName } = storeToRefs(useCalibrationJobStore());
+const { calibrationDownloadJobID } = storeToRefs(useCalibrationJobStore());
 const { getMenuIndex, addToastRecord } = generalStore();
 
 const { 
@@ -690,7 +690,11 @@ const openSelectedCalibrationRun = async (selectedCalibrationRun: any) => {
   queryUserCalibrationRunData().then(queryResponse => {
     if (queryResponse?.status === 200) {
       userCalibrationRunData.value = queryResponse?._data;
-      gotoRunStatusTab();
+      if (userCalibrationRunData.value.status === 'Saved') {
+        gotoHeadwaterBasinGage();
+      } else {
+        gotoRunStatusTab();
+      }
     } else {
       let tDetail = "Unable to Retrieve Calibration Job Data";
       if (queryResponse?._data?.message) {
@@ -828,7 +832,7 @@ const changeSelectedCalibrationRunStatus = (selectedCalibrationRun: any, jobStat
     acceptLock(selectedRunId, false)
   }
   else {
-    const selectedRunName = (selectedCalibrationRun.value.formulation_name) ? " titled '" + selectedCalibrationRun.value.formulation_name + "'" : " (untitled)";
+    const selectedRunName = (selectedCalibrationRun.value.job_name) ? " titled '" + selectedCalibrationRun.value.job_name + "'" : " (untitled)";
     let confirmMessage = "Are you sure you want to " + ty.toLowerCase() + " calibration run " + selectedRunId + selectedRunName;
     if (selectedCalibrationRun.value.status === "Running") confirmMessage += " The running calibration will be aborted."
 
@@ -1155,7 +1159,7 @@ const downloadSelectedCalibrationData = async (selectedCalibrationRun: any) => {
     toast.add(tMsg); addToastRecord(tMsg);
     nextTick(async () => {
       try {
-        // If successful, this job will update calibrationDownloadFileName, and watch function will trigger a Toast message
+        // If successful, this job will update calibrationDownloadJobID, and watch function will trigger a Toast message
         await getCalibrationJobZip(selectedRunId);
       } catch (error) {
         const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Download Error for Calibration Job ID ' + selectedRunId, detail: error, life: ToastTimeout.timeoutError };
@@ -1174,13 +1178,9 @@ watch(calibrationDownloadJobID, () => {
     // Display Toast message saying download was successful and then clear the Job ID/filename refs
     // to avoid interfering with next download
     let tDetail = 'Download zip file successfully created.'
-    if (calibrationDownloadFileName.value) {
-      tDetail = 'Download zip file "' + calibrationDownloadFileName.value + '" successfully created.'
-    }
     const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Download Successful for Calibration Job ID ' + calibrationDownloadJobID.value, detail: tDetail, life: ToastTimeout.timeoutInfo };
     toast.add(tMsg); addToastRecord(tMsg);
     calibrationDownloadJobID.value = null;
-    calibrationDownloadFileName.value = null;
   }
 });
 

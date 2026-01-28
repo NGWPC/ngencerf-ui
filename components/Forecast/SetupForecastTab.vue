@@ -116,9 +116,7 @@
             :teleport="true" utc='preserve' 
             :disabled="!forecastConfiguration"/>
         </div>
-        <div class="text-nowrap text-right font-bold p-1">
-          Cycle Date<span class="text-red-600">*</span>
-        </div>
+        <div class="text-nowrap text-right font-bold p-1 required-label">Cycle Date</div>
         <div class="text-nowrap p-1">
           <VueDatePicker v-model="cycleDate" class="dp__theme_dark" text-input format="yyyy-MM-dd"
             @update:model-value="convertCycleDateStringToDateTimeObject" :enable-time-picker="false"
@@ -145,17 +143,13 @@
             aria-label="Cold Start Hour Select" title="Cold Start Hour Select"
             :disabled="!forecastConfiguration">
           </Select>
-          Z
         </div>
-        <div class="text-nowrap text-right font-bold p-1">
-          Cycle Hour<span class="text-red-600">*</span>
-        </div>
+        <div class="text-nowrap text-right font-bold p-1 required-label">Cycle Hour</div>
         <div class="text-nowrap p-1">
           <Select id="cycleHour" v-model="cycleHour" :options="cycleHourList" default="12" 
             aria-label="Cycle Hour Select" title="Cycle Hour Select"
             :disabled="!forecastConfiguration">
           </Select>
-          Z
         </div>
       </div>
     </div>
@@ -228,8 +222,6 @@ const rowStyle = (data: any) => {
 onMounted(async () => {
     toast.removeAllGroups(); // clear all toast messages
     isLoading.value = false; // set isLoading to false
-
-    console.log('calibrationRunForForecast:',calibrationRunForForecast.value);
     
     if (!cycleHour.value && cycleDate.value) {
       try {
