@@ -330,19 +330,43 @@ const clearDataDueToGageChange = () => {
   setTimeout(() => {
     fetchSelectedGageData();
     hardResetTuningTimeConrols();
+    let timeReset = false;
     if (userCalibrationRunData.value) {
-      userCalibrationRunData.value.calibration_times.calibration_start_time = "";
-      userCalibrationRunData.value.calibration_times.calibration_end_time = "";
-      userCalibrationRunData.value.calibration_times.simulation_start_time = "";
-      userCalibrationRunData.value.calibration_times.simulation_end_time = "";
-
-      userCalibrationRunData.value.validation_times.validation_start_time = "";
-      userCalibrationRunData.value.validation_times.validation_end_time = "";
-      userCalibrationRunData.value.validation_times.simulation_start_time = "";
-      userCalibrationRunData.value.validation_times.simulation_end_time = "";
+      if (userCalibrationRunData.value?.calibration_times?.calibration_start_time) {
+        userCalibrationRunData.value.calibration_times.calibration_start_time = "";
+        timeReset = true;
+      }
+      if (userCalibrationRunData.value?.calibration_times?.calibration_end_time) {
+        userCalibrationRunData.value.calibration_times.calibration_end_time = "";
+        timeReset = true;
+      }
+      if (userCalibrationRunData.value?.calibration_times?.simulation_start_time) {
+        userCalibrationRunData.value.calibration_times.simulation_start_time = "";
+        timeReset = true;
+      }
+      if (userCalibrationRunData.value?.calibration_times?.simulation_end_time) {
+        userCalibrationRunData.value.calibration_times.simulation_end_time = "";
+        timeReset = true;
+      }
+      if (userCalibrationRunData.value?.validation_times?.validation_start_time) {
+        userCalibrationRunData.value.validation_times.validation_start_time = "";
+        timeReset = true;
+      }
+      if (userCalibrationRunData.value?.validation_times?.validation_end_time) {
+        userCalibrationRunData.value.validation_times.validation_end_time = "";
+        timeReset = true;
+      }
+      if (userCalibrationRunData.value?.validation_times?.simulation_start_time) {
+        userCalibrationRunData.value.validation_times.simulation_start_time = "";
+        timeReset = true;
+      }
+      if (userCalibrationRunData.value?.validation_times?.simulation_end_time) {
+        userCalibrationRunData.value.validation_times.simulation_end_time = "";
+        timeReset = true;
+      }
     }
-    
-    if (userCalibrationRunData?.value?.gage?.gage_id) {
+
+    if (userCalibrationRunData?.value?.gage?.gage_id && timeReset) {
       const tMsg: ToastMessageOptions = {
         severity: 'info', summary: `Gage or Sources Changed`,
         detail: "Changes made here affect Time Controls. Make sure they are properly set on the Tuning Controls Tab.", 
