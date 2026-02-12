@@ -284,6 +284,7 @@ export const useFormulationStore = defineStore("FormulationStore", () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          calibration_run_id: calibrationJobId.value,
           modules: selectedModuleValues.value.length > 0 ? selectedModuleValues.value : []
         }),
       }
