@@ -15,9 +15,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
   const { ngencerfBaseUrl } = useBackendConfig();
   const { getAccessToken } = useUserDataStore();
   const { 
-    uiGageId,
-    uiGageList,
-    uiDomainName,
     createdAtStart,
     createdAtEnd,
     minCreatedAt,
@@ -81,8 +78,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
         direction: forecastRunsForVerificationListSort.value.direction === -1 ? 'desc' : 'asc'
       },
       filters: {
-        domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
-        gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
         date_filter:
             (createdAtStart.value && createdAtEnd.value) ? {
               start_date: formatISOStringOrDateToYYYYMMDD(createdAtStart.value) + 'T00:00:00',
@@ -109,7 +104,7 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
             operator: "before"
           } : {}
         ,
-        status: statusTypeFilterList.value,
+        status: statusTypeFilterList.value
       }
     }
     const runListDataResult = await makeProtectedApiCall<ForecastJobs>(`${ngencerfBaseUrl}/calibration/get_forecast_jobs_for_verification/`, {
@@ -160,8 +155,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
         direction: verificationRunListSort.value.direction === -1 ? 'desc' : 'asc'
       },
       filters: {
-        domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
-        gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
         date_filter:
             (createdAtStart.value && createdAtEnd.value) ? {
               start_date: formatISOStringOrDateToYYYYMMDD(createdAtStart.value) + 'T00:00:00',
@@ -188,7 +181,7 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
             operator: "before"
           } : {}
         ,
-        status: statusTypeFilterList.value,
+        status: statusTypeFilterList.value
       }
     }
     const runListDataResult = await makeProtectedApiCall<VerificationJobs>(`${ngencerfBaseUrl}/calibration/get_verification_jobs/`, {
@@ -498,8 +491,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
    * reset job filters
    */
   const resetFilters = () => {
-    uiDomainName.value = 'All';
-    uiGageId.value = 'All';
     statusTypeFilterList.value = [];
     createdAtStart.value = null;
     createdAtEnd.value = null;

@@ -46,7 +46,6 @@ export const useUserDataStore = defineStore(
     const userSelectedCalibrationIterationId = ref<number | null>(null);
     const uiGageId = ref<string>("");
     const uiGageList = ref<string[]>([]);
-    const uiDomainName = ref<string>("");
 
     // Used for Job Filters
     const modulesFilterList = ref<string[]>([]);
@@ -283,7 +282,6 @@ export const useUserDataStore = defineStore(
           direction: calibrationRunListSort.value.direction === -1 ? 'desc' : 'asc'
         },
         filters: {
-          domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
           gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
           module_filter: {
             modules: modulesFilterList.value,
@@ -356,7 +354,6 @@ export const useUserDataStore = defineStore(
       // apply user's filters without paging, since we want the entire list
       let requestBody = {
         filters: {
-          domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
           gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
           module_filter: {
             modules: modulesFilterList.value,
@@ -543,7 +540,6 @@ export const useUserDataStore = defineStore(
      * reset job filters
      */
     const resetFilters = () => {
-      uiDomainName.value = 'All';
       uiGageId.value = 'All';
       modulesFilterList.value = []; 
       moduleOperator.value = 'All';
@@ -565,7 +561,6 @@ export const useUserDataStore = defineStore(
       userSelectedCalibrationIterationId,
       uiGageId,
       uiGageList,
-      uiDomainName,
       isLoggedIn,
       userName,
       firstName,

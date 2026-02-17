@@ -18,7 +18,6 @@ export const useForecastStore = defineStore('ForecastStore', () => {
     userCalibrationRunData, 
     uiGageId, 
     uiGageList, 
-    uiDomainName,
     createdAtStart,
     createdAtEnd,
     minCreatedAt,
@@ -140,8 +139,6 @@ export const useForecastStore = defineStore('ForecastStore', () => {
         direction: forecastRunListSort.value.direction === -1 ? 'desc' : 'asc'
       },
       filters: {
-        domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
-        gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
         date_filter:
             (createdAtStart.value && createdAtEnd.value) ? {
               start_date: formatISOStringOrDateToYYYYMMDD(createdAtStart.value) + 'T00:00:00',
@@ -408,7 +405,6 @@ export const useForecastStore = defineStore('ForecastStore', () => {
         direction: calibrationRunsForForecastListSort.value.direction === -1 ? 'desc' : 'asc'
       },
       filters: {
-        domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
         gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
         date_filter:
             (createdAtStart.value && createdAtEnd.value) ? {
@@ -661,7 +657,6 @@ export const useForecastStore = defineStore('ForecastStore', () => {
    * reset job filters
    */
   const resetFilters = () => {
-    uiDomainName.value = 'All';
     uiGageId.value = 'All';
     statusTypeFilterList.value = [];
     createdAtStart.value = null;

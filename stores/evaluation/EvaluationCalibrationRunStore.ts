@@ -27,7 +27,6 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
     moduleOperator, 
     uiGageId, 
     uiGageList, 
-    uiDomainName,
     createdAtStart,
     createdAtEnd,
     minCreatedAt,
@@ -116,7 +115,6 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
         direction: evaluationRunListSort.value.direction === -1 ? 'desc' : 'asc'
       },
       filters: {
-        domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
         gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
         module_filter: {
           modules: modulesFilterList.value,
@@ -451,7 +449,6 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
    * reset job filters
    */
   const resetFilters = () => {
-    uiDomainName.value = 'All';
     uiGageId.value = 'All';
     modulesFilterList.value = []; 
     moduleOperator.value = 'All';

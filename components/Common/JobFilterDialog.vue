@@ -6,6 +6,7 @@
         <div class="col-span-5">
           <div class="flex flex-wrap gap-2">
             <div v-show="showGage" class="whitespace-nowrap">
+<<<<<<< HEAD
               <label class="block text-left w-[90%]" for="Domain" aria-label="Domain"
                 title="Domain">Domain</label>
               <Select id="Domain" class="mt-1 basin-gage-filter text-left w-32" v-model="uiDomainName" 
@@ -16,10 +17,12 @@
             </div>
 
             <div v-show="showGage" class="whitespace-nowrap">
+=======
+>>>>>>> 4024d77c (Revert "Enable domain filters and specify which ID is being filtered on")
               <label class="block text-left w-[90%]" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
                 title="Headwater Basin Gage">Headwater Basin Gage</label>
               <Select id="HeadwaterBasinGage" class="mt-1 basin-gage-filter text-left w-40" v-model="uiGageId"
-                :options="filterGageList" filter optionLabel="name" optionValue="name" placeholder="All"
+                :options="calibrationRunGageList" filter optionLabel="name" optionValue="name" placeholder="All"
                 aria-label="Headwater Basin Gage Filter Select" title="Headwater Basin Gage Filter Select"
                 :disabled="disableAll" @change="refreshJobList();">
               </Select>
@@ -92,13 +95,13 @@
               <div class="flex gap-2" v-show="showJobId">
                 <div>
                   <label class="block text-left mb-1" for="jobIdStart" aria-label="Job ID Start Filter"
-                    title="Job ID Start Filter">{{ props.jobType !== '' ? props.jobType + ' ' : '' }}Job ID Start</label>
-                  <InputNumber id="jobIdStart" :class="props.jobType !== '' ? 'w-40' : 'w-24'" v-model="jobIdStart" v-bind="minMaxJobIdProps" :disabled="disableAll"/>
+                    title="Job ID Start Filter">Job ID Start</label>
+                  <InputNumber id="jobIdStart" class="w-24" v-model="jobIdStart" v-bind="minMaxJobIdProps" :disabled="disableAll"/>
                 </div>
                 <div>
                   <label class="block text-left mb-1" for="jobIdEnd" aria-label="Job ID End Filter"
-                    title="Job ID End Filter">{{ props.jobType !== '' ? props.jobType + ' ' : '' }}Job ID End</label>
-                  <InputNumber id="jobIdEnd" :class="props.jobType !== '' ? 'w-40' : 'w-24'" v-model="jobIdEnd" v-bind="minMaxJobIdProps" :disabled="disableAll"/>
+                    title="Job ID End Filter">Job ID End</label>
+                  <InputNumber id="jobIdEnd" class="w-24" v-model="jobIdEnd" v-bind="minMaxJobIdProps" :disabled="disableAll"/>
                 </div>
               </div>
             </div>
@@ -171,13 +174,11 @@ import { StatusTypes, JobStatusAction } from "@/composables/NgencerfEnums";
 
 import { useFormulationStore } from "@/stores/calibration/FormulationStore";
 import { useUserDataStore } from "@/stores/common/UserDataStore";
-import { useGageStore } from "@/stores/calibration/GageStore";
 
 const { fetchFormulationModuleOptions } = useFormulationStore();
 const { filterGroup } = storeToRefs(useFormulationStore());
 
 const { 
-  uiDomainName,
   uiGageId, 
   uiGageList, 
   modulesFilterList, 
@@ -195,8 +196,6 @@ const {
   selectedBulkJobAction,
   preFilterList
 } = storeToRefs(useUserDataStore());
-
-const { getDomainOptionsList } = storeToRefs(useGageStore());
 
 const emit = defineEmits([
   "ModulesFilterDialogClosing", 
@@ -217,7 +216,7 @@ const ptCheckbox = ref({
 /**
  * @returns {SelectOption[]}
  */
-const filterGageList = computed(() => {
+const calibrationRunGageList = computed(() => {
   let gageOptionList = <SelectOption[]>[];
   gageOptionList.push({
     name: "All",
@@ -239,7 +238,6 @@ const filterGageList = computed(() => {
 });
 
 interface Props {
-  jobType?: string;
   selectedJobs?: number[];
   allJobs?: number[];
   visibleJobs?: number[];
@@ -247,7 +245,6 @@ interface Props {
   totalSize?: number;
   totalPages?: number;
   currentPage?: number;
-  showDomain?: boolean;
   showGage?: boolean;
   showStatus?: boolean;
   showModules?: boolean;
@@ -258,7 +255,6 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  jobType: '',
   selectedJobs: () => [],
   allJobs: () => [],
   visibleJobs: () => [],
@@ -266,7 +262,6 @@ const props = withDefaults(defineProps<Props>(), {
   totalSize: 0,
   totalPages: 1,
   currentPage: 1,
-  showDomain: true,
   showGage: true,
   showStatus: true,
   showModules: true,
@@ -303,7 +298,6 @@ const bulkJobActionsListDisplay = computed(() => {
 
 const filterInactive = computed(() => {
   return (
-    (props.showDomain === false || uiDomainName.value === '' || uiDomainName.value === 'All') && 
     (props.showGage === false || uiGageId.value === '' || uiGageId.value === 'All') && 
     (props.showModules === false || modulesFilterList.value.length === 0) && 
     (props.showStatus === false || statusTypeFilterList.value === null || statusTypeFilterList.value.length === 0) &&
