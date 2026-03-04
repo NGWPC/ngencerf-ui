@@ -45,10 +45,11 @@
         </div>
 
         <div class="p-4">
+          {{ gitInfoArray.length }} / {{ gitListSort }} / {{ uniqueFields }}
           <DataTable :value="gitInfoArray" class="p-datatable-sm text-sm" scrollable :scroll-height="scrollHeight"
-            scroller="true">
+            scroller="true" v-model:sortField="gitListSort.field" v-model:sortOrder="gitListSort.direction">
             <Column v-for="(item, index) in Array.from(uniqueFields)" :key="item" :field="item"
-              :sortable="index === 0 ? true : false" :header="Array.from(uniqueHeaders)[index]">
+              :sortable="true" :header="Array.from(uniqueHeaders)[index]">
               <template #body="{ data }">
                 <!-- Using whitespace-nowrap for all fields except message -->
                 <span :class="item !== 'message' ? 'whitespace-nowrap' : ''">
@@ -80,7 +81,7 @@ const toast = useToast();
 const { addToastRecord } = generalStore();
 const { getServerInfo } = generalStore();
 
-const { popupActive, gitInfo } = storeToRefs(generalStore());
+const { popupActive, gitInfo, gitListSort } = storeToRefs(generalStore());
 
 const combinedVersionInfo = ref<CombinedVersionInfo>();
 
@@ -202,6 +203,7 @@ const gitInfoArray = computed(() => {
     infoArray.push(addedGitInfo.value);
   }
   getUniqueFields(infoArray);
+  console.log('infoArray:',infoArray);
   return infoArray;
 });
 

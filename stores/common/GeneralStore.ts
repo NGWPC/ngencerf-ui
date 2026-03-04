@@ -14,6 +14,7 @@ export const generalStore = defineStore(
   () => {
 
     const gitInfo = ref<Record<string, GitData>>({});
+    const gitListSort = ref<DynamicObject>({'field': 'repository', 'direction': 1});
 
     const calibrationTabIndex = ref("1");
     const evaluationTabIndex = ref("1");
@@ -136,6 +137,7 @@ export const generalStore = defineStore(
 
     return {
       gitInfo,
+      gitListSort,
       getMenuIndex,
       setMenuIndex,
       getCalibrationTabIndex,
