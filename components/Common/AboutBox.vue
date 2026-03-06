@@ -45,10 +45,9 @@
         </div>
 
         <div class="p-4">
-          {{ gitInfoArray.length }} / {{ gitListSort }} / {{ uniqueFields }}
           <DataTable :value="gitInfoArray" class="p-datatable-sm text-sm" scrollable :scroll-height="scrollHeight"
             scroller="true" v-model:sortField="gitListSort.field" v-model:sortOrder="gitListSort.direction">
-            <Column v-for="(item, index) in Array.from(uniqueFields)" :key="item" :field="item"
+            <Column v-for="(item, index) in gitInfoColumns" :key="item" :field="item"
               :sortable="true" :header="Array.from(uniqueHeaders)[index]">
               <template #body="{ data }">
                 <!-- Using whitespace-nowrap for all fields except message -->
@@ -196,15 +195,22 @@ const formatTableOutput = (field: Record<string, string>, item: string) => {
 }
 
 const gitInfoArray = computed(() => {
-  let infoArray = Object.entries(gitInfo.value).map(([repository, info]) => ({ repository, ...info }));
-  // Append additional git info if it was loaded
+  let infoArray = Object.entries(gitInfo.value).map(([repository, info]) => ({
+    repository,
+    ...info
+  }));
+
   if (infoArray.length && addedGitInfo.value && Object.keys(addedGitInfo.value).length > 0) {
-    addedGitInfo.value.repository = 'ngencerf-ui';
-    infoArray.push(addedGitInfo.value);
+    infoArray.push({
+      ...addedGitInfo.value,
+      repository: 'ngencerf-ui'
+    });
   }
-  getUniqueFields(infoArray);
-  console.log('infoArray:',infoArray);
   return infoArray;
+});
+
+const gitInfoColumns = computed(() => {
+  return getUniqueFields(gitInfoArray.value);
 });
 
 const closeAboutBox = () => {
