@@ -11,10 +11,9 @@
           <div class="grid grid-rows-12">
             <div class="row-span-12 flex items-center justify-center h-screen-inner">
 
-              <div id="LoginBox" class="bg-white mx-auto px-12 py-12 rounded-[10px] max-w-screen-md"
-                :class="!showDialog ? 'loginBox' : 'createAccountBox'">
+              <div id="LoginBox" class="bg-white mx-auto px-12 py-12 rounded-[10px] max-w-[510px] loginBox">
 
-                <div v-if="!showDialog" class="mx-auto px-8 text-left">
+                <div v-if="showDialog === 'login'" class="mx-auto px-8 text-left">
                   <form onsubmit="return false">
 
                     <h1>Login</h1>
@@ -23,16 +22,13 @@
                       <label for="uname" style="font-weight: normal;" class="required-label">Email</label><br>
                       <input id="uname" class="w-[350px]" type="text" v-model="userName" placeholder=" Email"
                         aria-label="Username" autocomplete="email" v-on:keypress="autoSubmit" />
-                      <!-- <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="ForgotUsername">
-                        Forgot Email
-                      </Button> -->
                     </div>
                     <div class="mt-4">
                       <label for="pword" style="font-weight: normal;" class="required-label">Password</label><br>
                       <Password id="pword" type="password" autocomplete="current-password" v-model="userPassword"
                         placeholder=" Password" aria-label="Password" toggleMask :feedback="false"
                         class="block w-[350px]" v-on:keypress="autoSubmit" />
-                      <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="ForgotPassword">
+                      <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="openResetDialog">
                         Forgot Password
                       </Button>
                     </div>
@@ -41,13 +37,56 @@
                       aria-label="sign in">Sign In</Button>
 
                     <div class="signupButton underline text-base mt-2" aria-label="sign up">
-                      <Button @click="openDialog" class="c-blue">Create an Account</Button>
+                      <Button @click="openCreateDialog" class="c-blue">Create an Account</Button>
                     </div>
 
                   </form>
                 </div>
 
-                <div v-if="showDialog">
+                <div v-else-if="showDialog === 'requireVerify'">
+                  <div class="dialog-overlay" @click.self="closeDialog">
+                    <div class="dialog-content">
+                      <h1>Verify Email Required</h1>
+                      <div class="pt-2">You must verify your email address before using the application.</div>
+                      <Button id="ResendVerifyButton" class="ngenButtonDiv btn-left mt-4" v-on:click="SubmitResendVerifyForm"
+                      aria-label="Resend verification email">Resend verification email</Button>
+                      <hr>
+                      <h2>Change Email and Verify</h2>
+                      <div class="pt-2">You can optionally enter an Email address here to have your account 
+                        updated to use the new address instead.</div>
+                      <form @submit.prevent="SubmitResendVerifyForm">
+                        <div class="form-group inputBox">
+                          <label for="newEmail" class="required-label">Email</label>
+                          <InputText v-model="newEmail" id="newEmail" type="newEmail" required />
+                        </div>
+                      </form>
+                      <div :class="buttonClasses">
+                        <Button id="ResendVerifyNewButton" class="ngenButtonDiv btn-left mt-4" v-on:click="SubmitResendVerifyForm"
+                        aria-label="Send Verification" :disabled="disableButtons">Send Verification</Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else-if="showDialog === 'confirmVerify'">
+                  <div class="dialog-overlay" @click.self="closeDialog">
+                    <div class="dialog-content">
+                      <h1>Verifying your email...</h1>
+                      <div class="pt-2">Please wait while we confirm your email verification link.</div>
+
+                      <h2>If verification fails</h2>
+
+                      <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="openRequireVerifyDialog">
+                        Resend Verification
+                      </Button>
+                      <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="closeDialog">
+                        Back to Login
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else-if="showDialog === 'create'">
                   <div class="dialog-overlay" @click.self="closeDialog">
                     <div class="dialog-content">
                       <h1>Create an Account</h1>
@@ -86,17 +125,39 @@
                           <Password v-model="confirmPassword" id="confirmPassword" type="password" :feedback="false"
                             required toggleMask class="block" />
                         </div>
-                        <div :class="createAccountButtonClasses">
-                          <Button type="submit" :disabled="disableCreateAccountBtn">Create Account</Button>
+                        <div :class="buttonClasses">
+                          <Button type="submit" :disabled="disableButtons">Create Account</Button>
                         </div>
                         <div class="signupButton underline text-base inline pl-6">
-                          <Button @click="closeDialog" :class="cancelCreateAccountLinkClasses"
-                            :disabled="disableCreateAccountBtn">Cancel</Button>
+                          <Button @click="closeDialog" :class="cancelClasses">Cancel</Button>
                         </div>
                       </form>
                     </div>
                   </div>
                 </div>
+
+                <div v-else-if="showDialog === 'reset'">
+                  <div class="dialog-overlay" @click.self="closeDialog">
+                    <div class="dialog-content">
+                      <h1>Reset Password</h1>
+                      <div class="pt-2">Enter the Email address you registered with and your last name, and click "Send Email"
+                        to have password reset instructions sent to you.</div>
+                      <form @submit.prevent="SubmitResetPasswordForm">
+                        <div class="form-group inputBox">
+                          <label for="email" class="required-label">Email</label>
+                          <InputText v-model="resetEmail" id="reset_mail" type="email" required />
+                        </div>
+                        <div :class="buttonClasses">
+                          <Button type="submit" :disabled="disableButtons">Send Email</Button>
+                        </div>
+                        <div class="signupButton underline text-base inline pl-6">
+                          <Button @click="closeDialog" :class="cancelClasses">Cancel</Button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="required-hint mt-4">
                   <span class="required-asterisk">*</span> Required field
                 </div>
@@ -135,7 +196,7 @@ const { popupActive } = storeToRefs(generalStore());
 
 const { calibrationJobId } = storeToRefs(generalStore());
 
-const { logUserIn, setUserName, hardResetUserDataStore, isUserLoggedIn, getAccessToken } = useUserDataStore();
+const { logUserIn, setUserName, hardResetUserDataStore, isUserLoggedIn, isUserVerified, getAccessToken } = useUserDataStore();
 const { resetGeneralStore, clearToastRecords, addToastRecord, getServerInfo, setServerInfo } = generalStore();
 
 const { ngencerfBaseUrl } = useBackendConfig();
@@ -144,7 +205,7 @@ const toast = useToast();
 const userDataStore = useUserDataStore();
 const userName = ref<string>("");
 const userPassword = ref<string>("");
-const showDialog = ref(false);
+const showDialog = ref<string>("login");
 
 const newEmail = ref('');
 const newFirstName = ref('');
@@ -152,9 +213,14 @@ const newLastName = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
 
-const disableCreateAccountBtn = ref<boolean>(false);
-const createAccountButtonClasses = ref<string[]>(["ngenButtonDiv", "btn-left", "mt-4"]);
-const cancelCreateAccountLinkClasses = ref<string[]>(['c-blue'])
+const resetEmail = ref('');
+const resetLastName = ref('');
+
+const disableButtons = ref<boolean>(false);
+const buttonClasses = ref<string[]>(["ngenButtonDiv", "btn-left", "mt-4"]);
+const cancelClasses = ref<string[]>(['c-blue'])
+
+const route = useRoute();
 
 onMounted(() => {
   popupActive.value = false;
@@ -166,6 +232,36 @@ onMounted(() => {
     hardResetUserDataStore();
     resetGeneralStore();
     await getFooterInformation();
+
+    if (route.query?.uid && route.query?.token) {
+      // If UID and Token are provided, an Email verification link was clicked - immediately verify
+      openConfirmVerifyDialog();
+      await $fetch<any>(`${ngencerfBaseUrl}/auth/jwt/activation/`, {
+        method: 'POST',
+        body: {
+          uid: route.query.uid,
+          token: route.query.token
+        }
+      }).then(response => {
+        // if user is verified, go to Login screen - otherwise, ask them to re-verify
+        if (response.email_verified) {
+          closeDialog();
+        } else {
+          openRequireVerifyDialog();
+        }
+      }
+      ).catch(error => {
+        if (error) {
+          let err = error.data?.detail;
+          if (!err) {
+            err = "Cannot reach server. Error code: " + error.statusCode;
+          }
+          const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
+          toast.add(tMsg); addToastRecord(tMsg);
+          console.error("Error during user verification:", error.message, error.data.detail);
+        }
+      });
+    }
   });
 });
 
@@ -200,21 +296,20 @@ const getGitInformation = () => {
   })
 }
 
-const openDialog = () => {
-  showDialog.value = true;
+const openCreateDialog = () => {
+  showDialog.value = "create";
 };
-
+const openRequireVerifyDialog = () => {
+  showDialog.value = "requireVerify";
+};
+const openConfirmVerifyDialog = () => {
+  showDialog.value = "requireConfirm";
+};
+const openResetDialog = () => {
+  showDialog.value = "reset";
+};
 const closeDialog = () => {
-  showDialog.value = false;
-};
-
-const ForgotUsername = () => {
-  //
-};
-
-const ForgotPassword = () => {
-  const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Info', detail: 'Please contact the ngenCERF administrator to reset your password.', life: ToastTimeout.timeoutInfo };
-  toast.add(tMsg); addToastRecord(tMsg);
+  showDialog.value = "login";
 };
 
 const autoSubmit = (e: KeyboardEvent) => {
@@ -247,9 +342,14 @@ const SubmitLoginForm = async (e: Event) => {
       // store user name in UserDataStore
       userDataStore.setFirstName(response.first_name);
       userDataStore.setLastName(response.last_name);
-      GetExternalInfo();
       logUserIn();
-      GoToLanding();
+      // if user is verified, go to Landing page - otherwise, require them to verify
+      if (response.email_verified) {
+        GetExternalInfo();
+        GoToLanding();
+      } else {
+        openRequireVerifyDialog();
+      }
     }
     ).catch(error => {
       if (error) {
@@ -273,7 +373,6 @@ const GetExternalInfo = async () => {
   serverInfo.value = getServerInfo();
 }
 
-
 const SubmitNewAccountForm = async () => {
   if (newPassword.value !== confirmPassword.value) {
     const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: 'Passwords do not match.', life: ToastTimeout.timeoutError };
@@ -281,9 +380,9 @@ const SubmitNewAccountForm = async () => {
     return;
   }
 
-  disableCreateAccountBtn.value = true;
-  if (!createAccountButtonClasses.value.includes('disabledButton')) createAccountButtonClasses.value.push('disabledButton');
-  if (!cancelCreateAccountLinkClasses.value.includes('disabledLink')) cancelCreateAccountLinkClasses.value.push('disabledLink');
+  disableButtons.value = true;
+  if (!buttonClasses.value.includes('disabledButton')) buttonClasses.value.push('disabledButton');
+  if (!cancelClasses.value.includes('disabledLink')) cancelClasses.value.push('disabledLink');
 
   //try to create a new account for user
   const { data, error, } = await useFetch<any>(`${ngencerfBaseUrl}/auth/users/`, {
@@ -298,9 +397,9 @@ const SubmitNewAccountForm = async () => {
   });
 
   if (error.value) {
-    disableCreateAccountBtn.value = false;
-    createAccountButtonClasses.value.splice(createAccountButtonClasses.value.indexOf('disabledButton'), 1);
-    cancelCreateAccountLinkClasses.value.splice(cancelCreateAccountLinkClasses.value.indexOf('disabledLink'), 1);
+    disableButtons.value = false;
+    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
+    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
     if (error.value?.data.email) {
       let detail = error.value?.data.email[0];
       if (detail.indexOf('already exists')) {
@@ -330,10 +429,82 @@ const SubmitNewAccountForm = async () => {
   }
 
   if (data.value.email && data.value.id) {
-    disableCreateAccountBtn.value = false;
-    createAccountButtonClasses.value.splice(createAccountButtonClasses.value.indexOf('disabledButton'), 1);
-    cancelCreateAccountLinkClasses.value.splice(cancelCreateAccountLinkClasses.value.indexOf('disabledLink'), 1);
+    disableButtons.value = false;
+    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
+    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
     const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'Account created successfully. Please log in.', life: ToastTimeout.timeoutSuccess };
+    toast.add(tMsg); addToastRecord(tMsg);
+    closeDialog();
+  };
+};
+
+const SubmitResendVerifyForm = async () => {
+  disableButtons.value = true;
+  if (!buttonClasses.value.includes('disabledButton')) buttonClasses.value.push('disabledButton');
+  if (!cancelClasses.value.includes('disabledLink')) cancelClasses.value.push('disabledLink');
+
+  //send email verification request to server
+  let requestBody = {};
+  if (newEmail.value) {
+    requestBody['email'] = newEmail.value;
+  }
+  const { data, error, } = await useFetch<any>(`${ngencerfBaseUrl}/auth/users/activation/`, {
+    method: 'POST',
+    body: requestBody
+  });
+
+  if (error.value) {
+    disableButtons.value = false;
+    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
+    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
+    if (error.value?.data.email) {
+      let detail = error.value?.data.email[0];
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: detail, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+      return;
+    }
+  }
+
+  if (data.value.email && data.value.id) {
+    disableButtons.value = false;
+    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
+    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
+    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'A message has been sent to ' + (newEmail.value ? newEmail.value : userName.value) + ' with instructions on how to reset your password.', life: ToastTimeout.timeoutSuccess };
+    toast.add(tMsg); addToastRecord(tMsg);
+    closeDialog();
+  };
+};
+
+const SubmitResetPasswordForm = async () => {
+  disableButtons.value = true;
+  if (!buttonClasses.value.includes('disabledButton')) buttonClasses.value.push('disabledButton');
+  if (!cancelClasses.value.includes('disabledLink')) cancelClasses.value.push('disabledLink');
+
+  //send reset password request to server
+  const { data, error, } = await useFetch<any>(`${ngencerfBaseUrl}/auth/users/reset_password/`, {
+    method: 'POST',
+    body: {
+      email: resetEmail.value.toLowerCase()
+    }
+  });
+
+  if (error.value) {
+    disableButtons.value = false;
+    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
+    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
+    if (error.value?.data.email) {
+      let detail = error.value?.data.email[0];
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: detail, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+      return;
+    }
+  }
+
+  if (data.value.email && data.value.id) {
+    disableButtons.value = false;
+    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
+    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
+    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'A message has been sent to ' + resetEmail.value + ' with instructions on how to reset your password.', life: ToastTimeout.timeoutSuccess };
     toast.add(tMsg); addToastRecord(tMsg);
     closeDialog();
   };

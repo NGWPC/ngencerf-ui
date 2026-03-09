@@ -110,8 +110,8 @@ const { addToastRecord } = generalStore();
 
 const formulationStore = useFormulationStore;
 const { formulationTabData } = storeToRefs(formulationStore());
-const { statusTypeFilterList, preFilterList } = storeToRefs(useUserDataStore());
-const { fetchUserCalibrationJobCounts } = useUserDataStore();
+const { preFilterList } = storeToRefs(useUserDataStore());
+const { isUserVerified, logUserOut, fetchUserCalibrationJobCounts } = useUserDataStore();
 
 const { getUserFullName } = useUserDataStore()
 
@@ -120,6 +120,11 @@ const readyCalibrationJobs = ref<number | null>(null);
 const savedCalibrationJobs = ref<number | null>(null);
 
 onMounted(async () => {
+  if (!isUserVerified) {
+    logUserOut();
+    return;
+  }
+
   popupActive.value = false;
   resetGageStore();
   resetFormulationStore();

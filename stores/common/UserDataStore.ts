@@ -23,6 +23,7 @@ export const useUserDataStore = defineStore(
     const { calibrationJobId } = storeToRefs(generalStore());
 
     const isLoggedIn = ref<boolean>(false);
+    const isVerified = ref<boolean>(false);
     const userName = ref("");
     const firstName = ref("");
     const lastName = ref("");
@@ -126,6 +127,14 @@ export const useUserDataStore = defineStore(
      */
     function isUserLoggedIn(): boolean {
       return isLoggedIn.value;
+    }
+
+    /**
+     * Checks if user account is verified
+     * @returns {boolean} true if user is verified, false otherwise.
+     */
+    function isUserVerified(): boolean {
+      return isVerified.value;
     }
 
     /**
@@ -583,6 +592,7 @@ export const useUserDataStore = defineStore(
       uiGageList,
       uiDomainName,
       isLoggedIn,
+      isVerified,
       userName,
       firstName,
       lastName,
@@ -620,6 +630,7 @@ export const useUserDataStore = defineStore(
       forcingLogLevel,
       logLevels,
       isUserLoggedIn,
+      isUserVerified,
       logUserIn,
       logUserOut,
       getUserName,
