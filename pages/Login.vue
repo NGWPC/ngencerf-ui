@@ -33,7 +33,7 @@
                       </Button>
                     </div>
 
-                    <Button id="LoginButton" class="ngenButtonDiv btn-left mt-4" v-on:click="SubmitLoginForm"
+                    <Button id="LoginButton" :class="buttonClasses" v-on:click="SubmitLoginForm"
                       aria-label="sign in">Sign In</Button>
 
                     <div class="signupButton underline text-base mt-2" aria-label="sign up">
@@ -48,9 +48,9 @@
                     <div class="dialog-content">
                       <h1>Verify Email Required</h1>
                       <div class="pt-2">You must verify your email address before using the application.</div>
-                      <Button id="ResendVerifyButton" class="ngenButtonDiv btn-left mt-4" v-on:click="SubmitResendVerifyForm"
+                      <Button id="ResendVerifyButton" :class="buttonClasses" v-on:click="SubmitResendVerifyForm"
                       aria-label="Resend verification email">Resend verification email</Button>
-                      <hr>
+                      <div class="py-4"><hr/></div>
                       <h2>Change Email and Verify</h2>
                       <div class="pt-2">You can optionally enter an Email address here to have your account 
                         updated to use the new address instead.</div>
@@ -60,9 +60,12 @@
                           <InputText v-model="newEmail" id="newEmail" type="newEmail" required />
                         </div>
                       </form>
-                      <div :class="buttonClasses">
-                        <Button id="ResendVerifyNewButton" class="ngenButtonDiv btn-left mt-4" v-on:click="SubmitResendVerifyForm"
-                        aria-label="Send Verification" :disabled="disableButtons">Send Verification</Button>
+                      <div>
+                        <Button id="ResendVerifyNewButton" v-on:click="SubmitResendVerifyForm"
+                        aria-label="Send Verification" :class="buttonClasses" :disabled="disableButtons">Send Verification</Button>
+                      </div>
+                      <div class="signupButton underline text-base inline pl-6">
+                        <Button @click="closeDialog" :class="cancelClasses">Cancel</Button>
                       </div>
                     </div>
                   </div>
@@ -72,16 +75,19 @@
                   <div class="dialog-overlay" @click.self="closeDialog">
                     <div class="dialog-content">
                       <h1>Verifying your email...</h1>
-                      <div class="pt-2">Please wait while we confirm your email verification link.</div>
 
-                      <h2>If verification fails</h2>
+                      <div class="py-4">Please wait while we confirm your email verification link.</div>
 
-                      <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="openRequireVerifyDialog">
-                        Resend Verification
-                      </Button>
-                      <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="closeDialog">
-                        Back to Login
-                      </Button>
+                      <h2 class="py-2">If verification fails</h2>
+                      
+                      <div :class="buttonClasses">
+                        <Button v-on:click="openRequireVerifyDialog">Resend Verification</Button>
+                      </div>
+                      <div class="py-2">
+                        <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="closeDialog">
+                          Back to Login
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -158,7 +164,45 @@
                   </div>
                 </div>
 
-                <div class="required-hint mt-4">
+                <div v-else-if="showDialog === 'password'">
+                  <div class="dialog-overlay" @click.self="closeDialog">
+                    <div class="dialog-content">
+                      <h1>Set a new password</h1>
+                      <form @submit.prevent="SubmitPasswordForm">
+                        <div class="form-group inputBox">
+                          <label for="password" class="required-label">Password</label>
+                          <Password v-model="newPassword" id="new_password" type="password" name="new_password"
+                            autocomplete="current-password" required toggleMask class="block">
+                            <template #header>
+                              <div class="font-semibold text-xm mb-4">Password</div>
+                            </template>
+                            <template #footer>
+                              <Divider />
+                              <ul class="pl-2 ml-2 my-0 leading-normal">
+                                <li>Cannot be a commonly used password</li>
+                                <li>Must be at least 8 characters long</li>
+                                <li>Must contain at least one non-numeric character</li>
+                              </ul>
+                            </template>
+                          </Password>
+                        </div>
+                        <div class="form-group inputBox">
+                          <label for="confirmPassword" class="required-label">Confirm Password</label>
+                          <Password v-model="confirmPassword" id="new_confirmPassword" type="password" :feedback="false"
+                            required toggleMask class="block" />
+                        </div>
+                        <div :class="buttonClasses">
+                          <Button type="submit" :disabled="disableButtons">Update Password</Button>
+                        </div>
+                        <div class="signupButton underline text-base inline pl-6">
+                          <Button @click="closeDialog" :class="cancelClasses">Cancel</Button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="required-hint mt-4" v-if="showDialog !== 'confirmVerify'">
                   <span class="required-asterisk">*</span> Required field
                 </div>
               </div>
@@ -233,34 +277,72 @@ onMounted(() => {
     resetGeneralStore();
     await getFooterInformation();
 
-    if (route.query?.uid && route.query?.token) {
-      // If UID and Token are provided, an Email verification link was clicked - immediately verify
-      openConfirmVerifyDialog();
-      await $fetch<any>(`${ngencerfBaseUrl}/auth/jwt/activation/`, {
-        method: 'POST',
-        body: {
-          uid: route.query.uid,
-          token: route.query.token
-        }
-      }).then(response => {
-        // if user is verified, go to Login screen - otherwise, ask them to re-verify
-        if (response.email_verified) {
-          closeDialog();
+    if (route.query?.token) {
+      // If UID and Token are provided:
+      // - If action is "reset", show fields to set new password
+      // - Else, an Email verification link was clicked - immediately verify
+      if (route.query?.uid && route.query?.action === 'reset-password') {
+        openPasswordDialog();
+      } else {
+        openConfirmVerifyDialog();
+        if (route.query?.action === 'verify-email') {
+          await $fetch<any>(`${ngencerfBaseUrl}/auth/jwt/verify_email_confirm/`, {
+            method: 'POST',
+            body: {
+              token: route.query.token
+            }
+          }).then(response => {
+            // if user is verified, go to Login screen - otherwise, ask them to re-verify
+            if (response.email_verified) {
+              closeDialog();
+            } else {
+              openRequireVerifyDialog();
+            }
+          }
+          ).catch(error => {
+            if (error) {
+              let err = error.data?.detail;
+              if (!err) {
+                err = "Cannot reach server. Error code: " + error.statusCode;
+              }
+              toast.removeAllGroups();
+              const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
+              toast.add(tMsg); addToastRecord(tMsg);
+              console.error("Error during user verification:", error.message, error.data.detail);
+            }
+          });
+        } else if (route.query?.uid && route.query?.action === 'activate') {
+          await $fetch<any>(`${ngencerfBaseUrl}/auth/users/activation/`, {
+            method: 'POST',
+            body: {
+              uid: route.query.uid,
+              token: route.query.token
+            }
+          }).then(response => {
+            // if user is verified, go to Login screen - otherwise, ask them to re-verify
+            if (response.email_verified) {
+              closeDialog();
+            } else {
+              openRequireVerifyDialog();
+            }
+          }
+          ).catch(error => {
+            if (error) {
+              let err = error.data?.detail;
+              if (!err) {
+                err = "Cannot reach server. Error code: " + error.statusCode;
+              }
+              toast.removeAllGroups();
+              const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
+              toast.add(tMsg); addToastRecord(tMsg);
+              console.error("Error during user verification:", error.message, error.data.detail);
+            }
+          });
         } else {
-          openRequireVerifyDialog();
+          // invalid action - return to login
+          closeDialog();
         }
       }
-      ).catch(error => {
-        if (error) {
-          let err = error.data?.detail;
-          if (!err) {
-            err = "Cannot reach server. Error code: " + error.statusCode;
-          }
-          const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
-          toast.add(tMsg); addToastRecord(tMsg);
-          console.error("Error during user verification:", error.message, error.data.detail);
-        }
-      });
     }
   });
 });
@@ -300,16 +382,27 @@ const openCreateDialog = () => {
   showDialog.value = "create";
 };
 const openRequireVerifyDialog = () => {
-  showDialog.value = "requireVerify";
+  if (isUserLoggedIn()) {
+    showDialog.value = "requireVerify";
+  } else {
+    closeDialog();
+    toast.removeAllGroups();
+    const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Login Required', detail: "A Username and Password must be entered before a verification link can be resent to your Email address.", life: ToastTimeout.timeoutInfo };
+    toast.add(tMsg); addToastRecord(tMsg);
+  }
 };
 const openConfirmVerifyDialog = () => {
-  showDialog.value = "requireConfirm";
+  showDialog.value = "confirmVerify";
 };
 const openResetDialog = () => {
   showDialog.value = "reset";
 };
+const openPasswordDialog = () => {
+  showDialog.value = "password";
+};
 const closeDialog = () => {
   showDialog.value = "login";
+  changeButtonState(false);
 };
 
 const autoSubmit = (e: KeyboardEvent) => {
@@ -357,12 +450,14 @@ const SubmitLoginForm = async (e: Event) => {
         if (!err) {
           err = "Cannot reach server. Error code: " + error.statusCode;
         }
+        toast.removeAllGroups();
         const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
         toast.add(tMsg); addToastRecord(tMsg);
         console.error("Error during user creation:", error.message, error.data.detail);
       }
     });
   } else if (userName.value.trim() === "" || userPassword.value.trim() === "") {
+    toast.removeAllGroups();
     const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: "A Username and Password are required", life: ToastTimeout.timeoutError };
     toast.add(tMsg); addToastRecord(tMsg);
   }
@@ -373,19 +468,29 @@ const GetExternalInfo = async () => {
   serverInfo.value = getServerInfo();
 }
 
+const changeButtonState = (disabled: boolean=true) => {
+  disableButtons.value = disabled;
+  if (disabled) {
+    if (!buttonClasses.value.includes('disabledButton')) buttonClasses.value.push('disabledButton');
+    if (!cancelClasses.value.includes('disabledLink')) cancelClasses.value.push('disabledLink');
+  } else {
+    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
+    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
+  }
+}
+
 const SubmitNewAccountForm = async () => {
   if (newPassword.value !== confirmPassword.value) {
+    toast.removeAllGroups();
     const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: 'Passwords do not match.', life: ToastTimeout.timeoutError };
     toast.add(tMsg); addToastRecord(tMsg);
     return;
   }
 
-  disableButtons.value = true;
-  if (!buttonClasses.value.includes('disabledButton')) buttonClasses.value.push('disabledButton');
-  if (!cancelClasses.value.includes('disabledLink')) cancelClasses.value.push('disabledLink');
+  changeButtonState(true);
 
   //try to create a new account for user
-  const { data, error, } = await useFetch<any>(`${ngencerfBaseUrl}/auth/users/`, {
+  await $fetch<any>(`${ngencerfBaseUrl}/auth/users/`, {
     method: 'POST',
     body: {
       email: newEmail.value.toLowerCase(),
@@ -394,120 +499,171 @@ const SubmitNewAccountForm = async () => {
       password: newPassword.value,
       re_password: confirmPassword.value
     }
-  });
-
-  if (error.value) {
-    disableButtons.value = false;
-    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
-    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
-    if (error.value?.data.email) {
-      let detail = error.value?.data.email[0];
+  }).then(response => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'An Email has been sent to ' + (newEmail.value ? newEmail.value : userName.value) + ' with a link to verify your account.', life: ToastTimeout.timeoutSuccess };
+    toast.add(tMsg); addToastRecord(tMsg);
+    closeDialog();
+  }).catch(error => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    if (error.data?.data.email) {
+      let detail = error.data?.data.email[0];
       if (detail.indexOf('already exists')) {
         // customize error message since the one we get back from Djoser isn't ideal
         detail = 'A user with this Email address has already registered.'
       }
       const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: detail, life: ToastTimeout.timeoutError };
       toast.add(tMsg); addToastRecord(tMsg);
-      return;
-    } else if (error.value?.data.first_name) {
-      let detail = error.value?.data.first_name[0];
+    }
+    if (error.data?.data.first_name) {
+      let detail = error.data?.data.first_name[0];
       const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: detail, life: ToastTimeout.timeoutError };
       toast.add(tMsg); addToastRecord(tMsg);
-      return;
-    } else if (error.value?.data.last_name) {
-      let detail = error.value?.data.last_name[0];
+    }
+    if (error.data?.data.last_name) {
+      let detail = error.data?.data.last_name[0];
       const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: detail, life: ToastTimeout.timeoutError };
       toast.add(tMsg); addToastRecord(tMsg);
-      return;
-    } else if (error.value?.data.password) {
-      error.value?.data.password.forEach((e: any) => {
+    }
+    if (error.data?.data.password) {
+      error.data?.data.password.forEach((e: any) => {
         const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: e, life: ToastTimeout.timeoutError }
         toast.add(tMsg); addToastRecord(tMsg);
       });
-      return;
     }
-  }
-
-  if (data.value.email && data.value.id) {
-    disableButtons.value = false;
-    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
-    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
-    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'Account created successfully. Please log in.', life: ToastTimeout.timeoutSuccess };
-    toast.add(tMsg); addToastRecord(tMsg);
-    closeDialog();
-  };
+  });
 };
 
 const SubmitResendVerifyForm = async () => {
-  disableButtons.value = true;
-  if (!buttonClasses.value.includes('disabledButton')) buttonClasses.value.push('disabledButton');
-  if (!cancelClasses.value.includes('disabledLink')) cancelClasses.value.push('disabledLink');
+  changeButtonState(true);
 
   //send email verification request to server
   let requestBody = {};
   if (newEmail.value) {
-    requestBody['email'] = newEmail.value;
+    requestBody['new_email'] = newEmail.value;
   }
-  const { data, error, } = await useFetch<any>(`${ngencerfBaseUrl}/auth/users/activation/`, {
+  await $fetch<any>(`${ngencerfBaseUrl}/auth/users/send_verification_email/`, {
     method: 'POST',
+    headers: {
+      "Authorization": `Bearer ${getAccessToken()}`,
+      "Content-Type": 'application/json'
+    },
     body: requestBody
-  });
-
-  if (error.value) {
-    disableButtons.value = false;
-    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
-    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
-    if (error.value?.data.email) {
-      let detail = error.value?.data.email[0];
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: detail, life: ToastTimeout.timeoutError };
-      toast.add(tMsg); addToastRecord(tMsg);
-      return;
-    }
-  }
-
-  if (data.value.email && data.value.id) {
-    disableButtons.value = false;
-    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
-    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
-    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'A message has been sent to ' + (newEmail.value ? newEmail.value : userName.value) + ' with instructions on how to reset your password.', life: ToastTimeout.timeoutSuccess };
+  }).then(response => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'An Email has been sent to ' + (newEmail.value ? newEmail.value : userName.value) + ' with a link to verify your account.', life: ToastTimeout.timeoutSuccess };
     toast.add(tMsg); addToastRecord(tMsg);
     closeDialog();
-  };
+  }).catch(error => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    if (error.data?.validation_errors) {
+      let messageBody = '';
+      Object.keys(error.data.validation_errors).forEach((error_field: string) => {
+        error.data.validation_errors[error_field].forEach((message: string) => {
+          messageBody += message + '\n';
+        });
+      });
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: messageBody, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    } else {
+      let err = error.data?.detail;
+      if (!err) {
+        err = "Cannot reach server. Error code: " + error.statusCode;
+      }
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    }
+  });
 };
 
 const SubmitResetPasswordForm = async () => {
-  disableButtons.value = true;
-  if (!buttonClasses.value.includes('disabledButton')) buttonClasses.value.push('disabledButton');
-  if (!cancelClasses.value.includes('disabledLink')) cancelClasses.value.push('disabledLink');
+  changeButtonState(true);
 
-  //send reset password request to server
-  const { data, error, } = await useFetch<any>(`${ngencerfBaseUrl}/auth/users/reset_password/`, {
+  // send reset password request to server
+  await $fetch<any>(`${ngencerfBaseUrl}/auth/users/reset_password/`, {
     method: 'POST',
     body: {
       email: resetEmail.value.toLowerCase()
     }
-  });
-
-  if (error.value) {
-    disableButtons.value = false;
-    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
-    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
-    if (error.value?.data.email) {
-      let detail = error.value?.data.email[0];
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: detail, life: ToastTimeout.timeoutError };
-      toast.add(tMsg); addToastRecord(tMsg);
-      return;
-    }
-  }
-
-  if (data.value.email && data.value.id) {
-    disableButtons.value = false;
-    buttonClasses.value.splice(buttonClasses.value.indexOf('disabledButton'), 1);
-    cancelClasses.value.splice(cancelClasses.value.indexOf('disabledLink'), 1);
-    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'A message has been sent to ' + resetEmail.value + ' with instructions on how to reset your password.', life: ToastTimeout.timeoutSuccess };
+  }).then(response => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'An Email has been sent to ' + resetEmail.value + ' with a link to reset your password.', life: ToastTimeout.timeoutSuccess };
     toast.add(tMsg); addToastRecord(tMsg);
     closeDialog();
-  };
+  }).catch(error => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    if (error.data?.validation_errors) {
+      let messageBody = '';
+      Object.keys(error.data.validation_errors).forEach((error_field: string) => {
+        error.data.validation_errors[error_field].forEach((message: string) => {
+          messageBody += message + '\n';
+        });
+      });
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: messageBody, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    } else {
+      let err = error.data?.detail;
+      if (!err) {
+        err = "Cannot reach server. Error code: " + error.statusCode;
+      }
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    }
+  });
+};
+
+const SubmitPasswordForm = async () => {
+  if (newPassword.value !== confirmPassword.value) {
+    toast.removeAllGroups();
+    const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: 'Passwords do not match.', life: ToastTimeout.timeoutError };
+    toast.add(tMsg); addToastRecord(tMsg);
+    return;
+  }
+
+  changeButtonState(true);
+
+  // send reset password request to server
+  await $fetch<any>(`${ngencerfBaseUrl}/auth/users/reset_password_confirm/`, {
+    method: 'POST',
+    body: {
+      uid: route.query.uid,
+      token: route.query.token,
+      new_password: newPassword.value,
+      re_new_password: confirmPassword.value
+    }
+  }).then(response => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'Your password has been updated.', life: ToastTimeout.timeoutSuccess };
+    toast.add(tMsg); addToastRecord(tMsg);
+    closeDialog();
+  }).catch(error => {
+    changeButtonState(false);
+    toast.removeAllGroups();
+    if (error.data?.validation_errors) {
+      let messageBody = '';
+      Object.keys(error.data.validation_errors).forEach((error_field: string) => {
+        error.data.validation_errors[error_field].forEach((message: string) => {
+          messageBody += message + '\n';
+        });
+      });
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: messageBody, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    } else {
+      let err = error.data?.detail;
+      if (!err) {
+        err = "Cannot reach server. Error code: " + error.statusCode;
+      }
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    }
+  });
 };
 
 /**
