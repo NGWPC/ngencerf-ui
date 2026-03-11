@@ -80,8 +80,8 @@
 
                       <h2 class="py-2">If verification fails</h2>
                       
-                      <div :class="buttonClasses">
-                        <Button v-on:click="openRequireVerifyDialog">Resend Verification</Button>
+                      <div>
+                        <Button :class="buttonClasses" v-on:click="openRequireVerifyDialog">Resend Verification</Button>
                       </div>
                       <div class="py-2">
                         <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="closeDialog">
@@ -131,8 +131,8 @@
                           <Password v-model="confirmPassword" id="confirmPassword" type="password" :feedback="false"
                             required toggleMask class="block" />
                         </div>
-                        <div :class="buttonClasses">
-                          <Button type="submit" :disabled="disableButtons">Create Account</Button>
+                        <div>
+                          <Button type="submit" :class="buttonClasses" :disabled="disableButtons">Create Account</Button>
                         </div>
                         <div class="signupButton underline text-base inline pl-6">
                           <Button @click="closeDialog" :class="cancelClasses">Cancel</Button>
@@ -153,8 +153,8 @@
                           <label for="email" class="required-label">Email</label>
                           <InputText v-model="resetEmail" id="reset_mail" type="email" required />
                         </div>
-                        <div :class="buttonClasses">
-                          <Button type="submit" :disabled="disableButtons">Send Email</Button>
+                        <div>
+                          <Button type="submit" :class="buttonClasses" :disabled="disableButtons">Send Email</Button>
                         </div>
                         <div class="signupButton underline text-base inline pl-6">
                           <Button @click="closeDialog" :class="cancelClasses">Cancel</Button>
@@ -191,8 +191,8 @@
                           <Password v-model="confirmPassword" id="new_confirmPassword" type="password" :feedback="false"
                             required toggleMask class="block" />
                         </div>
-                        <div :class="buttonClasses">
-                          <Button type="submit" :disabled="disableButtons">Update Password</Button>
+                        <div>
+                          <Button type="submit" :class="buttonClasses" :disabled="disableButtons">Update Password</Button>
                         </div>
                         <div class="signupButton underline text-base inline pl-6">
                           <Button @click="closeDialog" :class="cancelClasses">Cancel</Button>
@@ -286,18 +286,17 @@ onMounted(() => {
       } else {
         openConfirmVerifyDialog();
         if (route.query?.action === 'verify-email') {
-          await $fetch<any>(`${ngencerfBaseUrl}/auth/jwt/verify_email_confirm/`, {
+          await $fetch<any>(`${ngencerfBaseUrl}/auth/users/verify_email_confirm/`, {
             method: 'POST',
             body: {
               token: route.query.token
             }
           }).then(response => {
-            // if user is verified, go to Login screen - otherwise, ask them to re-verify
-            if (response.email_verified) {
-              closeDialog();
-            } else {
-              openRequireVerifyDialog();
-            }
+            // if user is verified, go to Login screen
+            toast.removeAllGroups();
+            const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Email Verified', detail: 'Your Email address has been verified. Enter your username and password to log in.', life: ToastTimeout.timeoutSuccess };
+            toast.add(tMsg); addToastRecord(tMsg);
+            closeDialog();
           }
           ).catch(error => {
             if (error) {
