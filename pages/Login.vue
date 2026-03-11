@@ -269,11 +269,13 @@ const route = useRoute();
 onMounted(() => {
   popupActive.value = false;
   nextTick(async () => {
-    sessionStorage.clear();
-    localStorage.clear();
+    if (!isUserLoggedIn()) {
+      sessionStorage.clear();
+      localStorage.clear();
+      hardResetUserDataStore();
+    }
     clearToastRecords();
     calibrationJobId.value = 0;
-    hardResetUserDataStore();
     resetGeneralStore();
     await getFooterInformation();
 
@@ -296,33 +298,11 @@ onMounted(() => {
             toast.removeAllGroups();
             const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Email Verified', detail: 'Your Email address has been verified. Enter your username and password to log in.', life: ToastTimeout.timeoutSuccess };
             toast.add(tMsg); addToastRecord(tMsg);
-            closeDialog();
-          }
-          ).catch(error => {
-            if (error) {
-              let err = error.data?.detail;
-              if (!err) {
-                err = "Cannot reach server. Error code: " + error.statusCode;
-              }
-              toast.removeAllGroups();
-              const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: err, life: ToastTimeout.timeoutError };
-              toast.add(tMsg); addToastRecord(tMsg);
-              console.error("Error during user verification:", error.message, error.data.detail);
-            }
-          });
-        } else if (route.query?.uid && route.query?.action === 'activate') {
-          await $fetch<any>(`${ngencerfBaseUrl}/auth/users/activation/`, {
-            method: 'POST',
-            body: {
-              uid: route.query.uid,
-              token: route.query.token
-            }
-          }).then(response => {
-            // if user is verified, go to Login screen - otherwise, ask them to re-verify
-            if (response.email_verified) {
-              closeDialog();
+            if (isUserLoggedIn()) {
+              GetExternalInfo();
+              GoToLanding();
             } else {
-              openRequireVerifyDialog();
+              closeDialog();
             }
           }
           ).catch(error => {
@@ -345,7 +325,6 @@ onMounted(() => {
     }
   });
 });
-
 
 // Get footer infongenCERF
 const getFooterInformation = () => {
@@ -591,7 +570,7 @@ const SubmitResetPasswordForm = async () => {
   }).then(response => {
     changeButtonState(false);
     toast.removeAllGroups();
-    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'An Email has been sent to ' + resetEmail.value + ' with a link to reset your password.', life: ToastTimeout.timeoutSuccess };
+    const tMsg: ToastMessageOptions = { severity: 'success', summary: 'Success', detail: 'If we found an account associated with this email address, you will receive an email with instructions to reset your password.', life: ToastTimeout.timeoutSuccess };
     toast.add(tMsg); addToastRecord(tMsg);
     closeDialog();
   }).catch(error => {
