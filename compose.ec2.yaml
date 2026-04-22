@@ -1,0 +1,21 @@
+services:
+  ngencerf-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ngencerf-ui
+    environment:
+      NGENCERF_BASE_URL: "http://10.6.2.27:8000"
+      NUXT_HOST: "0.0.0.0"
+      NUXT_PORT: "3000"
+      NODE_ENV: "production"
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - ngencerf_net
+
+networks:
+  ngencerf_net:
+    external: true
+    name: ngencerf-server_default
