@@ -3,8 +3,11 @@
     <div v-if="!userCalibrationRunData?.modules?.some(item => item.toLowerCase() === 'lstm')" class="h-screen-inner pr-2">
       <div id="RunDetailsTbl" class="text-left mt-3 pr-3 pl-3 pt-1">
         <div class="tableTitle">Run Details - Calibration Job ID {{ calibrationJobId }}</div>
+        <ContextMenu :pt="{ root: { id: ' detail-context-menu' } }" class="bg-white" ref="detailContextMenu"
+          :model="detailIteration"></ContextMenu>
         <DataTable id="cr-detail-list" :value="computedCalibrationRunDetailDataList" scrollable scroll-height="250px"
-          @row-select="onDetailTableRowSelect" @row-unselect="onTableRowUnselect" table-style="min-width: 50rem"
+          @row-select="onDetailTableRowSelect" @row-unselect="onTableRowUnselect" 
+          @row-dblclick="onRowDblClick($event)" @rowContextmenu="onDetailRowContextMenu" table-style="min-width: 50rem"
           selectionMode="single" class="boxed" ref="calibrationRunDetailTable"
           v-model:selection="selectedCalibrationByIterationDetailRow"
           :rowClass="( {validation_run_id} ) => validation_run_id > 0 ? 'disabled-row' : ''">
@@ -34,8 +37,11 @@
       <div class="mt-1">
         <div id="CalTuningParamsTbl" class="text-left pr-3 pl-3 pt-1">
           <div class="tableTitle">Corresponding Calibration Tuning Parameters</div>
+          <ContextMenu :pt="{ root: { id: ' parameter-context-menu' } }" class="bg-white" ref="parameterContextMenu"
+            :model="parameterIteration"></ContextMenu>
           <DataTable class="dtable boxed" :value="computedtuningParametersDataList" scrollable scroll-height="200px"
-            @row-select="onParameterTableRowSelect" @row-unselect="onTableRowUnselect" selectionMode="single"
+            @row-select="onParameterTableRowSelect" @row-unselect="onTableRowUnselect" 
+            @row-dblclick="onRowDblClick($event)" @rowContextmenu="onParameterRowContextMenu" selectionMode="single"
             ref="tuningParametersTable" v-model:selection="selectedCalibrationByIterationParameterRow"
             :rowClass="( {validation_run_id} ) => validation_run_id > 0 ? 'disabled-row' : ''">
             <ColumnGroup type="header">
@@ -78,6 +84,7 @@ import { useToast } from "primevue/usetoast";
 
 import type { DataTableRowClickEvent } from 'primevue/datatable';
 import type { ToastMessageOptions } from "primevue/toast";
+import type { DataTableContextMenuOption } from "@/composables/NgencerfModels";
 import { ToastTimeout } from "@/composables/NgencerfEnums";
 
 import { useUserDataStore } from "@/stores/common/UserDataStore";
@@ -119,6 +126,11 @@ const selectedCalibrationByIterationParameterRow = ref<any>();
 const calibrationRunDetailTable = ref<HTMLTableElement>();
 const tuningParametersTable = ref<HTMLTableElement>();
 
+const detailContextMenu = ref(); // detail context menu
+const detailIteration = ref<DataTableContextMenuOption[]>([]);
+const parameterContextMenu = ref(); // parameter context menu
+const parameterIteration = ref<DataTableContextMenuOption[]>([]);
+
 onMounted(() => {
   hilightTab(EvaluationTabs.tab_selectAltIteration);
 
@@ -142,11 +154,13 @@ onMounted(() => {
   })
 })
 
+let clickTimer = null;
+
 const onDetailTableRowSelect = (event: DataTableRowClickEvent) => {
   if (event.data.validation_run_id === "") {
     evaluateIterationRunId.value = event.data.iteration_id;
   } else {
-    evaluateIterationRunId.value = 0;
+    clickTimer = setTimeout(() => {evaluateIterationRunId.value = 0;}, 250);
   }
   evaluateDisplayIterationNumber.value = event.data.iteration_num;
   const paramDataIndex = computedtuningParametersDataList.value.findIndex(paramData => paramData.iteration_id === event.data.iteration_id);
@@ -157,7 +171,7 @@ const onParameterTableRowSelect = (event: DataTableRowClickEvent) => {
   if (event.data.validation_run_id === "") {
     evaluateIterationRunId.value = event.data.iteration_id;
   } else {
-    evaluateIterationRunId.value = 0;
+    clickTimer = setTimeout(() => {evaluateIterationRunId.value = 0;}, 250);
   }
   evaluateDisplayIterationNumber.value = event.data.iteration_num;
   const detailDataIndex = computedCalibrationRunDetailDataList.value.findIndex(paramData => paramData.iteration_id === event.data.iteration_id);
@@ -165,10 +179,38 @@ const onParameterTableRowSelect = (event: DataTableRowClickEvent) => {
 }
 
 const onTableRowUnselect = (event: DataTableRowClickEvent) => {
-  selectedCalibrationByIterationParameterRow.value = null;
-  selectedCalibrationByIterationDetailRow.value = null;
-  evaluateIterationRunId.value = 0;
-  evaluateDisplayIterationNumber.value = 0;
+  clickTimer = setTimeout(() => {
+    selectedCalibrationByIterationParameterRow.value = null;
+    selectedCalibrationByIterationDetailRow.value = null;
+    evaluateIterationRunId.value = 0;
+    evaluateDisplayIterationNumber.value = 0;
+  }, 250);
+}
+
+const onRowDblClick = (event: DataTableRowClickEvent) => {
+  clearTimeout(clickTimer);
+  if (event.data.validation_run_id === "") {
+    evaluateIterationRunId.value = event.data.iteration_id;
+    navigateToEvaluateStatus(event);
+  }
+}
+
+const onDetailRowContextMenu = (event: any) => {
+  detailContextMenu.value.show(event.originalEvent);
+  detailIteration.value = [];
+  if (event.data.validation_run_id === "") {
+    evaluateIterationRunId.value = event.data.iteration_id;
+    detailIteration.value.push({ label: 'New Alternate Iteration Run', icon: 'pi pi-chevron-circle-right', command: () => onRowDblClick(event) });
+  }
+}
+
+const onParameterRowContextMenu = (event: any) => {
+  parameterContextMenu.value.show(event.originalEvent);
+  parameterIteration.value = [];
+  if (event.data.validation_run_id === "") {
+    evaluateIterationRunId.value = event.data.iteration_id;
+    parameterIteration.value.push({ label: 'New Alternate Iteration Run', icon: 'pi pi-chevron-circle-right', command: () => onRowDblClick(event) });
+  }
 }
 
 const navigateToEvaluateStatus = (event: any) => {

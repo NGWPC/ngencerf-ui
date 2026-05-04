@@ -46,7 +46,7 @@
             v-model:sortField="verificationRunListSort.field" v-model:sortOrder="verificationRunListSort.direction"
             v-model:selection="selectedVerificationJob" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onVerificationRowSelect" @rowUnselect="onVerificationRowUnSelect"
-            @rowContextmenu="onRowContextMenu" class="boxed">
+            @rowContextmenu="onRowContextMenu" @row-dblclick="onRowDblClick($event)"class="boxed">
             <Column :pt="ptColumn" field="verification_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -206,6 +206,10 @@ const onRowContextMenu = (event: any) => {
   }
 };
 
+const onRowDblClick = (event: any) => {
+  navigateToVerificationJobStatus(event);
+}
+
 onMounted(() => {
   isLoading.value = true;
 
@@ -279,8 +283,11 @@ const acceptDelete = (selectedRunId: number) => {
   });
 }
 
-const navigateToVerificationJobStatus = () => {
+const navigateToVerificationJobStatus = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedVerificationRowData(event.data);
+  }
   nextTick(async () => {
     const e: HTMLElement | null = document.querySelector('.tabs[title="Verification Run/Status Tab"]');
 

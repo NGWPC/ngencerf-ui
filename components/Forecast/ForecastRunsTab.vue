@@ -47,7 +47,7 @@
             v-model:sortField="forecastRunListSort.field" v-model:sortOrder="forecastRunListSort.direction"
             v-model:selection="selectedForecastJob" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onForecastRowSelect" @rowUnselect="onForecastRowUnSelect" @rowContextmenu="onRowContextMenu"
-            class="boxed">
+            @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="forecast_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -281,6 +281,10 @@ const onRowContextMenu = (event: any) => {
   }
 };
 
+const onRowDblClick = (event: any) => {
+  navigateToForecastRunStatus(event);
+}
+
 onMounted(async () => {
   isLoading.value = true;
   forecastJobId.value = undefined;
@@ -366,8 +370,11 @@ const navigateToSetupForecast = (new_forecast: boolean=true) => {
   });
 }
 
-const navigateToForecastRunStatus = () => {
+const navigateToForecastRunStatus = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedForecastRowData(event.data);
+  }
   nextTick(async () => {
     const e: HTMLElement | null = document.querySelector('.tabs[title="Forecast Run/Status Tab"]');
 
@@ -381,8 +388,11 @@ const navigateToForecastRunStatus = () => {
   });
 }
 
-const navigateToForecastResults = () => {
+const navigateToForecastResults = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedForecastRowData(event.data);
+  }
   nextTick(async () => {
     const e: HTMLElement | null = document.querySelector('.tabs[title="Forecast Results Tab"]');
 

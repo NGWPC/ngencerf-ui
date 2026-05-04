@@ -49,7 +49,7 @@
             v-model:sortField="calibrationRunsForForecastListSort.field" v-model:sortOrder="calibrationRunsForForecastListSort.direction"
             v-model:selection="calibrationRunForForecast" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onCalibrationRunForForecastRowSelect" @rowUnselect="onCalibrationRunForForecastRowUnSelect"
-            @rowContextmenu="onRowContextMenu" class="boxed">
+            @rowContextmenu="onRowContextMenu" @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="calibration_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -262,7 +262,7 @@ const crContextMenu = ref(); //calibration run context menu
 //this model is for highlighting purpose
 const selectedCalibrationRun = ref<CalibrationRunForForecast>();
 
-const { isLoading } = storeToRefs(generalStore());
+const { isLoading, calibrationJobId } = storeToRefs(generalStore());
 const { calibrationDownloadJobID } = storeToRefs(useCalibrationJobStore());
 
 const cmCalibrationRun = ref<DataTableContextMenuOption[]>([]);
@@ -287,6 +287,10 @@ const onRowContextMenu = (event: any) => {
     }
   }
 };
+
+const onRowDblClick = (event: any) => {
+  navigateToSetupForecast(event);
+}
 
 const {
   loadCalibrationDataComplete,
@@ -391,7 +395,11 @@ watch(() => userCalibrationRunData.value, (updatedRunData, initialRunData) => {
   }
 });
 
-const navigateToSetupForecast = async () => {
+const navigateToSetupForecast = async (event: any=null) => {
+  if (event) {
+    calibrationRunForForecast.value = event.data;
+    setSelectedCalibrationRunId(event.data.calibration_run_id);
+  }
   if (calibrationRunForForecast?.value?.calibration_run_id && calibrationRunForForecast.value.calibration_run_id > 0) {
     forecastJobId.value = undefined;
     const e: HTMLElement | null = document.querySelector('.tabs[title="Setup Forecast Tab"]');

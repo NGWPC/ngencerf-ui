@@ -45,7 +45,7 @@
             sortField="validation_run_id" :sortOrder="-1" table-style="min-width: 50rem" selectionMode="single"
             v-model:selection="selectedCalibrationValidationRun" :rowStyle="rowStyle"
             @rowContextmenu="onRowVrContextMenu" @rowSelect="onEvalValidationRowSelect"
-            @rowUnselect="onEvalValidationRowUnSelect" class="boxed">
+            @row-dblclick="onRowVrDblClick($event)" @rowUnselect="onEvalValidationRowUnSelect" class="boxed">
             <Column :pt="ptValColumns" v-for="(col, colIndex) in calibrationValidationRunListHeaders" :key="colIndex"
               :header="col.header" :field="col.field">
             </Column>
@@ -130,7 +130,7 @@
             v-model:sortField="evaluationRunListSort.field" v-model:sortOrder="evaluationRunListSort.direction"
             selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onEvalCalibrationRowSelect" @rowUnselect="onEvalCalibrationRowUnSelect"
-            @rowContextmenu="onRowContextMenu" class="boxed">
+            @row-dblclick="onRowDblClick($event)" @rowContextmenu="onRowContextMenu" class="boxed">
             <Column :pt="ptColumn" field="calibration_run_id" sortable> 
               <template #header>
                 <div class="column-header">
@@ -614,11 +614,21 @@ const onEvalValidationRowUnSelect = async (event: DataTableRowClickEvent) => {
 }
 
 const onRowDblClick = (event: any) => {
-  isLoading.value = true;
-  const rowData = event.data;
-  contextMenuJob.value = rowData.calibration_run_id;
-  openSelectedCalibrationRun();
+  const data = ref<any>();
+  data.value = event.data;
+  if (data.value.validation_runs > 1) {
+    viewSelectedCalibrationValidationRuns(data.value.calibration_run_id);
+  } else {
+    evaluateValidationJobFromCalibration(data.value.calibration_run_id);
+  }
 }
+
+const onRowVrDblClick = (event: any) => {
+  const data = ref<any>();
+  data.value = event.data;
+  evaluateValidationJob(data.value.validation_run_id, data.value.status);
+}
+
 
 const openSelectedCalibrationRun = () => {
   isLoading.value = true;

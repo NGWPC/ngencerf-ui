@@ -49,7 +49,7 @@
             v-model:sortField="calibrationRunsForHindcastListSort.field" v-model:sortOrder="calibrationRunsForHindcastListSort.direction"
             v-model:selection="calibrationRunForHindcast" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="oncalibrationRunForHindcastRowSelect" @rowUnselect="oncalibrationRunForHindcastRowUnSelect"
-            @rowContextmenu="onRowContextMenu" class="boxed">
+            @rowContextmenu="onRowContextMenu" @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="calibration_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -262,7 +262,7 @@ const crContextMenu = ref(); //calibration run context menu
 //this model is for highlighting purpose
 const selectedCalibrationRun = ref<calibrationRunForHindcast>();
 
-const { isLoading } = storeToRefs(generalStore());
+const { isLoading, calibrationJobId } = storeToRefs(generalStore());
 const { calibrationDownloadJobID } = storeToRefs(useCalibrationJobStore());
 
 const cmCalibrationRun = ref<DataTableContextMenuOption[]>([]);
@@ -287,6 +287,10 @@ const onRowContextMenu = (event: any) => {
     }
   }
 };
+
+const onRowDblClick = (event: any) => {
+  navigateToSetupHindcast(event);
+}
 
 const {
   loadCalibrationDataComplete,
@@ -391,7 +395,11 @@ watch(() => userCalibrationRunData.value, (updatedRunData, initialRunData) => {
   }
 });
 
-const navigateToSetupHindcast = async () => {
+const navigateToSetupHindcast = async (event: any=null) => {
+  if (event) {
+    calibrationRunForHindcast.value = event.data;
+    setSelectedCalibrationRunId(event.data.calibration_run_id);
+  }
   if (calibrationRunForHindcast?.value?.calibration_run_id && calibrationRunForHindcast.value.calibration_run_id > 0) {
     hindcastJobId.value = undefined;
     const e: HTMLElement | null = document.querySelector('.tabs[title="Setup Hindcast Tab"]');

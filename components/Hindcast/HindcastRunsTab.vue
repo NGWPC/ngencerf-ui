@@ -47,7 +47,7 @@
             v-model:sortField="hindcastRunListSort.field" v-model:sortOrder="hindcastRunListSort.direction"
             v-model:selection="selectedHindcastJob" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onHindcastRowSelect" @rowUnselect="onHindcastRowUnSelect" @rowContextmenu="onRowContextMenu"
-            class="boxed">
+            @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="hindcast_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -283,6 +283,10 @@ const onRowContextMenu = (event: any) => {
 
 const isMounted = ref(false);
 
+const onRowDblClick = (event: any) => {
+  navigateToHindcastRunStatus(event);
+}
+
 onMounted(async () => {
   isLoading.value = true;
   hindcastJobId.value = undefined;
@@ -368,8 +372,11 @@ const navigateToSetupHindcast = (new_hindcast: boolean=true) => {
   });
 }
 
-const navigateToHindcastRunStatus = () => {
+const navigateToHindcastRunStatus = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedHindcastRowData(event.data);
+  }
   nextTick(async () => {
     const e: HTMLElement | null = document.querySelector('.tabs[title="Hindcast Run/Status Tab"]');
 
@@ -383,8 +390,11 @@ const navigateToHindcastRunStatus = () => {
   });
 }
 
-const navigateToHindcastResults = () => {
+const navigateToHindcastResults = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedHindcastRowData(event.data);
+  }
   nextTick(async () => {
     const e: HTMLElement | null = document.querySelector('.tabs[title="Hindcast Results Tab"]');
 
