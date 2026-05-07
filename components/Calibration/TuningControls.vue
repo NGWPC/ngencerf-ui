@@ -290,7 +290,7 @@
       <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
         <div class="col-span-1 mr-3">
           <Button v-if="tuningDataHasChanged || calibratableParametersHaveChanged" class="ngenButtonDiv-yellow" title="Revert All Changes"
-            @click="restorePage()" aria-label="Revert All Changes">Revert</Button>
+            @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
         </div>
       </span>
       <span v-else>
@@ -314,7 +314,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, defineExpose } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { DateTime } from "luxon";
 import Select from "primevue/select";
@@ -1296,7 +1296,7 @@ const compareTimeEntries = (txtDT: string, dT: Date) => {
   return new Date(dT).getTime() !== new Date(txtDT).getTime();
 }
 
-const restorePage = async () => {
+const restoreTab = async () => {
   // reset calibration times
   if (userCalibrationRunData?.value?.calibration_times) {
     const { simulation_start_time, simulation_end_time, calibration_start_time, calibration_end_time } = userCalibrationRunData.value.calibration_times;
@@ -1378,7 +1378,7 @@ const showPrevNextDialog = (body: string[], next: boolean) => {
 
 const handleNextPrevDialogClose = (opt: any) => {
   if (opt.data && opt.data.moveToNextResponse) {
-    restorePage();
+    restoreTab();
     if (opt.data.goNext) {
       gotoNext();
     } else {
@@ -1435,6 +1435,11 @@ const checkInitialValueOutOfRange = (parameterName: string, initialValue: number
     toast.add(tMsg); addToastRecord(tMsg);
   }
 }
+
+defineExpose({
+  validateTab,
+  restoreTab
+});
 
 onUnmounted(async () => {
   saveTuningTabRequestBody.value = {};

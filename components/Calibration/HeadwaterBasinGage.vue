@@ -129,7 +129,7 @@
             <span v-if="jobNameHasChanged || (gageHasChanged && userCalibrationRunData?.gage !== null) || gageDataSourceHasChanged">
               <div class="col-span-1 mr-3">
                 <Button class="ngenButtonDiv-yellow" title="Revert All Changes"
-                  @click="gageSelectionReset()" aria-label="Revert All Changes">Revert</Button>
+                  @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
               </div>
             </span>
             <span v-else>
@@ -156,7 +156,7 @@
 
 </template>
 <script lang="ts" setup>
-import { onMounted } from "vue";
+import { onMounted, defineExpose } from "vue";
 import { storeToRefs } from "pinia";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
@@ -253,7 +253,7 @@ onMounted(async() => {
       submitTimeDate.value = new Date(userCalibrationRunData.value.submit_date);
     }
     if (userCalibrationRunData?.value?.gage?.gage_id) {
-      gageSelectionReset();
+      restoreTab();
     } else {
       selectedForcingValue.value = resetData.value.forcing_source;
       selectedObservationalValue.value = resetData.value.observational_source;
@@ -307,7 +307,7 @@ const onGageSelectionChange = () => {
 /**
  * Resets the Gage to the previous gage if it was changed and not saved.
  */
-const gageSelectionReset = () => {
+const restoreTab = () => {
   jobNameInput.value = userCalibrationRunData?.value?.job_name ?? "";
   selectedDomainValue.value = getSavedDomainValue.value ?? '';
   selectedGageValue.value = userCalibrationRunData?.value?.gage?.gage_id ? userCalibrationRunData.value.gage.gage_id : '';
@@ -726,13 +726,18 @@ const showPrevNextDialog = (body: string[], next: boolean) => {
 
 const handleNextPrevDialogClose = (opt: any) => {
   if (opt.data && opt.data.moveToNextResponse) {
-    gageSelectionReset();
+    restoreTab();
     gotoNext();
   }
   if (opt.type && opt.type === 'dialog-close') {
     return;
   }
 }
+
+defineExpose({
+  validateTab,
+  restoreTab
+});
 
 </script>
 <style lang="scss" scoped>

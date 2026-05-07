@@ -225,7 +225,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted defineExpose } from "vue";
 import { storeToRefs } from "pinia";
 import { useDialog } from "primevue/usedialog";
 import { useToast } from "primevue/usetoast";
@@ -684,6 +684,11 @@ const handleNextPrevDialogClose = (opt: any) => {
     return;
   }
 }
+
+defineExpose({
+  validateTab,
+  restoreTab
+});
 
 onUnmounted(() => {
   restoreTab();

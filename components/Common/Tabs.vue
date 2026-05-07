@@ -186,6 +186,7 @@
 </template>
 
 <script lang="ts" setup>
+import { defineProps } from 'vue';
 import { storeToRefs } from "pinia";
 
 import { generalStore } from "@/stores/common/GeneralStore";
@@ -195,6 +196,12 @@ import { useEvaluationRunStatusStore } from '@/stores/evaluation/EvaluationRunSt
 import { useForecastStore } from "@/stores/forecast/ForecastStore";
 import { useVerificationStore } from "~/stores/forecast/VerificationStore";
 import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
+
+import { useDialog } from "primevue/usedialog";
+import MoveNextPrevDialog from "../Common/MoveNextPrevDialog.vue";
+
+const dialog = useDialog();
+const navDialogOpened = ref<boolean>(false);
 
 const {
   calibrationJobId,
@@ -250,13 +257,31 @@ const currentMenu = ref(getMenuIndex());
 // temporary. Will be replaced by logic from each tabuserCalibrationRunData
 const tabNotCompleted = ref(false);
 
+const props = defineProps({
+  callTabValidator: {
+    type: Function,
+    required: false,
+  },
+  callTabRestore: {
+    type: Function,
+    required: false,
+  }
+});
+
 const tabClicked = (event: Event) => {
   event.preventDefault();
   const ele: HTMLElement = event.currentTarget as HTMLElement;
   let tabNumber = Number(ele.getAttribute("data-tab"));
-  nextTick(() => {
+  if (props.callTabValidator) {
+    const errors = props.callTabValidator();
+    if (errors.error) {
+      showTabNavDialog(errors.text, true, tabNumber);
+    } else {
+      goToTab(tabNumber);
+    }
+  } else {
     goToTab(tabNumber);
-  })
+  }
 }
 
 const goToTab = (tabNumber: number) => {
@@ -286,6 +311,47 @@ onMounted( () => {
     goToTab(1);
   }
 })
+
+const showTabNavDialog = (body: string[], next: boolean, tabNumber: number) => {
+  if (!navDialogOpened.value) {
+    dialog.open(MoveNextPrevDialog, {
+      props: {
+        header: "Unsaved changes!",
+        style: {
+          width: 'auto',
+        },
+        modal: true,
+      },
+      data: {
+        body: body,
+        direction: next
+      },
+      onClose: (opt) => {
+        navDialogOpened.value = false;
+        handleTabNavDialogClose(opt, tabNumber);
+      },
+
+    })
+    navDialogOpened.value = true;
+  }
+}
+
+const handleTabNavDialogClose = (opt: any, tabNumber: number) => {
+  if (opt.data && opt.data.moveToNextResponse) {
+    if (props.callTabRestore) {
+      props.callTabRestore();
+    }
+    goToTab(tabNumber);
+  }
+  if (opt.type && opt.type === 'dialog-close') {
+    return;
+  }
+}
+
+defineExpose({
+  showTabNavDialog,
+  goToTab
+});
 </script>
 <style lang="scss" scoped>
 @use "@/assets/styles/global.scss";

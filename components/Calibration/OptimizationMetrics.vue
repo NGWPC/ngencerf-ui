@@ -188,7 +188,7 @@
       <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
         <div class="col-span-1">
           <Button v-if="optMetDataHasChanged && !userCalibrationRunData?.modules?.includes('LSTM')" class="ngenButtonDiv-yellow" title="Revert All Changes"
-            @click="restorePage()" aria-label="Revert All Changes">Revert</Button>
+            @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
         </div>
       </span>
       <div class="col-span-4">&nbsp;</div>
@@ -210,7 +210,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, defineExpose } from "vue";
 import { storeToRefs } from "pinia";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
@@ -512,7 +512,7 @@ const validateTab = () => {
   return { error: error, text: text }
 }
 
-const restorePage = async () => {
+const restoreTab = async () => {
   await fetchUserCalibrationRunData();
   if (userCalibrationRunData.value) {
     uiOptimization.value = userCalibrationRunData?.value?.optimization;
@@ -597,7 +597,7 @@ const showPrevNextDialog = (body: string[], next: boolean) => {
 
 const handleNextPrevDialogClose = (opt: any) => {
   if (opt.data && opt.data.moveToNextResponse) {
-    restorePage();
+    restoreTab();
     if (opt.data.goNext) {
       gotoNext();
     } else {
@@ -608,6 +608,11 @@ const handleNextPrevDialogClose = (opt: any) => {
     return;
   }
 }
+
+defineExpose({
+  validateTab,
+  restoreTab
+});
 
 onUnmounted(async () => {
   optMetDataHasChanged.value = false;
