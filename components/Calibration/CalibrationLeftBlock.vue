@@ -53,9 +53,9 @@ const tabChanged = (tabNum: number) => {
 
 const tabRef = ref(null);
 
-function validateCurrentTab() {
+function validateCurrentTab(ele?: HTMLElement) {
   if (typeof tabRef?.value?.validateTab === 'function') {
-    return tabRef.value.validateTab();
+    return tabRef.value.validateTab(ele);
   }
   return true;
 }
