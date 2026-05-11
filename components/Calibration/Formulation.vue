@@ -478,7 +478,7 @@ const validateModuleProperties = () => {
   return errors;
 }
 
-const validateTab = () => {
+const validateTab = (ele?: HTMLElement) => {
   let error = false;
   let text = [];
   /* check if list of modules changed */

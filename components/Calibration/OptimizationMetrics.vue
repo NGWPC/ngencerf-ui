@@ -464,7 +464,7 @@ const updateJobData = () => {
   }
 };
 
-const validateTab = () => {
+const validateTab = (ele?: HTMLElement) => {
   let error = false;
   let text = [];
   if (!userCalibrationRunData?.value?.modules.includes('LSTM')) {

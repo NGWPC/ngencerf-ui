@@ -204,6 +204,9 @@ const cycleHourList = ref<number[]>([]);
 const coldStartHour = ref<number>();
 const coldStartHourList = ref<number[]>(Array.from({ length: 24 }, (_, index) => index));
 
+const dialog = useDialog();
+const nextPrevDialogOpened = ref<boolean>(false);
+
 /**
  * Disable row if forecast configuration is not active
  */
@@ -219,7 +222,6 @@ const rowStyle = (data: any) => {
         color: calibrationRunForForecast?.value?.forecast_status && calibrationRunForForecast?.value?.forecast_status !== 'Ready' ? 'grey' : 'black'
     };
 };
-
 
 onMounted(async () => {
     toast.removeAllGroups(); // clear all toast messages
@@ -347,6 +349,23 @@ const goToRunStatusTab = () => {
     const e = allTabs[ForecastTabs.tab_forecastRunStatus] as HTMLElement;
     e.click();
 };
+
+const validateTab = (ele?: HTMLElement) => {
+  let error = false;
+  let text = [];
+  // configuration has to be picked first, so just check for that.
+  // ignore if they're actually clicking through to Run/Status
+  console.log('ele in validateTab:',ele);
+  if (forecastConfiguration.value && Number(ele.getAttribute("data-tab")) !== 4) {
+    error = true;
+    text.push("Are you sure you want to abandon this Forecast? It will not be saved.");
+  }
+  return { error: error, text: text }
+}
+
+defineExpose({
+  validateTab
+});
 </script>
 
 <style lang="scss" scoped>

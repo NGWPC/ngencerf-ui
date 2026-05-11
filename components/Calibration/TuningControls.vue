@@ -1237,7 +1237,7 @@ const saveTuningData = () => {
   }
 };
 
-const validateTab = () => {
+const validateTab = (ele?: HTMLElement) => {
   /* Check the DateTimes */
   let error = false;
   let text = [];

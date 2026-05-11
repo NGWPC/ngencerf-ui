@@ -1,31 +1,31 @@
 <template>
   <!-- ForecastLeftBlock.vue -->
   <div>
-    <Tabs @tabNumber="tabChanged" />
+    <Tabs @tabNumber="tabChanged" :call-tab-validator="validateCurrentTab" />
     <div class="shrink-0">
       <span v-if="activeTab === 1">
-        <PreviousCalibrationRuns />
+        <PreviousCalibrationRuns/>
       </span>
       <span v-else-if="activeTab === 2">
-        <ForecastRunsTab />
+        <ForecastRunsTab/>
       </span>
       <span v-else-if="activeTab === 3">
-        <SetupForecastTab />
+        <SetupForecastTab ref="tabRef"/>
       </span>
       <span v-else-if="activeTab === 4">
-        <ForecastRunStatusTab />
+        <ForecastRunStatusTab ref="tabRef"/>
       </span>
       <span v-else-if="activeTab === 5">
-        <ForecastResultsTab />
+        <ForecastResultsTab/>
       </span>
       <span v-if="activeTab === 6">
-        <VerificationRunsTab />
+        <VerificationRunsTab/>
       </span>
       <span v-else-if="activeTab === 7">
-        <VerificationRunStatusTab />
+        <VerificationRunStatusTab ref="tabRef"/>
       </span>
       <span v-else-if="activeTab === 8">
-        <VerificationResultsTab />
+        <VerificationResultsTab/>
       </span>
     </div>
   </div>
@@ -58,7 +58,13 @@ const tabChanged = (tabNum: number) => {
     setForecastTabIndex(tabNum);
   } 
 };
-onUnmounted(() => {
-  verificationJobId.value = undefined;
-})
+
+const tabRef = ref(null);
+
+function validateCurrentTab() {
+  if (typeof tabRef?.value?.validateTab === 'function') {
+    return tabRef.value.validateTab();
+  }
+  return true;
+}
 </script>

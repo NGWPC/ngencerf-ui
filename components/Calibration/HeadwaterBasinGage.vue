@@ -658,7 +658,7 @@ const resetTabData = () => {
   }
 };
 
-const validateTab = () => {
+const validateTab = (ele?: HTMLElement) => {
   let error = false;
   let text = [];
   /* Check if Job Name changed */
@@ -698,7 +698,6 @@ const goNextTab = () => {
   } else {
     gotoNext();
   }
-
 };
 
 const showPrevNextDialog = (body: string[], next: boolean) => {
