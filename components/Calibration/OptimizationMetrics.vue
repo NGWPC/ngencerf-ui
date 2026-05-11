@@ -210,7 +210,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, defineExpose } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";

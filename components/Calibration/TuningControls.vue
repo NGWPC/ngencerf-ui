@@ -314,7 +314,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted, defineExpose } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { DateTime } from "luxon";
 import Select from "primevue/select";

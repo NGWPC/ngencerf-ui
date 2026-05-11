@@ -156,7 +156,7 @@
 
 </template>
 <script lang="ts" setup>
-import { onMounted, defineExpose } from "vue";
+import { onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";

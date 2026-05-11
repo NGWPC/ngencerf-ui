@@ -1,25 +1,25 @@
 <template>
-  <!-- LeftBlock.vue -->
+  <!-- CalibrationLeftBlock.vue -->
   <div>
-    <Tabs @tabNumber="tabChanged" />
+    <Tabs @tabNumber="tabChanged" :call-tab-validator="validateCurrentTab" :call-tab-restore="restoreCurrentTab"/>
     
     <div v-if="activeTab === 1">
-      <CalibrationCalibrationRunsTab />
+      <CalibrationCalibrationRunsTab/>
     </div> 
     <div v-else-if="activeTab === 2">
-      <CalibrationHeadwaterBasinGage />
+      <CalibrationHeadwaterBasinGage ref="tabRef"/>
     </div>
     <div v-else-if="activeTab === 3">
-      <CalibrationFormulation />
+      <CalibrationFormulation ref="tabRef"/>
     </div>
     <div v-else-if="activeTab === 4">
-      <CalibrationTuningControls />
+      <CalibrationTuningControls ref="tabRef"/>
     </div>
     <div v-else-if="activeTab === 5">
-      <CalibrationOptimizationMetrics />
+      <CalibrationOptimizationMetrics ref="tabRef"/>
     </div>
     <div v-else-if="activeTab === 6">
-      <CalibrationRunStatus />
+      <CalibrationRunStatus/>
     </div>
     
   </div>
@@ -37,6 +37,7 @@ import CalibrationTuningControls from '@/components/Calibration/TuningControls.v
 import CalibrationOptimizationMetrics from '@/components/Calibration/OptimizationMetrics.vue';
 import CalibrationRunStatus from '@/components/Calibration/RunStatus.vue';
 import CalibrationCalibrationRunsTab from '@/components/Calibration/PreviousCalibrationRuns.vue';
+import { ThemeUtils } from "@primeuix/styled";
 
 const { getCalibrationTabIndex, setCalibrationTabIndex } = generalStore();
 
@@ -49,4 +50,19 @@ const tabChanged = (tabNum: number) => {
     setCalibrationTabIndex(tabNum);
   }
 };
+
+const tabRef = ref(null);
+
+function validateCurrentTab() {
+  if (typeof tabRef?.value?.validateTab === 'function') {
+    return tabRef.value.validateTab();
+  }
+  return true;
+}
+function restoreCurrentTab() {
+  if (typeof tabRef?.value?.restoreTab === 'function') {
+    return tabRef?.value?.restoreTab();
+  }
+  return true;
+}
 </script>

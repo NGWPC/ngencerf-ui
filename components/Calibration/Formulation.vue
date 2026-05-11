@@ -102,85 +102,7 @@
           </div>
           <div class="col-span-1">&nbsp;</div>
         </div>
-        <!-- <div class="mt-3 mb-5 hr"></div> -->
       </div>
-      <!--
-      /* Don't Display this implemented SLoTH capability until available to send SLoTH variables to ngen-cal */
-      <div class="row-span-2 -mt-2">
-
-        <div class="flex">
-          <span class="text-left pt-1">
-            <input type="checkbox" id="SlothCheck" class="ml-2" v-model="useSlothParameters" />
-            <label class="inline-block text-[18px]" for="SlothCheck">&nbsp;Add SLoTH output variable for
-              formulation</label>
-          </span>
-          <span v-show="useSlothParameters" class="ml-auto pr-2">
-            <label class="inline-block  text-[16px] pl-10 pr-4" for="SlothName">SLoTH Name</label>
-            <input class="inline-block w-auto" id="SlothName" type="text" v-model="new_sloth_variable_name"
-              @keypress="addSlothOnEnter($event)">
-            <div class="ngenButtonDiv ml-3 inline-block">
-              <Button id="SlothAddBtn" @click="addSlothVariable">Add</Button>
-            </div>
-          </span>
-        </div>
-
-        <div id="SlothDataTable" v-show="useSlothParameters"
-          class="items-center pl-2 pr-2 mt-2 overflow-auto max-h-[157px]">
-
-          <ContextMenu :pt="{ root: { id: 'loth-param-context-menu' } }" class="bg-white" ref="slothParamContextMenu"
-            :model="cmSlothParameterData"></ContextMenu>
-          <DataTable class="stripe" id="sloth-params-list" :value="slothParameterInputs" editMode="cell" scrollable
-            scroll-height="157px" table-style="min-width: 50rem" v-model:selection="selectedSlothParameterData"
-            selectionMode="single" contextMenu v-model:contextMenuSelection="selectedSlothParameterData"
-            @rowContextmenu="onRowContextMenu">
-            <Column :pt="ptColumn" field="param_name" header="SLoTH Output Var" sortable></Column>
-            <Column :pt="ptColumn" field="param_count" header="Count" sortable>
-              <template #editor="{ index }">
-                <InputNumber v-model="slothParameterInputs[index].param_count" autofocus class="w-12 p-1">
-                </InputNumber>
-              </template>
-            </Column>
-            <Column :pt="ptColumn" field="param_type" header="Type" sortable>
-              <template #editor="{ index }">
-                <Select v-model="slothParameterInputs[index].param_type"
-                  :options="fetchFormulationSlothParameterTypeOptions" optionLabel="name" optionValue="name"></Select>
-              </template>
-            </Column>
-            <Column :pt="ptColumn" field="param_units" header="Units" sortable>
-              <template #editor="{ index }">
-                <Select v-model="slothParameterInputs[index].param_units"
-                  :options="fetchFormulationSlothParameterUnitOptions" optionLabel="name" optionValue="name"></Select>
-              </template>
-            </Column>
-            <Column :pt="ptColumn" field="param_location" header="Location" sortable>
-              <template #editor="{ index }">
-                <InputText v-model="slothParameterInputs[index].param_location" autofocus class="w-20 p-1">
-                </InputText>
-              </template>
-            </Column>
-            <Column :pt="ptColumn" field="maps_to_module" header="For Module" sortable>
-              <template #editor="{ index }">
-                <Select v-model="slothParameterInputs[index].maps_to_module" filter
-                  :options="fetchSelectedFormulationModuleOptions" optionLabel="name" optionValue="name"></Select>
-              </template>
-            </Column>
-            <Column :pt="ptColumn" field="maps_to_variable_name" header="Module Param" sortable>
-              <template #editor="{ index }">
-                <InputText v-model="slothParameterInputs[index].maps_to_variable_name" autofocus fluid>
-                </InputText>
-              </template>
-            </Column>
-            <Column :pt="ptColumn" field="param_value" header="Value" sortable>
-              <template #editor="{ index }">
-                <InputNumber v-model="slothParameterInputs[index].param_value" autofocus :minFractionDigits="0"
-                  :maxFractionDigits="2" class="w-12 p-1" fluid>
-                </InputNumber>
-              </template>
-            </Column>
-          </DataTable>
-        </div>
-      </div>
--->
       <div id="FormulationBottomButtons" class="grid grid-cols-8 mt-3 ActionButtonsBox">
         <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
           <div class="col-span-1 mr-6 h-8" @click="saveFormulationData()">
@@ -225,7 +147,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onUnmounted defineExpose } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useDialog } from "primevue/usedialog";
 import { useToast } from "primevue/usetoast";
