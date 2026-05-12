@@ -1,22 +1,22 @@
 <template> 
   <!-- EvaluationLeftBlock.vue -->
   <div>
-    <Tabs @tabNumber="tabChanged" />
+    <Tabs @tabNumber="tabChanged" ref="navRef" :call-tab-validator="validateCurrentTab"/>
     <div class="shrink-0">
       <span v-if="activeTab === 1">
-        <EvaluationRunsTab />
+        <EvaluationRunsTab/>
       </span>
       <span v-else-if="activeTab === 2">
-        <EvaluateTab />
+        <EvaluateTab/>
       </span>
       <span v-else-if="activeTab === 3">
-        <ComparePermutationsTab />
+        <ComparePermutationsTab/>
       </span>
       <span v-else-if="activeTab === 4">
-        <SelectAltIterationTab />
+        <SelectAltIterationTab/>
       </span>
       <span v-else-if="activeTab === 5">
-        <RunStatus />
+        <RunStatus ref="tabRef"/>
       </span>
     </div>
   </div>
@@ -32,8 +32,10 @@ import SelectAltIterationTab from './SelectAltIterationTab.vue';
 import EvaluationRunsTab from './EvaluationRunsTab.vue';
 import RunStatus from './EvaluationRunStatus.vue';
 
-const { getEvaluationTabIndex, setEvaluationTabIndex } = generalStore();
+const { tabRef, navRef } = storeToRefs(generalStore());
+const { getEvaluationTabIndex, setEvaluationTabIndex, validateCurrentTab } = generalStore();
 
+// Default to Tab 1, EvaluationRunsTab
 const activeTab = ref(getEvaluationTabIndex());
 
 // Activate new tab

@@ -87,6 +87,8 @@
       </div>
     </div>
 
+    <DynamicDialog />
+
     <!-- DISPLAY LOGS -->
     <div v-show="logListOptions.length > 0">
       <LogDisplay/>
@@ -106,6 +108,7 @@ import LogDisplay from "../Common/LogDisplay.vue";
 import type { ToastMessageOptions } from "primevue/toast";
 import { ToastTimeout } from "@/composables/NgencerfEnums";
 import { hilightTab } from '@/composables/TabHilight';
+import { useDialog } from 'primevue/usedialog';
 import { storeToRefs } from "pinia";
 
 import { useForecastStore } from "~/stores/forecast/ForecastStore";
@@ -120,6 +123,9 @@ const toast = useToast();
 
 const runButtonDisabled = ref<boolean>(true);
 const cancelButtonDisabled = ref<boolean>(true);
+
+const dialog = useDialog();
+const nextPrevDialogOpened = ref<boolean>(false);
 
 const forecastStore = useForecastStore();
 const verificationStore = useVerificationStore();
@@ -289,6 +295,21 @@ const goNextTab = () => {
   const e = <HTMLElement>tabs[ForecastTabs.tab_verificationResults];
   e.click();
 }
+
+const validateTab = (tabNumber?: number) => {
+  let error = false;
+  let text = [];
+  // assume they've run the job if Run button is disabled
+  if (!runButtonDisabled.value) {
+    error = true;
+    text.push("Are you sure you want to leave without running this Verification? It will not be saved.");
+  }
+  return { error: error, text: text }
+}
+
+defineExpose({
+  validateTab
+});
 
 onUnmounted(() => {
   isMounted.value = false;

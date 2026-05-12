@@ -1,7 +1,7 @@
 <template>
   <!-- ForecastLeftBlock.vue -->
   <div>
-    <Tabs @tabNumber="tabChanged" :call-tab-validator="validateCurrentTab" />
+    <Tabs @tabNumber="tabChanged" ref="navRef" :call-tab-validator="validateCurrentTab" />
     <div class="shrink-0">
       <span v-if="activeTab === 1">
         <PreviousCalibrationRuns/>
@@ -44,11 +44,10 @@ import VerificationRunsTab from "./VerificationRunsTab.vue"
 import VerificationRunStatusTab from "./VerificationRunStatusTab.vue"
 import VerificationResultsTab from "./VerificationResultsTab.vue"
 
-const { getForecastTabIndex, setForecastTabIndex } = generalStore();
+const { tabRef, navRef } = storeToRefs(generalStore());
+const { getForecastTabIndex, setForecastTabIndex, validateCurrentTab } = generalStore();
 
-import { useVerificationStore } from '@/stores/forecast/VerificationStore';
-const { verificationJobId } = storeToRefs(useVerificationStore());
-
+// Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getForecastTabIndex());
 
 // Activate new tab
@@ -58,16 +57,4 @@ const tabChanged = (tabNum: number) => {
     setForecastTabIndex(tabNum);
   } 
 };
-
-const tabRef = ref(null);
-
-function validateCurrentTab(ele?: HTMLElement) {
-  if (typeof tabRef?.value?.validateTab === 'function') {
-    return tabRef.value.validateTab(ele);
-  }
-  return {
-    error: false,
-    text: []
-  };
-}
 </script>

@@ -1,22 +1,23 @@
 <template>
   <!-- CalibrationLeftBlock.vue -->
   <div>
-    <Tabs @tabNumber="tabChanged" :call-tab-validator="validateCurrentTab" :call-tab-restore="restoreCurrentTab"/>
+    <Tabs @tabNumber="tabChanged" ref="navRef" :call-tab-validator="validateCurrentTab" 
+      :call-tab-restore="restoreCurrentTab"/>
     
     <div v-if="activeTab === 1">
       <CalibrationCalibrationRunsTab/>
     </div> 
     <div v-else-if="activeTab === 2">
-      <CalibrationHeadwaterBasinGage ref="tabRef"/>
+      <CalibrationHeadwaterBasinGage ref="tabRef" :call-go-to-tab="currentTabNavGo" :call-nav-dialog="showCurrentTabNavDialog"/>
     </div>
     <div v-else-if="activeTab === 3">
-      <CalibrationFormulation ref="tabRef"/>
+      <CalibrationFormulation ref="tabRef" :call-go-to-tab="currentTabNavGo" :call-nav-dialog="showCurrentTabNavDialog"/>
     </div>
     <div v-else-if="activeTab === 4">
-      <CalibrationTuningControls ref="tabRef"/>
+      <CalibrationTuningControls ref="tabRef" :call-go-to-tab="currentTabNavGo" :call-nav-dialog="showCurrentTabNavDialog"/>
     </div>
     <div v-else-if="activeTab === 5">
-      <CalibrationOptimizationMetrics ref="tabRef"/>
+      <CalibrationOptimizationMetrics ref="tabRef" :call-go-to-tab="currentTabNavGo" :call-nav-dialog="showCurrentTabNavDialog"/>
     </div>
     <div v-else-if="activeTab === 6">
       <CalibrationRunStatus/>
@@ -39,8 +40,10 @@ import CalibrationRunStatus from '@/components/Calibration/RunStatus.vue';
 import CalibrationCalibrationRunsTab from '@/components/Calibration/PreviousCalibrationRuns.vue';
 import { ThemeUtils } from "@primeuix/styled";
 
-const { getCalibrationTabIndex, setCalibrationTabIndex } = generalStore();
+const { tabRef, navRef } = storeToRefs(generalStore());
+const { getCalibrationTabIndex, setCalibrationTabIndex, validateCurrentTab, restoreCurrentTab, currentTabNavGo, showCurrentTabNavDialog} = generalStore();
 
+// Default to Tab 1, HeadwaterBasinGage
 const activeTab = ref(getCalibrationTabIndex());
 
 // Activate new tab
@@ -50,22 +53,4 @@ const tabChanged = (tabNum: number) => {
     setCalibrationTabIndex(tabNum);
   }
 };
-
-const tabRef = ref(null);
-
-function validateCurrentTab(ele?: HTMLElement) {
-  if (typeof tabRef?.value?.validateTab === 'function') {
-    return tabRef.value.validateTab(ele);
-  }
-  return {
-    error: false,
-    text: []
-  };
-}
-function restoreCurrentTab() {
-  if (typeof tabRef?.value?.restoreTab === 'function') {
-    return tabRef?.value?.restoreTab();
-  }
-  return true;
-}
 </script>

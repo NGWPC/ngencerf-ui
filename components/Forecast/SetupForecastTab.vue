@@ -352,12 +352,12 @@ const goToRunStatusTab = () => {
     e.click();
 };
 
-const validateTab = (ele?: HTMLElement) => {
+const validateTab = (tabNumber?: number) => {
   let error = false;
   let text = [];
   // configuration has to be picked first, so just check for that.
   // ignore if they're actually clicking through to Run/Status
-  if (forecastConfiguration.value && Number(ele.getAttribute("data-tab")) !== 4) {
+  if (forecastConfiguration.value && tabNumber !== 4) {
     error = true;
     text.push("Are you sure you want to abandon this Forecast? It will not be saved.");
   }

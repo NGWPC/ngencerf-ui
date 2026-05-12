@@ -1,39 +1,40 @@
 <template> 
   <!-- HindcastLeftBlock.vue -->
   <div>
-    <Tabs @tabNumber="tabChanged" />
+    <Tabs @tabNumber="tabChanged" ref="navRef" :call-tab-validator="validateCurrentTab" />
     <div class="shrink-0">
       <span v-if="activeTab === 1">
-        <PreviousCalibrationRuns />
+        <PreviousCalibrationRuns/>
       </span>
       <span v-else-if="activeTab === 2">
-        <HindcastRunsTab />
+        <HindcastRunsTab/>
       </span>
       <span v-else-if="activeTab === 3">
-        <SetupHindcastTab />
+        <SetupHindcastTab ref="tabRef"/>
       </span>
       <span v-else-if="activeTab === 4">
-        <HindcastRunStatusTab />
+        <HindcastRunStatusTab ref="tabRef"/>
       </span>
       <span v-else-if="activeTab === 5">
-        <HindcastResultsTab />
+        <HindcastResultsTab/>
       </span>
       <span v-if="activeTab === 6">
-        <VerificationRunsTab />
+        <VerificationRunsTab/>
       </span>
       <span v-else-if="activeTab === 7">
-        <VerificationRunStatusTab />
+        <VerificationRunStatusTab ref="tabRef"/>
       </span>
       <span v-else-if="activeTab === 8">
-        <VerificationResultsTab />
+        <VerificationResultsTab/>
       </span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Tabs from '@/components/Common/Tabs.vue'
+import { generalStore } from "@/stores/common/GeneralStore";
 
+import Tabs from '@/components/Common/Tabs.vue'
 import PreviousCalibrationRuns from "./PreviousCalibrationRuns.vue"
 import HindcastRunsTab from "./HindcastRunsTab.vue"
 import SetupHindcastTab from './SetupHindcastTab.vue';
@@ -43,12 +44,10 @@ import VerificationRunsTab from "./VerificationRunsTab.vue"
 import VerificationRunStatusTab from "./VerificationRunStatusTab.vue"
 import VerificationResultsTab from "./VerificationResultsTab.vue"
 
-import { generalStore } from "@/stores/common/GeneralStore";
-const { getHindcastTabIndex, setHindcastTabIndex } = generalStore();
+const { tabRef, navRef } = storeToRefs(generalStore());
+const { getHindcastTabIndex, setHindcastTabIndex, validateCurrentTab } = generalStore();
 
-import { useVerificationStore } from '@/stores/forecast/VerificationStore';
-const { verificationJobId } = storeToRefs(useVerificationStore());
-
+// Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getHindcastTabIndex());
 
 // Activate new tab
@@ -56,14 +55,6 @@ const tabChanged = (tabNum: number) => {
   if (activeTab.value !== tabNum) {
     activeTab.value = tabNum;
     setHindcastTabIndex(tabNum);
-  }
+  } 
 };
-
-onMounted(() => {
-  console.log('Hindcast activeTab:',activeTab.value);
-})
-
-onUnmounted(() => {
-  verificationJobId.value = undefined;
-})
 </script>

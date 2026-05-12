@@ -56,6 +56,10 @@ export const generalStore = defineStore(
     const gageDataSourceHasChanged = ref<boolean>(false);
     // This is set if the user changes the modules on the Formulation page
     const modulesHaveChanged = ref<boolean>(false);
+    
+    // This is to allow propagation of individual validation/restore functions from specific tabs
+    const tabRef = ref(null);
+    const navRef = ref(null);
 
     const toastRecords = ref<ToastRecord[]>([]);
 
@@ -126,6 +130,41 @@ export const generalStore = defineStore(
       evaluationRunSelected.value = b;
     }
 
+    // generic tab validation - individual validator functions will come from specific tabs
+    function validateCurrentTab(tabNumber?: number) {
+      if (typeof tabRef?.value?.validateTab === 'function') {
+        return tabRef.value.validateTab(tabNumber);
+      }
+      return {
+        error: false,
+        text: []
+      };
+    }
+
+    // generic tab restore - individual restore functions will come from specific tabs
+    function restoreCurrentTab() {
+      if (typeof tabRef?.value?.restoreTab === 'function') {
+        return tabRef?.value?.restoreTab();
+      }
+      return true;
+    }
+
+    // tab clicked function - this can be passed to specific tabs to facilitate previous/next navigation
+    function currentTabNavGo(tabNumber: number) {
+      if (typeof navRef?.value?.goToTab === 'function') {
+        return navRef?.value?.goToTab(tabNumber);
+      }
+      return true;
+    }
+
+    // show tab navigation dialog - this can be passed to specific tabs
+    function showCurrentTabNavDialog(body: string[], next: boolean, ele: HTMLElement) {
+      if (typeof navRef?.value?.showTabNavDialog === 'function') {
+        return navRef?.value?.showTabNavDialog(body, next, ele);
+      }
+      return true;
+    }
+
     function resetGeneralStore() {
       calibrationJobId.value = 0;
       popupActive.value = false;
@@ -179,7 +218,13 @@ export const generalStore = defineStore(
       toastRecords,
       addToastRecord,
       clearToastRecords,
-      popupActive
+      popupActive,
+      tabRef,
+      navRef,
+      validateCurrentTab,
+      restoreCurrentTab,
+      currentTabNavGo,
+      showCurrentTabNavDialog,
     };
   },
   {
