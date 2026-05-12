@@ -57,7 +57,10 @@ function validateCurrentTab(ele?: HTMLElement) {
   if (typeof tabRef?.value?.validateTab === 'function') {
     return tabRef.value.validateTab(ele);
   }
-  return true;
+  return {
+    error: false,
+    text: []
+  };
 }
 function restoreCurrentTab() {
   if (typeof tabRef?.value?.restoreTab === 'function') {

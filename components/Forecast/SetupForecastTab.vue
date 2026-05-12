@@ -83,6 +83,7 @@
             </Column>
         </DataTable>
     </div>
+    <DynamicDialog />
     <div v-if="calibrationRunForForecast?.forecast_status && !['Saved','Ready'].includes(calibrationRunForForecast?.forecast_status)" class="text-normal mt-2 mx-auto text-center">
       This forecast has already been run. Click Next to see status.
       <Button class="ngenButtonDiv ml-6 font-normal h-8" title="Next Button" aria-label="Next Button"
@@ -171,6 +172,7 @@ import { useForecastStore } from '@/stores/forecast/ForecastStore';
 import { generalStore } from '~/stores/common/GeneralStore';
 
 import { hilightTab } from '@/composables/TabHilight';
+import { useDialog } from 'primevue/usedialog';
 
 import MessagesGroup from "../Common/MessagesGroup.vue";
 
@@ -355,7 +357,6 @@ const validateTab = (ele?: HTMLElement) => {
   let text = [];
   // configuration has to be picked first, so just check for that.
   // ignore if they're actually clicking through to Run/Status
-  console.log('ele in validateTab:',ele);
   if (forecastConfiguration.value && Number(ele.getAttribute("data-tab")) !== 4) {
     error = true;
     text.push("Are you sure you want to abandon this Forecast? It will not be saved.");

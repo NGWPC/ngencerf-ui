@@ -273,7 +273,6 @@ const tabClicked = (event: Event) => {
   const ele: HTMLElement = event.currentTarget as HTMLElement;
   let tabNumber = Number(ele.getAttribute("data-tab"));
   if (props.callTabValidator) {
-    console.log('ele in tabClicked:',ele);
     const errors = props.callTabValidator(ele);
     if (errors.error) {
       showTabNavDialog(errors.text, true, tabNumber);
