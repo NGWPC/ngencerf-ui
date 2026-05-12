@@ -4,25 +4,25 @@
     <Tabs @tabNumber="tabChanged" ref="navRef" :call-tab-validator="validateCurrentTab" />
     <div class="shrink-0">
       <span v-if="activeTab === 1">
-        <PreviousCalibrationRuns/>
+        <PreviousCalibrationRuns :call-go-to-tab="currentTabNavGo" />
       </span>
       <span v-else-if="activeTab === 2">
-        <ForecastRunsTab/>
+        <ForecastRunsTab :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 3">
-        <SetupForecastTab ref="tabRef"/>
+        <SetupForecastTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 4">
-        <ForecastRunStatusTab ref="tabRef"/>
+        <ForecastRunStatusTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 5">
         <ForecastResultsTab/>
       </span>
       <span v-if="activeTab === 6">
-        <VerificationRunsTab/>
+        <VerificationRunsTab :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 7">
-        <VerificationRunStatusTab ref="tabRef"/>
+        <VerificationRunStatusTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 8">
         <VerificationResultsTab/>
@@ -45,7 +45,7 @@ import VerificationRunStatusTab from "./VerificationRunStatusTab.vue"
 import VerificationResultsTab from "./VerificationResultsTab.vue"
 
 const { tabRef, navRef } = storeToRefs(generalStore());
-const { getForecastTabIndex, setForecastTabIndex, validateCurrentTab } = generalStore();
+const { getForecastTabIndex, setForecastTabIndex, validateCurrentTab, currentTabNavGo, showCurrentTabNavDialog } = generalStore();
 
 // Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getForecastTabIndex());

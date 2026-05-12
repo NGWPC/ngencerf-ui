@@ -158,9 +158,9 @@ export const generalStore = defineStore(
     }
 
     // show tab navigation dialog - this can be passed to specific tabs
-    function showCurrentTabNavDialog(body: string[], next: boolean, ele: HTMLElement) {
+    function showCurrentTabNavDialog(body: string[], next: boolean, tabNumber: number) {
       if (typeof navRef?.value?.showTabNavDialog === 'function') {
-        return navRef?.value?.showTabNavDialog(body, next, ele);
+        return navRef?.value?.showTabNavDialog(body, next, tabNumber);
       }
       return true;
     }

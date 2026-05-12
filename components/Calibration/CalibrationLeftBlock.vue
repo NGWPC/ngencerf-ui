@@ -5,7 +5,7 @@
       :call-tab-restore="restoreCurrentTab"/>
     
     <div v-if="activeTab === 1">
-      <CalibrationCalibrationRunsTab/>
+      <CalibrationCalibrationRunsTab :call-go-to-tab="currentTabNavGo"/>
     </div> 
     <div v-else-if="activeTab === 2">
       <CalibrationHeadwaterBasinGage ref="tabRef" :call-go-to-tab="currentTabNavGo" :call-nav-dialog="showCurrentTabNavDialog"/>

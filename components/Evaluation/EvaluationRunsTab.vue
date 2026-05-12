@@ -417,6 +417,14 @@ const { isLoading, calibrationJobId } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
 
 const toast = useToast();
+
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 //this model is for highlighting purpose
 const selectedCalibrationRun = ref<ValidatedCalibrationRunListItem>();
 const selectedCalibrationValidationRun = ref<CalibrationValidationJobData>();
@@ -538,7 +546,7 @@ const onRowContextMenu = (event: any) => {
     if (crRowData.validation_runs >= 1) {
       cmCalibrationRun.value.push({ label: 'Compare Permutations', icon: 'pi pi-arrows-h', command: () => viewSelectedGageCalibrationRuns(crRowData.calibration_run_id, crRowData.gage_id) });
       if (!['Submitted','Running'].includes(selectedCalibrationRun?.value?.status) && !crRowData.modules?.some(item => item.toLowerCase() === 'lstm')) {
-        cmCalibrationRun.value.push({ label: 'New Validation Run', icon: 'pi pi-chevron-circle-right', command: () => viewSelectAlternateIteration(crRowData.calibration_run_id) });
+        cmCalibrationRun.value.push({ label: 'New Validation Run', icon: 'pi pi-chevron-circle-right', command: () => goToSelectAlternateIteration(crRowData.calibration_run_id) });
       }
     }
     cmCalibrationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })
@@ -563,11 +571,11 @@ const onRowVrContextMenu = (event: any) => {
     if (vrRowData.status.toLocaleUpperCase() !== 'RUNNING') {
       cmValidationRun.value.push({ label: 'Evaluate', icon: 'pi pi-chart-scatter', command: () => evaluateValidationJob(vrRowData.validation_run_id, vrRowData.status) });
     }
-    cmValidationRun.value.push({ label: 'New Validation Run', icon: 'pi pi-chevron-circle-right', command: () => viewSelectAlternateIteration(userSelectedEvalCalibrationRunId.value) });
+    cmValidationRun.value.push({ label: 'New Validation Run', icon: 'pi pi-chevron-circle-right', command: () => goToSelectAlternateIteration(userSelectedEvalCalibrationRunId.value) });
     cmValidationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(userSelectedEvalCalibrationRunId.value) });
     if (vrRowData.status.toLocaleUpperCase() === 'RUNNING') {
-      cmValidationRun.value.push({ label: 'View Run Status Details', icon: 'pi pi-chart-bar', command: () => navigationToRunStatus(vrRowData.validation_run_id, vrRowData.status) });
-      cmValidationRun.value.push({ label: 'Cancel', icon: 'pi pi-ban', command: () => navigationToRunStatus(vrRowData.validation_run_id, vrRowData.status) });
+      cmValidationRun.value.push({ label: 'View Run Status Details', icon: 'pi pi-chart-bar', command: () => goToRunStatus(vrRowData.validation_run_id, vrRowData.status) });
+      cmValidationRun.value.push({ label: 'Cancel', icon: 'pi pi-ban', command: () => goToRunStatus(vrRowData.validation_run_id, vrRowData.status) });
     }
   }
 }
@@ -695,31 +703,20 @@ const viewSelectedGageCalibrationRuns = async (calibration_run_id: number, gage_
   })
 }
 
-const navigationToRunStatus = (validation_run_id: number, validation_status: string) => {
+const goToRunStatus = (validation_run_id: number, validation_status: string) => {
   evaluateValidationRunId.value = validation_run_id;
   evaluateValidationRunStatus.value = validation_status;
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[EvaluationTabs.tab_runStatus];
-  e.click();
-}
-
-const viewSelectAlternateIteration = async (calibration_run_id: number) => {
-  setSelectedCalibrationRunId(calibration_run_id);
-  if (userSelectedEvalCalibrationRunId.value > 0) {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[EvaluationTabs.tab_selectAltIteration];
-    e.click();
-  } else {
-    const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Calibration Job', detail: 'Please select a calibration job first.', life: ToastTimeout.timeoutWarn };
-    toast.add(tMsg); addToastRecord(tMsg);
+  if (props.callGoToTab) {
+    props.callGoToTab(5);
   }
 }
 
-const navigateToAlternateIteration = (event: any) => {
+const goToSelectAlternateIteration = async (calibration_run_id: number) => {
+  setSelectedCalibrationRunId(calibration_run_id);
   if (userSelectedEvalCalibrationRunId.value > 0) {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[EvaluationTabs.tab_selectAltIteration];
-    e.click();
+    if (props.callGoToTab) {
+      props.callGoToTab(4);
+    }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Calibration Job', detail: 'Please select a calibration job first.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
@@ -732,10 +729,9 @@ const evaluateValidationJobFromCalibration = async (calibration_run_id: number):
     if (validationRunList.length === 1) {
       evaluateValidationRunId.value = validationRunList[0].validation_run_id;
       evaluateValidationRunStatus.value = validationRunList[0].status;
-
-      const tabs = document.getElementsByClassName("tabs");
-      const e = <HTMLElement>tabs[EvaluationTabs.tab_evaluate];
-      e.click();
+      if (props.callGoToTab) {
+        props.callGoToTab(2);
+      }
     }
   });
 }
@@ -743,16 +739,16 @@ const evaluateValidationJobFromCalibration = async (calibration_run_id: number):
 const evaluateValidationJob = (validation_run_id: number, validation_status: string): void => {
   evaluateValidationRunId.value = validation_run_id;
   evaluateValidationRunStatus.value = validation_status;
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[EvaluationTabs.tab_evaluate];
-  e.click();
+  if (props.callGoToTab) {
+    props.callGoToTab(2);
+  }
 }
 
 const compareSelectedCalibrationJobs = async (): Promise<void> => {
   if (selectedCalibrationCompareRuns.value.length >= 2) {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[EvaluationTabs.tab_compare];
-    e.click();
+    if (props.callGoToTab) {
+      props.callGoToTab(3);
+    }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Not Enough Calibration Jobs Selected', detail: 'Please select at least two calibration jobs to compare.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
@@ -765,21 +761,10 @@ const viewValidationRunStatus = async (calibration_run_id: number): Promise<void
     setSelectedCalibrationRunId(calibration_run_id);
     await fetchValidationRunListByCalibrationRun().then(validationRunList => {
       if (validationRunList.length === 1) {
-        navigationToRunStatus(validationRunList[0].validation_run_id, validationRunList[0].status);
+        goToRunStatus(validationRunList[0].validation_run_id, validationRunList[0].status);
       }
     });
   })
-}
-
-const navigateToEvaluation = (event: any) => {
-  if (evaluateValidationRunId.value > 0) {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[EvaluationTabs.tab_evaluate];
-    e.click();
-  } else {
-    const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Validation Job', detail: 'Please select a validation job first.', life: ToastTimeout.timeoutWarn };
-    toast.add(tMsg); addToastRecord(tMsg);
-  }
 }
 
 const returnCalibrationJobList = (event: any) => {

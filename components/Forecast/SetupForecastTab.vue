@@ -199,6 +199,13 @@ const {
 
 const { loadForecastTab } = useForecastStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const minCycleDate = ref<any>();
 const maxCycleDate = ref<any>();
 const cycleHour = ref<number>();
@@ -347,9 +354,9 @@ const goToRunStatusTab = () => {
           }
         }
     }
-    const allTabs = document.getElementsByClassName("tabs");
-    const e = allTabs[ForecastTabs.tab_forecastRunStatus] as HTMLElement;
-    e.click();
+    if (props.callGoToTab) {
+      props.callGoToTab(4);
+    }
 };
 
 const validateTab = (tabNumber?: number) => {

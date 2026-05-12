@@ -234,8 +234,14 @@ import { calculateElapsedTime } from '@/utils/TimeHelpers';
 
 const { isLoading } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
-
 const toast = useToast();
+
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
 
 const runButtonDisabled = ref<boolean>(true);
 const cancelButtonDisabled = ref<boolean>(true);
@@ -504,21 +510,21 @@ const cancelForecastRun = async () => {
 };
 
 /**
- * Go to the Status Run tab
- */
-const goToResultsTab = () => {
-  const allTabs = document.getElementsByClassName("tabs");
-  const e = allTabs[ForecastTabs.tab_forecastResults] as HTMLElement;
-  e.click();
-};
-
-/**
  * Go to the Setup Forecast Tab
  */
 const goToSetupForecastTab = () => {
-    const allTabs = document.getElementsByClassName("tabs");
-    const e = allTabs[ForecastTabs.tab_setupForecast] as HTMLElement;
-    e.click();
+  if (props.callGoToTab) {
+    props.callGoToTab(3);
+  }
+};
+
+/**
+ * Go to the Status Run tab
+ */
+const goToResultsTab = () => {
+  if (props.callGoToTab) {
+    props.callGoToTab(5);
+  }
 };
 
 const validateTab = (tabNumber?: number) => {

@@ -67,7 +67,7 @@
                 </span>
                 <span v-if="verificationJobStatus === 'Done'">
                   <Button class="ngenButtonDiv ml-6 font-normal px-4 whitespace-nowrap" title="View Results Button"
-                    @click="goNextTab()" aria-label="View Results Button">
+                    @click="goToVerificationResultsTab()" aria-label="View Results Button">
                     View Results
                   </Button>
                 </span>
@@ -163,6 +163,13 @@ const {
   populateLogListOptions,
   resetUserLogRefs
 } = useLogStore();
+
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
 
 const isMounted = ref(false);
 
@@ -290,10 +297,10 @@ const stopVerificationJob = async () => {
   }
 };
 
-const goNextTab = () => {
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[ForecastTabs.tab_verificationResults];
-  e.click();
+const goToVerificationResultsTab = () => {
+  if (props.callGoToTab) {
+    props.callGoToTab(8);
+  }
 }
 
 const validateTab = (tabNumber?: number) => {

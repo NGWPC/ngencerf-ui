@@ -153,6 +153,13 @@ import { useDialog } from 'primevue/usedialog';
 
 const toast = useToast();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const runButtonDisabled = ref<boolean>(true);
 const cancelButtonDisabled = ref<boolean>(true);
 
@@ -292,9 +299,9 @@ const cancelRun = async () => {
 
 const navigateToEvaluation = (event: any) => {
   if (evaluateValidationRunId.value > 0) {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[EvaluationTabs.tab_evaluate];
-    e.click();
+    if (props.callGoToTab) {
+      props.callGoToTab(2);
+    }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Validation Job', detail: 'Please select a validation job first.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);

@@ -4,25 +4,25 @@
     <Tabs @tabNumber="tabChanged" ref="navRef" :call-tab-validator="validateCurrentTab" />
     <div class="shrink-0">
       <span v-if="activeTab === 1">
-        <PreviousCalibrationRuns/>
+        <PreviousCalibrationRuns :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 2">
-        <HindcastRunsTab/>
+        <HindcastRunsTab :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 3">
-        <SetupHindcastTab ref="tabRef"/>
+        <SetupHindcastTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 4">
-        <HindcastRunStatusTab ref="tabRef"/>
+        <HindcastRunStatusTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 5">
         <HindcastResultsTab/>
       </span>
       <span v-if="activeTab === 6">
-        <VerificationRunsTab/>
+        <VerificationRunsTab :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 7">
-        <VerificationRunStatusTab ref="tabRef"/>
+        <VerificationRunStatusTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 8">
         <VerificationResultsTab/>
@@ -45,7 +45,7 @@ import VerificationRunStatusTab from "./VerificationRunStatusTab.vue"
 import VerificationResultsTab from "./VerificationResultsTab.vue"
 
 const { tabRef, navRef } = storeToRefs(generalStore());
-const { getHindcastTabIndex, setHindcastTabIndex, validateCurrentTab } = generalStore();
+const { getHindcastTabIndex, setHindcastTabIndex, validateCurrentTab, currentTabNavGo, showCurrentTabNavDialog } = generalStore();
 
 // Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getHindcastTabIndex());

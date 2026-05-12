@@ -252,6 +252,13 @@ const {
 
 const { loadHindcastTab, getColdStartJobsForConfiguration, createAndRunHindcastJob } = useHindcastStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const minCycleDate = ref<any>();
 const maxCycleDate = ref<any>();
 const cycleHour = ref<number>();
@@ -543,10 +550,10 @@ const goToRunStatusTab = async() => {
         return false;
       }
     }
+    if (props.callGoToTab) {
+      props.callGoToTab(4);
+    }
   }
-  const allTabs = document.getElementsByClassName("tabs");
-  const e = allTabs[HindcastTabs.tab_hindcastRunStatus] as HTMLElement;
-  e.click();
 };
 
 const validateTab = (tabNumber?: number) => {

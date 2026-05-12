@@ -160,6 +160,13 @@ const vrContextMenu = ref(); //calibration run context menu
 
 const { addToastRecord } = generalStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const cmVerificationJob = ref<DataTableContextMenuOption[]>([]);
 
 const ptColumn = ref({
@@ -196,9 +203,9 @@ const onRowContextMenu = (event: any) => {
   const vrRowData = event.data as VerificationJob;
   if (selectedVerificationJob && selectedVerificationJob.value?.verification_run_id === vrRowData.verification_run_id) {
     vrContextMenu.value.show(event.originalEvent);
-    cmVerificationJob.value.push({ label: 'View Status', icon: 'pi pi-gauge', command: () => navigateToVerificationJobStatus() });
+    cmVerificationJob.value.push({ label: 'View Status', icon: 'pi pi-gauge', command: () => goToVerificationJobStatus() });
     if (vrRowData.status === 'Done') {
-      cmVerificationJob.value.push({ label: 'View Results', icon: 'pi pi-chart-line', command: () => navigateToVerificationResults() });
+      cmVerificationJob.value.push({ label: 'View Results', icon: 'pi pi-chart-line', command: () => goToVerificationResults() });
     }
     if (vrRowData.status !== 'Running') {
       cmVerificationJob.value.push({ label: 'Delete', icon: 'pi pi-trash', command: () => deleteSelectedVerificationJob() });
@@ -207,7 +214,7 @@ const onRowContextMenu = (event: any) => {
 };
 
 const onRowDblClick = (event: any) => {
-  navigateToVerificationJobStatus(event);
+  goToVerificationJobStatus(event);
 }
 
 onMounted(() => {
@@ -283,32 +290,24 @@ const acceptDelete = (selectedRunId: number) => {
   });
 }
 
-const navigateToVerificationJobStatus = (event: any=null) => {
+const goToVerificationJobStatus = (event: any=null) => {
   isLoading.value = true;
   if (event) {
     setSelectedVerificationRowData(event.data);
   }
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Verification Run/Status Tab"]');
-
-    if (e) {
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Verification Run/Status Tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+    if (props.callGoToTab) {
+      props.callGoToTab(7);
     }
     isLoading.value = false;
   });
 }
 
-const navigateToVerificationResults = () => {
+const goToVerificationResults = () => {
   isLoading.value = true;
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Verification Results Tab"]');
-
-    if (e) {
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Verification Results Tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+    if (props.callGoToTab) {
+      props.callGoToTab(8);
     }
     isLoading.value = false;
   });

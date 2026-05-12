@@ -308,6 +308,13 @@ const {
 
 import { hilightTab } from '@/composables/TabHilight';
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const toast = useToast();
 const crContextMenu = ref(); //calibration run context menu
 
@@ -697,10 +704,26 @@ const openSelectedCalibrationRun = async (selectedCalibrationRun: any) => {
   queryUserCalibrationRunData().then(queryResponse => {
     if (queryResponse?.status === 200) {
       userCalibrationRunData.value = queryResponse?._data;
-      if (userCalibrationRunData.value.status === 'Saved') {
-        gotoHeadwaterBasinGage();
-      } else {
-        gotoRunStatusTab();
+      if (props.callGoToTab) {
+        if (userCalibrationRunData?.value?.status === 'Saved') {
+          if (!userCalibrationRunData?.value?.job_name || !userCalibrationRunData?.value?.gage.gage_id || !userCalibrationRunData?.value?.forcing_source) {
+            // Go to Headwater Basin Gage if job name, gage, and/or forcing source are not set
+            props.callGoToTab(2);
+          } else if (userCalibrationRunData?.value?.modules.length < 2) {
+            // Go to Formulation if Modules are not set
+            props.callGoToTab(3);
+          } else if (Object.keys(userCalibrationRunData?.value?.calibration_times).length === 0 || Object.keys(userCalibrationRunData?.value?.validation_times).length === 0) {
+            // Go to Tuning Controls if calibration/validation times are not set
+            // TO DO: Also check Tuning Parameters for non-LSTM jobs
+            props.callGoToTab(4);
+          } else {
+            // If job is stil not Ready, assume we should go to Optimization Metrics
+            // TO DO: skip this for LSTM
+            props.callGoToTab(5);
+          }
+        } else {
+          props.callGoToTab(6);
+        }
       }
     } else {
       let tDetail = "Unable to Retrieve Calibration Job Data";
@@ -712,12 +735,6 @@ const openSelectedCalibrationRun = async (selectedCalibrationRun: any) => {
     }
   });
   isLoading.value = false;
-}
-
-const gotoRunStatusTab = () => {
-  const allTabs = document.getElementsByClassName("tabs");
-  const e = allTabs[CalibrationTabs.tab_runStatus] as HTMLElement;
-  e.click();
 }
 
 const rowStyle = (data: any) => {
@@ -762,7 +779,9 @@ const createNewCalibration = async () => {
         calibrationJobId.value = response?._data?.calibration_run_id;
         queryUserCalibrationRunData().then(queryResponse => {
           userCalibrationRunData.value = queryResponse?._data;
-          gotoHeadwaterBasinGage();
+          if (props.callGoToTab) {
+            props.callGoToTab(2);
+          }
         });
       } else {
         const tMsg: ToastMessageOptions = { severity: "error", summary: 'Create Calibration Job Failed.', detail: "Unable to Retrieve Valid Calibration Job Id", life: ToastTimeout.timeoutError };
@@ -775,15 +794,6 @@ const createNewCalibration = async () => {
       });
     }
   });
-}
-
-const gotoHeadwaterBasinGage = () => {
-  nextTick(async () => {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[CalibrationTabs.tab_headwaterBasinGage];
-    e.click();
-  })
-
 }
 
 /**

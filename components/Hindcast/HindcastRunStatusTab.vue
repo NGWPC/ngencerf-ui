@@ -295,6 +295,13 @@ const {
   resetUserLogRefs
 } = useLogStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const isMounted = ref(false);
 
 onMounted(async () => {
@@ -528,21 +535,21 @@ const cancelHindcastRun = async () => {
 };
 
 /**
- * Go to the Status Run tab
- */
-const goToResultsTab = () => {
-  const allTabs = document.getElementsByClassName("tabs");
-  const e = allTabs[HindcastTabs.tab_hindcastResults] as HTMLElement;
-  e.click();
-};
-
-/**
  * Go to the Setup Hindcast Tab
  */
 const goToSetupHindcastTab = () => {
-    const allTabs = document.getElementsByClassName("tabs");
-    const e = allTabs[HindcastTabs.tab_setupHindcast] as HTMLElement;
-    e.click();
+  if (props.callGoToTab) {
+    props.callGoToTab(3);
+  }
+};
+
+/**
+ * Go to the Status Run tab
+ */
+const goToResultsTab = () => {
+  if (props.callGoToTab) {
+    props.callGoToTab(5);
+  }
 };
 
 const validateTab = (tabNumber?: number) => {

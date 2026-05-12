@@ -169,6 +169,13 @@ const {
   resetUserLogRefs
 } = useLogStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const isMounted = ref(false);
 
 onMounted(async() => {
@@ -296,9 +303,9 @@ const stopVerificationJob = async () => {
 };
 
 const goNextTab = () => {
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[HindcastTabs.tab_verificationResults];
-  e.click();
+  if (props.callGoToTab) {
+    props.callGoToTab(8);
+  }
 }
 
 const validateTab = (tabNumber?: number) => {

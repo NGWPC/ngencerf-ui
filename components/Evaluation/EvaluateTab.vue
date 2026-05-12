@@ -70,7 +70,7 @@
 
         <div class="pl-4 ml-auto text-nowrap text-right">
           <span id="NewButton" class="ngenButtonDiv-alt bg-blue4"><button id="NewValidationBtn"
-              @click="gotoSelectAlternateIteration">New Validation</button></span>
+              @click="goToSelectAlternateIteration">New Validation</button></span>
           <br />
           <a v-if="userCalibrationRunData" href="#" class="inline-block p-1 c-blue underline mt-1"
             @click="toggleMessagesGroup">
@@ -342,6 +342,13 @@ const showMessagesGroup = ref<boolean>(false);
 
 const { calibrationJobId, evaluateValidationRunId } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
+
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
 
 const ptColumn = ref({
   columnHeaderContent: { style: { "justify-content": "center" } },
@@ -1742,12 +1749,10 @@ function formatDateString(str: string) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-const gotoSelectAlternateIteration = () => {
-  nextTick(() => {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[3];
-    e.click();
-  })
+const goToSelectAlternateIteration = () => {
+  if (props.callGoToTab) {
+    props.callGoToTab(4);
+  }
 }
 
 const newValidation = () => {

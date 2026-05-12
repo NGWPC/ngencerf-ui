@@ -265,6 +265,13 @@ const selectedCalibrationRun = ref<calibrationRunForHindcast>();
 const { isLoading, calibrationJobId } = storeToRefs(generalStore());
 const { calibrationDownloadJobID } = storeToRefs(useCalibrationJobStore());
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const cmCalibrationRun = ref<DataTableContextMenuOption[]>([]);
 const onRowContextMenu = (event: any) => {
   cmCalibrationRun.value = [];
@@ -273,7 +280,7 @@ const onRowContextMenu = (event: any) => {
     crContextMenu.value.show(event.originalEvent);
     //hindcastJobId.value = parseInt(event.originalEvent.currentTarget.children[0].textContent);
     setSelectedCalibrationRunId(parseInt(event.originalEvent.currentTarget.children[0].textContent));
-    cmCalibrationRun.value.push({ label: 'Run New Hindcast', icon: 'pi pi-chevron-circle-right', command: () => navigateToSetupHindcast() });
+    cmCalibrationRun.value.push({ label: 'Run New Hindcast', icon: 'pi pi-chevron-circle-right', command: () => goToSetupHindcast() });
     cmCalibrationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })
     if (calibrationRunForHindcast.value?.is_downloadable) {
       cmCalibrationRun.value.push({ label: 'Download Results', icon: 'pi pi-download', command: () => downloadSelectedCalibrationData() });
@@ -289,7 +296,7 @@ const onRowContextMenu = (event: any) => {
 };
 
 const onRowDblClick = (event: any) => {
-  navigateToSetupHindcast(event);
+  goToSetupHindcast(event);
 }
 
 const {
@@ -395,19 +402,15 @@ watch(() => userCalibrationRunData.value, (updatedRunData, initialRunData) => {
   }
 });
 
-const navigateToSetupHindcast = async (event: any=null) => {
+const goToSetupHindcast = async (event: any=null) => {
   if (event) {
     calibrationRunForHindcast.value = event.data;
     setSelectedCalibrationRunId(event.data.calibration_run_id);
   }
   if (calibrationRunForHindcast?.value?.calibration_run_id && calibrationRunForHindcast.value.calibration_run_id > 0) {
     hindcastJobId.value = undefined;
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Setup Hindcast Tab"]');
-    if (e) {
-      e.click();
-    } else {
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: 'Setup Hindcast Tab not found', life: ToastTimeout.timeoutError};
-      toast.add(tMsg); addToastRecord(tMsg);
+    if (props.callGoToTab) {
+      props.callGoToTab(3);
     }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Calibration Job', detail: 'Please select a calibration job first.', life: ToastTimeout.timeoutWarn };

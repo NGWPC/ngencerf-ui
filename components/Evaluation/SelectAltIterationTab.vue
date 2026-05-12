@@ -95,8 +95,8 @@ import { useEvaluationRunStatusStore } from '@/stores/evaluation/EvaluationRunSt
 import { hilightTab } from '@/composables/TabHilight';
 
 const { addToastRecord } = generalStore();
-
 const toast = useToast();
+
 const {
   fetchCalibrationDataByIterationDataList,
   resetEvaluationAltIterationStore,
@@ -119,6 +119,13 @@ const { validationStatusCheckingIntervalId, validationRunningTimeIntervalId } = 
 const { hardResetEvaluationRunStatusStore } = useEvaluationRunStatusStore();
 const { iterationValidationRunId } = storeToRefs(useEvaluationRunStatusStore());
 const { calibrationJobId, evaluateIterationRunId, evaluateValidationRunId, evaluateDisplayIterationNumber } = storeToRefs(generalStore());
+
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
 
 const selectedCalibrationByIterationDetailRow = ref<any>();
 const selectedCalibrationByIterationParameterRow = ref<any>();
@@ -217,9 +224,9 @@ const navigateToEvaluateStatus = (event: any) => {
   if (evaluateIterationRunId.value && evaluateIterationRunId.value > 0) {
     iterationValidationRunId.value = evaluateValidationRunId.value = 0;
     hardResetEvaluationRunStatusStore();
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[EvaluationTabs.tab_runStatus];
-    e.click();
+    if (props.callGoToTab) {
+      props.callGoToTab(5);
+    }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Iteration ID', detail: 'Please select a iteration job first.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
