@@ -88,7 +88,7 @@ export const generalStore = defineStore(
     function setMenuIndex(tab: number) {
       menuIndex.value = tab.toString();
     }
-    // setEvaluationTabIndex
+    
     // Calibration Tab index
     function getCalibrationTabIndex() {
       return parseInt(calibrationTabIndex.value);

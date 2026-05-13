@@ -4,8 +4,11 @@
         <div id="TopBar">&nbsp;</div>
         <div class="grid grid-cols-12 gap-1" style="height: 80px">
             <div v-if="isUserLoggedIn()" id="PgmName" class="col-span-2 mt-6">
-                <NuxtLink title="Link to Landing Page" to="LandingPage"
-                    oncontextmenu="return false;">ngenCERF</NuxtLink>
+                <NuxtLink id="MainMenuLandingPage" to="LandingPage" custom v-slot="{ href, navigate }">
+                  <a :href="href" data-menu="0" @click="MenuChanged($event, navigate)">
+                    ngenCERF
+                  </a>
+                </NuxtLink>
             </div>
             <div v-else id="PgmName" class="col-span-2 mt-6">
                 <div>ngenCERF</div>
@@ -14,24 +17,36 @@
 
                 <ul v-show="userLoggedIn && location.name !== 'Login'" id="MainMenu">
                     <li aria-label="Calibration" title="Calibration">
-                        <NuxtLink id="MainMenuCalibration" :class="location.name === 'Calibration' ? 'isActive' : ''"
-                            to="calibration" data-menu='1' @click="MenuChanged"
-                            oncontextmenu="return false;">Calibration</NuxtLink>
+                      <NuxtLink id="MainMenuCalibration" :class="location.name === 'Calibration' ? 'isActive' : ''"
+                        to="calibration" custom v-slot="{ href, navigate }">
+                        <a :href="href" data-menu="1" @click="MenuChanged($event, navigate)">
+                          Calibration
+                        </a>
+                      </NuxtLink>
                     </li>
                     <li aria-label="Evaluation" title="Evaluation">
-                        <NuxtLink id="MainMenuEvaluation" :class="location.name === 'Evaluation' ? 'isActive' : ''"
-                            to="evaluation" data-menu='2' @click="MenuChanged"
-                            oncontextmenu="return false;">Evaluation</NuxtLink>
+                      <NuxtLink id="MainMenuEvaluation" :class="location.name === 'Evaluation' ? 'isActive' : ''"
+                        to="Evaluation" custom v-slot="{ href, navigate }">
+                        <a :href="href" data-menu="2" @click="MenuChanged($event, navigate)">
+                          Evaluation
+                        </a>
+                      </NuxtLink>
                     </li>
                     <li aria-label="Forecast" title="Forecast">
-                        <NuxtLink id="MainMenuForecast" :class="location.name === 'Forecast' ? 'isActive' : ''"
-                            to="forecast" data-menu='3' @click="MenuChanged"
-                            oncontextmenu="return false;">Forecast</NuxtLink>
+                      <NuxtLink id="MainMenuForecast" :class="location.name === 'Forecast' ? 'isActive' : ''"
+                        to="Forecast" custom v-slot="{ href, navigate }">
+                        <a :href="href" data-menu="3" @click="MenuChanged($event, navigate)">
+                          Forecast
+                        </a>
+                      </NuxtLink>
                     </li>
                     <li aria-label="Hindcast" title="Hindcast">
-                        <NuxtLink id="MainMenuHindcast" :class="location.name === 'Hindcast' ? 'isActive' : ''"
-                            to="hindcast" data-menu='4' @click="MenuChanged"
-                            oncontextmenu="return false;">Hindcast</NuxtLink>
+                      <NuxtLink id="MainMenuHindcast" :class="location.name === 'Hindcast' ? 'isActive' : ''"
+                        to="Hindcast" custom v-slot="{ href, navigate }">
+                        <a :href="href" data-menu="4" @click="MenuChanged($event, navigate)">
+                          Hindcast
+                        </a>
+                      </NuxtLink>
                     </li>
                 </ul>
 
@@ -201,6 +216,12 @@ import { generalStore } from "@/stores/common/GeneralStore";
 import { useLogout, useLogoutListen } from "@/composables/UseEventBus";
 import { getErrorTextFromStatus } from "@/utils/CommonHelpers";
 
+import { useDialog } from "primevue/usedialog";
+import MoveNextPrevDialog from "../Common/MoveNextPrevDialog.vue";
+
+const dialog = useDialog();
+const navDialogOpened = ref<boolean>(false);
+
 const LazyAboutBox = defineAsyncComponent(() => import("@/components/Common/AboutBox.vue"))
 const LazyErrorLog = defineAsyncComponent(() => import("@/components/Common/ErrorLog.vue"))
 const LazyUserAccount = defineAsyncComponent(() => import("@/components/Common/UserAccount.vue"))
@@ -243,7 +264,18 @@ const LazyHindcastVerificationRunsHelp = defineAsyncComponent(() => import("@/co
 const LazyHindcastVerificationRunStatusHelp = defineAsyncComponent(() => import("@/components/Help/Hindcast/VerificationRunStatusHelp.vue"));
 const LazyHindcastVerificationResultsHelp = defineAsyncComponent(() => import("@/components/Help/Hindcast/VerificationResultsHelp.vue"));
 
-const { popupActive, allowPasswordChange } = storeToRefs(generalStore());
+const props = defineProps({
+  callTabValidator: {
+    type: Function,
+    required: false,
+  },
+  callTabRestore: {
+    type: Function,
+    required: false,
+  }
+});
+
+const { popupActive } = storeToRefs(generalStore());
 
 const emit = defineEmits(["logoutEvent"]);
 
@@ -251,7 +283,7 @@ const accountOverlay = ref();
 const aboutOverlay = ref();
 const errorOverlay = ref();
 
-const { getMenuIndex, setMenuIndex, getCalibrationTabIndex, getEvaluationTabIndex, getForecastTabIndex, getHindcastTabIndex } = generalStore();
+const { getMenuIndex, setMenuIndex, getCalibrationTabIndex, getEvaluationTabIndex, getForecastTabIndex, getHindcastTabIndex, validateCurrentTab } = generalStore();
 
 const { isUserLoggedIn, getUserInitials, setIsTokenExpired, getIsTokenExpired } = useUserDataStore();
 
@@ -396,7 +428,7 @@ useLogoutListen('logoutEvent', (evStr: string) => {
         setIsTokenExpired();
         let err = (lastServerError?.value) ? getErrorTextFromStatus(lastServerError?.value?.status) + ' ' : '';
         useLogout("logoutEvent", "logout");
-        navigateTo('login');
+        destination('login');
         setTimeout(() => {
             Swal.fire({
                 width: 500,
@@ -413,7 +445,7 @@ const logoutUser = async () => {
     if (!popupActive.value) {
         if (confirm("Are you sure you want to logout?")) {
             useLogout("logoutEvent", "logout");
-            await navigateTo('login');
+            await destination('login');
         }
     }
 }
@@ -437,17 +469,58 @@ const displayHelp = () => {
     }
 }
 
-const MenuChanged = (e: MouseEvent) => {
-    nextTick(() => {
-        let ele = e.currentTarget as HTMLElement;
-        if (!ele) {
-            ele = e.target as HTMLElement;
-        }
-        const m = ele.getAttribute('data-menu');
-        if (m && e) {
-            setMenuIndex(parseInt(m, 10));
-        }
-    });
+const MenuChanged = (e: MouseEvent, navigate: () => void) => {
+  e.preventDefault();
+  const ele = e.currentTarget as HTMLAnchorElement;
+  const menuNumber = Number(ele.dataset.menu);
+
+  const errors = validateCurrentTab();
+  if (errors.error) {
+    showTabNavDialog(errors.text, true, menuNumber, navigate);
+    return;
+  } else {
+    goToMenuLink(menuNumber, navigate);
+  }
+}
+
+const showTabNavDialog = (body: string[], next: boolean, menuNumber: number, navigate: () => void) => {
+  if (!navDialogOpened.value) {
+    dialog.open(MoveNextPrevDialog, {
+      props: {
+        header: "Unsaved changes!",
+        style: {
+          width: 'auto',
+        },
+        modal: true,
+      },
+      data: {
+        body: body,
+        direction: next
+      },
+      onClose: (opt) => {
+        navDialogOpened.value = false;
+        handleTabNavDialogClose(opt, menuNumber, navigate);
+      },
+    })
+    navDialogOpened.value = true;
+  }
+}
+
+const handleTabNavDialogClose = (opt: any, menuNumber: number, navigate: () => void) => {
+  if (opt.data && opt.data.moveToNextResponse) {
+    if (props.callTabRestore) {
+      props.callTabRestore();
+    }
+    goToMenuLink(menuNumber, navigate);
+  }
+  if (opt.type && opt.type === 'dialog-close') {
+    return;
+  }
+}
+
+const goToMenuLink = (menuNumber: number, navigate: () => void) => {
+  setMenuIndex(menuNumber);
+  navigate();
 }
 
 </script>
