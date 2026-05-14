@@ -243,7 +243,7 @@ const LazyHindcastVerificationRunsHelp = defineAsyncComponent(() => import("@/co
 const LazyHindcastVerificationRunStatusHelp = defineAsyncComponent(() => import("@/components/Help/Hindcast/VerificationRunStatusHelp.vue"));
 const LazyHindcastVerificationResultsHelp = defineAsyncComponent(() => import("@/components/Help/Hindcast/VerificationResultsHelp.vue"));
 
-const { popupActive } = storeToRefs(generalStore());
+const { popupActive, allowPasswordChange } = storeToRefs(generalStore());
 
 const emit = defineEmits(["logoutEvent"]);
 
@@ -288,6 +288,11 @@ const onImageRightClick = (event: any) => {
 onMounted(() => {
     userInitials.value = getUserInitials();
     userLoggedIn.value = isUserLoggedIn();
+
+    // diable Account link if there's no use for it
+    if (!allowPasswordChange.value) {
+      userItems.value = userItems.value.filter(item => item.label !== 'Account')
+    }
 
     window.addEventListener('resize', function (event) {
         sizeHelpWindow();
