@@ -155,7 +155,7 @@
 
                     <div class="mt-10">
                       <label for="uname" style="font-weight: normal;" class="required-label">Email</label><br>
-                      <input id="uname" class="block w-[350px]" type="text" v-model="userName" placeholder=" Example: your.name@organization.com"
+                      <input id="uname" class="block w-[350px]" type="text" v-model="userName" placeholder=" your.name@organization.com"
                         aria-label="Username" autocomplete="email" v-on:keypress="autoSubmit($event)" />
                     </div>
                     <div class="mt-4">
