@@ -9,7 +9,7 @@
         <span class="pt-1 inline-block ml-3" style="font-size:0.7em;">( {{ userName }} )</span>
       </div>
     </div>
-    <div v-if="allowPasswordChange" class="grid grid-cols-2 gap-2">
+    <div class="grid grid-cols-2 gap-2">
       <div class="col-span-1">
         <a href="#" @click="showForm = 'changePassword'" class="mt-6 mb-6" :class="changePasswordClasses"
           aria-label="Change Password" title="Change Password">Change Password</a>
@@ -105,18 +105,6 @@
       </div>
 
     </div>
-    <div v-else>
-      <div>
-        Active Directory is enabled, so you cannot change your password or username here.
-      </div>
-      <div class="buttonArea mt-4">
-        <Button class="c-blue font-normal underline" id="closeAccountBox" name="cancel" value="Cancel"
-          v-on:click="closeAccountBox" aria-label="Close Account Box" title="Close Account Box">
-          Close
-        </Button>
-      </div>
-    </div>
-
   </div>
 
 </template>
@@ -164,6 +152,10 @@ const userName = ref<string>("")
 onMounted(() => {
   fullName.value = getUserFullName();
   userName.value = getUserName();
+
+  if (!allowPasswordChange.value) {
+    closeAccountBox();
+  }
 });
 
 watch(showForm, async () => {
