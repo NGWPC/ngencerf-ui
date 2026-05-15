@@ -155,24 +155,17 @@
 
                     <div class="mt-10">
                       <label for="uname" style="font-weight: normal;" class="required-label">Email</label><br>
-                      <input id="uname" class="w-[350px]" type="text" v-model="userName" placeholder=" Email"
+                      <input id="uname" class="block w-[350px]" type="text" v-model="userName" placeholder=" Example: your.name@organization.com"
                         aria-label="Username" autocomplete="email" v-on:keypress="autoSubmit($event)" />
-                      <!-- <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="ForgotUsername">
-                        Forgot Email
-                      </Button> -->
                     </div>
                     <div class="mt-4">
                       <label for="pword" style="font-weight: normal;" class="required-label">Password</label><br>
                       <Password id="pword" type="password" autocomplete="current-password" v-model="userPassword"
                         placeholder=" Password" aria-label="Password" toggleMask :feedback="false"
                         class="block w-[350px]" v-on:keypress="autoSubmit($event)" />
-                      <Button v-if="allowPasswordChange" tabindex="-1" class="c-blue underline text-xs" v-on:click="ForgotPassword">
+                      <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="ForgotPassword">
                         Forgot Password
                       </Button>
-                      <div v-else class="block w-[350px] mt-2">
-                        Passwords and account access are managed by your organization.
-                        Contact your system administrator if you need assistance.
-                      </div>
                     </div>
 
                     <Button id="LoginButton" class="ngenButtonDiv btn-left mt-4" v-on:click="SubmitLoginForm"
@@ -413,13 +406,12 @@ const openMFAVerify = () => {
   });
 };
 
-const ForgotUsername = () => {
-  //
-};
-
 const ForgotPassword = () => {
+  let message = allowPasswordChange.value ? 
+    'Please contact the ngenCERF administrator to reset your password.' :
+    'Passwords and account access are managed by your organization. Contact your system administrator if you need assistance.'
   toast.removeAllGroups();
-  const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Info', detail: 'Please contact the ngenCERF administrator to reset your password.', life: ToastTimeout.timeoutInfo };
+  const tMsg: ToastMessageOptions = { severity: 'info', detail: message, life: ToastTimeout.timeoutInfo };
   toast.add(tMsg); addToastRecord(tMsg);
 };
 
