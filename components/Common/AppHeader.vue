@@ -469,13 +469,13 @@ const displayHelp = () => {
     }
 }
 
-const MenuChanged = (e: MouseEvent, navigate: () => void) => {
-  e.preventDefault();
+const MenuChanged = async(e: MouseEvent, navigate: () => void) => {
   const ele = e.currentTarget as HTMLAnchorElement;
   const menuNumber = Number(ele.dataset.menu);
 
-  const errors = validateCurrentTab();
+  const errors = await Promise.resolve().then(() => validateCurrentTab());
   if (errors.error) {
+    e.preventDefault();
     showTabNavDialog(errors.text, true, menuNumber, navigate);
     return;
   } else {
@@ -518,9 +518,9 @@ const handleTabNavDialogClose = (opt: any, menuNumber: number, navigate: () => v
   }
 }
 
-const goToMenuLink = (menuNumber: number, navigate: () => void) => {
+const goToMenuLink = async(menuNumber: number, navigate: () => void) => {
+  await navigate();
   setMenuIndex(menuNumber);
-  navigate();
 }
 
 </script>
