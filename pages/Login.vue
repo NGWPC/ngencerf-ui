@@ -14,7 +14,7 @@
               <div id="LoginBox" class="bg-white mx-auto px-12 py-12 rounded-[10px] max-w-screen-md"
                 :class="!showCreateAccount ? 'loginBox' : 'createAccountBox'">
 
-                <div v-if="showCreateAccount">
+                <div v-if="showCreateAccount && allowSelfRegistration">
                   <div class="dialog-overlay" @click.self="closeAll">
                     <div class="dialog-content">
                       <h1 class="leading-tight text-balance">Create an Account</h1>
@@ -155,11 +155,8 @@
 
                     <div class="mt-10">
                       <label for="uname" style="font-weight: normal;" class="required-label">Email</label><br>
-                      <input id="uname" class="w-[350px]" type="text" v-model="userName" placeholder=" Email"
+                      <input id="uname" class="block w-[350px]" type="text" v-model="userName" placeholder=" your.name@organization.com"
                         aria-label="Username" autocomplete="email" v-on:keypress="autoSubmit($event)" />
-                      <!-- <Button tabindex="-1" class="c-blue underline text-xs" v-on:click="ForgotUsername">
-                        Forgot Email
-                      </Button> -->
                     </div>
                     <div class="mt-4">
                       <label for="pword" style="font-weight: normal;" class="required-label">Password</label><br>
@@ -174,7 +171,7 @@
                     <Button id="LoginButton" class="ngenButtonDiv btn-left mt-4" v-on:click="SubmitLoginForm"
                       aria-label="sign in">Sign In</Button>
 
-                    <div class="signupButton underline text-base mt-2" aria-label="sign up">
+                    <div v-if="allowSelfRegistration" class="signupButton underline text-base mt-2" aria-label="sign up">
                       <Button @click="openCreateAccount" class="c-blue">Create an Account</Button>
                     </div>
 
@@ -219,7 +216,7 @@ const { serverInfo, gitInfo, menuIndex, calibrationTabIndex, evaluationTabIndex,
 
 const { popupActive } = storeToRefs(generalStore());
 
-const { calibrationJobId } = storeToRefs(generalStore());
+const { activeDirectoryEnabled, allowSelfRegistration, allowPasswordChange, calibrationJobId } = storeToRefs(generalStore());
 
 const { logUserIn, setUserName, hardResetUserDataStore, isUserLoggedIn, getAccessToken } = useUserDataStore();
 const { resetGeneralStore, clearToastRecords, addToastRecord, getServerInfo, setServerInfo } = generalStore();
@@ -266,6 +263,7 @@ onMounted(() => {
     hardResetUserDataStore();
     resetGeneralStore();
     await getFooterInformation();
+    await getConfigInformation();
   });
 });
 
@@ -284,6 +282,23 @@ const getFooterInformation = () => {
       setServerInfo(serverInfo.value);
     }
   })
+}
+
+// Get active directory config info
+const getConfigInformation = () => {
+  makeProtectedApiCall<any>(`${ngencerfBaseUrl}/auth/config/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": 'application/json'
+    }
+  }).then(response => {
+    activeDirectoryEnabled.value = response._data.active_directory_enabled;
+    allowSelfRegistration.value = response._data.allow_self_registration;
+    allowPasswordChange.value = response._data.allow_password_change;
+  }).catch(error => {
+    const tMsg: ToastMessageOptions = { severity: 'error', detail: 'Unable to retrieve Active Directory settings from server', life: ToastTimeout.timeoutError };
+    toast.add(tMsg); addToastRecord(tMsg);
+  });
 }
 
 // Get footer infongenCERF
@@ -391,13 +406,12 @@ const openMFAVerify = () => {
   });
 };
 
-const ForgotUsername = () => {
-  //
-};
-
 const ForgotPassword = () => {
+  let message = allowPasswordChange.value ? 
+    'Please contact the ngenCERF administrator to reset your password.' :
+    'Passwords and account access are managed by your organization. Contact your system administrator if you need assistance.'
   toast.removeAllGroups();
-  const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Info', detail: 'Please contact the ngenCERF administrator to reset your password.', life: ToastTimeout.timeoutInfo };
+  const tMsg: ToastMessageOptions = { severity: 'info', detail: message, life: ToastTimeout.timeoutInfo };
   toast.add(tMsg); addToastRecord(tMsg);
 };
 

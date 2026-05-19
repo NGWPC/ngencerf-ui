@@ -13,6 +13,10 @@ export const generalStore = defineStore(
   "generalStore",
   () => {
 
+    const activeDirectoryEnabled = ref<boolean>(false);
+    const allowSelfRegistration = ref<boolean>(true);
+    const allowPasswordChange = ref<boolean>(true);
+
     const gitInfo = ref<Record<string, GitData>>({});
 
     const calibrationTabIndex = ref("1");
@@ -135,6 +139,9 @@ export const generalStore = defineStore(
     }
 
     return {
+      activeDirectoryEnabled,
+      allowSelfRegistration,
+      allowPasswordChange,
       gitInfo,
       getMenuIndex,
       setMenuIndex,
