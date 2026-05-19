@@ -264,8 +264,8 @@ const userLoggedIn = ref<boolean>();
 import pdfUrl from '@/assets/styles/pdfs/NGWPC_NgenCERF_Users_Guide.pdf';
 
 const userItems = ref([
-    { label: 'About', icon: 'pi pi-fw-times', command: () => aboutBox() },
     { label: 'Account', icon: 'pi pi-fw-times', command: () => gotoAccount() },
+    { label: 'About', icon: 'pi pi-fw-times', command: () => aboutBox() },
     { label: 'Notifications', icon: 'pi pi-fw-times', command: () => errorLog() },
     { label: 'Users Guide', icon: 'pi pi-fw-times', command: () => window.open(pdfUrl, '_blank') },
     { label: 'Logout', icon: 'pi pi-fw-times', command: () => logoutUser() }
