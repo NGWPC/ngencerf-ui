@@ -9,133 +9,130 @@
             </div>
 
             <!-- Middle: centers CenterBox -->
-            <div class="flex items-center justify-center px-4 py-8">
+            <div class="flex items-center justify-center px-4 py-6">
 
-                <div
-                id="CenterBox"
-                class="bg-white mx-auto px-6 py-8 rounded-[10px] max-w-screen-lg shadow-md"
-                >
+                <div id="CenterBox" class="bg-white mx-auto px-6 py-6 rounded-[10px] max-w-screen-lg shadow-md">
                     <!-- Page Title -->
-                    <div class="text-center mb-6">
+                    <div class="text-center mb-2">
                         <h1 class="text-4xl font-bold">Next Generation Water Prediction Capability</h1>
-                        <div class="text-lg sm:text-xl text-gray-700 mt-2">
+                        <div class="text-lg sm:text-xl text-gray-700 mt-1">
                         Welcome <strong>{{ getUserFullName() }}</strong>
                         </div>
                     </div>
 
-                    <hr class="my-6 border-black" />
+                    <hr class="my-2 border-black" />
 
                     <!-- Dashboard Section -->
-                    <div class="text-center font-bold text-2xl mb-4">Dashboard</div>
+                    <div class="text-center font-bold text-2xl mb-2">Dashboard</div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
                         <!-- Running Processes Card -->
-                        <div class="bg-teal-100 text-teal-800 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-teal-100 text-teal-800 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoCalibrationAndFilter({'status': 'Running'})">
-                            <i class="pi pi-sync text-teal-600 text-3xl mb-2"
+                            <i class="pi pi-sync text-teal-600 text-3xl mb-1"
                                 :class="{ 'pi-spin': runningCalibrationJobs > 0 }"></i>
                                 <div class="text-3xl sm:text-4xl font-extrabold text-teal-800">
                                 {{ runningCalibrationJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Calibrations Running
                             </div>
                         </div>
 
                         <!-- Ready to Run Card -->
-                        <div class="bg-green-50 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-green-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoCalibrationAndFilter({'status': 'Ready'})">
-                            <i class="pi pi-play-circle text-green-600 text-3xl mb-2"></i>
+                            <i class="pi pi-play-circle text-green-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-green-600">
                                 {{ readyCalibrationJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Calibrations Ready to Run
                             </div>
                         </div>
 
                         <!-- Setups to Complete Card -->
-                        <div class="bg-amber-50 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-amber-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoCalibrationAndFilter({'status': 'Saved'})">
-                            <i class="pi pi-sliders-h text-amber-600 text-3xl mb-2"></i>
+                            <i class="pi pi-sliders-h text-amber-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-amber-600">
                                 {{ savedCalibrationJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Calibrations In Setup
                             </div>
                         </div>
 
                         <!-- Running Forecasts Card -->
-                        <div class="bg-teal-100 text-teal-800 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-teal-100 text-teal-800 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoForecastAndFilter({'status': 'Running'})">
-                            <i class="pi pi-sync text-teal-600 text-3xl mb-2"
+                            <i class="pi pi-sync text-teal-600 text-3xl mb-1"
                                 :class="{ 'pi-spin': runningForecastJobs > 0 }"></i>
                                 <div class="text-3xl sm:text-4xl font-extrabold text-teal-800">
                                 {{ runningForecastJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Forecasts Running
                             </div>
                         </div>
 
                         <!-- Completed Forecasts Card -->
-                        <div class="bg-blue-50 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoForecastAndFilter({'status': 'Done'})">
-                            <i class="pi pi-check text-blue-600 text-3xl mb-2"></i>
+                            <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneForecastJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Forecasts Completed
                             </div>
                         </div>
 
                         <!-- Completed Forecast Verifications Card -->
-                        <div class="bg-blue-50 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoForecastVerificationAndFilter({'status': 'Done'})">
-                            <i class="pi pi-check text-blue-600 text-3xl mb-2"></i>
+                            <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneForecastVerificationJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Forecast Verifications Completed
                             </div>
                         </div>
 
                         <!-- Running Hindcasts Card -->
-                        <div class="bg-teal-100 text-teal-800 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-teal-100 text-teal-800 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoHindcastAndFilter({'status': 'Running'})">
-                            <i class="pi pi-sync text-teal-600 text-3xl mb-2"
+                            <i class="pi pi-sync text-teal-600 text-3xl mb-1"
                                 :class="{ 'pi-spin': runningHindcastJobs > 0 }"></i>
                                 <div class="text-3xl sm:text-4xl font-extrabold text-teal-800">
                                 {{ runningHindcastJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Hindcasts Running
                             </div>
                         </div>
 
                         <!-- Completed Hindcasts Card -->
-                        <div class="bg-blue-50 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoHindcastAndFilter({'status': 'Done'})">
-                            <i class="pi pi-check text-blue-600 text-3xl mb-2"></i>
+                            <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneHindcastJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Hindcasts Completed
                             </div>
                         </div>
 
                         <!-- Completed Hindcasts Verifications Card -->
-                        <div class="bg-blue-50 p-6 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
+                        <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                             @click="gotoHindcastVerificationAndFilter({'status': 'Done'})">
-                            <i class="pi pi-check text-blue-600 text-3xl mb-2"></i>
+                            <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneHindcastVerificationJobs }}
                             </div>
-                            <div class="text-sm sm:text-base text-gray-700 mt-2">
+                            <div class="text-sm sm:text-base text-gray-700 mt-1">
                                 Hindcast Verifications Completed
                             </div>
                         </div>
