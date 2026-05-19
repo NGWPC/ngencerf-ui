@@ -9,7 +9,7 @@
         <span class="pt-1 inline-block ml-3" style="font-size:0.7em;">( {{ userName }} )</span>
       </div>
     </div>
-    <div class="grid grid-cols-2 gap-2">
+    <div v-if="allowPasswordChange" class="grid grid-cols-2 gap-2">
       <div class="col-span-1">
         <a href="#" @click="showForm = 'changePassword'" class="mt-6 mb-6" :class="changePasswordClasses"
           aria-label="Change Password" title="Change Password">Change Password</a>
@@ -104,6 +104,16 @@
         
       </div>
 
+    </div>
+    <div v-else class="mt-2">
+      Passwords and account access are managed by your organization.
+      Contact your system administrator if you need assistance.
+      <div class="buttonArea mt-4">
+        <Button class="c-blue font-normal underline" id="closeAccountBtn" name="cancel" value="Cancel"
+          v-on:click="closeAccountBox" aria-label="Close Account Box" title="Close Account Box">
+          Close
+        </Button>
+      </div>
     </div>
   </div>
 

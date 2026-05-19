@@ -289,11 +289,6 @@ onMounted(() => {
     userInitials.value = getUserInitials();
     userLoggedIn.value = isUserLoggedIn();
 
-    // diable Account link if there's no use for it
-    if (!allowPasswordChange.value) {
-      userItems.value = userItems.value.filter(item => item.label !== 'Account')
-    }
-
     window.addEventListener('resize', function (event) {
         sizeHelpWindow();
         sizeLogWindow();
