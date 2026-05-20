@@ -4,10 +4,8 @@
         <div id="TopBar">&nbsp;</div>
         <div class="grid grid-cols-12 gap-1" style="height: 80px">
             <div v-if="isUserLoggedIn()" id="PgmName" class="col-span-2 mt-6">
-                <NuxtLink id="MainMenuLandingPage" to="LandingPage" custom v-slot="{ href, navigate }">
-                  <a :href="href" data-menu="0" @click="MenuChanged($event, navigate)">
-                    ngenCERF
-                  </a>
+                <NuxtLink id="MainMenuLandingPage" to="LandingPage">
+                  ngenCERF
                 </NuxtLink>
             </div>
             <div v-else id="PgmName" class="col-span-2 mt-6">
@@ -18,38 +16,29 @@
                 <ul v-show="userLoggedIn && location.name !== 'Login'" id="MainMenu">
                     <li aria-label="Calibration" title="Calibration">
                       <NuxtLink id="MainMenuCalibration" :class="location.name === 'Calibration' ? 'isActive' : ''"
-                        to="calibration" custom v-slot="{ href, navigate }">
-                        <a :href="href" data-menu="1" @click="MenuChanged($event, navigate)">
-                          Calibration
-                        </a>
+                        to="calibration">
+                        Calibration
                       </NuxtLink>
                     </li>
                     <li aria-label="Evaluation" title="Evaluation">
                       <NuxtLink id="MainMenuEvaluation" :class="location.name === 'Evaluation' ? 'isActive' : ''"
-                        to="Evaluation" custom v-slot="{ href, navigate }">
-                        <a :href="href" data-menu="2" @click="MenuChanged($event, navigate)">
-                          Evaluation
-                        </a>
+                        to="evaluation">
+                        Evaluation
                       </NuxtLink>
                     </li>
                     <li aria-label="Forecast" title="Forecast">
                       <NuxtLink id="MainMenuForecast" :class="location.name === 'Forecast' ? 'isActive' : ''"
-                        to="Forecast" custom v-slot="{ href, navigate }">
-                        <a :href="href" data-menu="3" @click="MenuChanged($event, navigate)">
-                          Forecast
-                        </a>
+                        to="forecast">
+                        Forecast
                       </NuxtLink>
                     </li>
                     <li aria-label="Hindcast" title="Hindcast">
                       <NuxtLink id="MainMenuHindcast" :class="location.name === 'Hindcast' ? 'isActive' : ''"
-                        to="Hindcast" custom v-slot="{ href, navigate }">
-                        <a :href="href" data-menu="4" @click="MenuChanged($event, navigate)">
-                          Hindcast
-                        </a>
+                        to="hindcast">
+                        Hindcast
                       </NuxtLink>
                     </li>
                 </ul>
-
             </div>
 
             <div id="Circles" class="col-span-2">
@@ -206,7 +195,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
 import ContextMenu from 'primevue/contextmenu';
 import Swal from 'sweetalert2';
 
@@ -290,6 +279,9 @@ const { isUserLoggedIn, getUserInitials, setIsTokenExpired, getIsTokenExpired } 
 const { userInitials, lastServerError } = storeToRefs(useUserDataStore());
 
 const location = useRoute();
+const router = useRouter();
+const pendingRoute = ref<any>(null);
+const allowNavigation = ref<boolean>(false);
 
 const userLoggedIn = ref<boolean>();
 
@@ -469,60 +461,67 @@ const displayHelp = () => {
     }
 }
 
-const MenuChanged = async(e: MouseEvent, navigate: () => void) => {
-  const ele = e.currentTarget as HTMLAnchorElement;
-  const menuNumber = Number(ele.dataset.menu);
-
-  const errors = await Promise.resolve().then(() => validateCurrentTab());
-  if (errors.error) {
-    e.preventDefault();
-    showTabNavDialog(errors.text, true, menuNumber, navigate);
-    return;
-  } else {
-    goToMenuLink(menuNumber, navigate);
+onBeforeRouteLeave(async(to, from) => {
+  // IMPORTANT:
+  // allow the second navigation attempt through
+  if (allowNavigation.value) {
+    allowNavigation.value = false
+    return true
   }
-}
 
-const showTabNavDialog = (body: string[], next: boolean, menuNumber: number, navigate: () => void) => {
-  if (!navDialogOpened.value) {
-    dialog.open(MoveNextPrevDialog, {
-      props: {
-        header: "Unsaved changes!",
-        style: {
-          width: 'auto',
-        },
-        modal: true,
-      },
-      data: {
-        body: body,
-        direction: next
-      },
-      onClose: (opt) => {
-        navDialogOpened.value = false;
-        handleTabNavDialogClose(opt, menuNumber, navigate);
-      },
-    })
-    navDialogOpened.value = true;
+  const errors = await validateCurrentTab()
+
+  if (!errors.error) {
+    return true
   }
-}
 
-const handleTabNavDialogClose = (opt: any, menuNumber: number, navigate: () => void) => {
-  if (opt.data && opt.data.moveToNextResponse) {
-    if (props.callTabRestore) {
-      props.callTabRestore();
+  pendingRoute.value = to
+
+  showTabNavDialog(errors.text)
+
+  return false
+})
+
+const showTabNavDialog = (body: string[]) => {
+  if (navDialogOpened.value) return
+
+  navDialogOpened.value = true
+
+  dialog.open(MoveNextPrevDialog, {
+    props: {
+      header: 'Unsaved changes!',
+      modal: true,
+      style: {
+        width: 'auto'
+      }
+    },
+
+    data: {
+      body,
+      direction: true
+    },
+
+    onClose: async (opt) => {
+
+      navDialogOpened.value = false
+
+      if (opt?.data?.moveToNextResponse && pendingRoute.value) {
+
+        if (props.callTabRestore) {
+          props.callTabRestore()
+        }
+
+        // bypass next guard execution
+        allowNavigation.value = true
+
+        const route = pendingRoute.value
+        pendingRoute.value = null
+
+        await router.push(route.fullPath)
+      }
     }
-    goToMenuLink(menuNumber, navigate);
-  }
-  if (opt.type && opt.type === 'dialog-close') {
-    return;
-  }
+  })
 }
-
-const goToMenuLink = async(menuNumber: number, navigate: () => void) => {
-  await navigate();
-  setMenuIndex(menuNumber);
-}
-
 </script>
 
 <style lang="scss" scoped>
