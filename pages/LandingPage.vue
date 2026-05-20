@@ -157,7 +157,6 @@ import AppHeader from '@/components/Common/AppHeader.vue';
 import AppFooter from '@/components/Common/AppFooter.vue';
 
 import { useUserDataStore } from '@/stores/common/UserDataStore';
-import { useCalibrationJobStore } from "@/stores/common/CalibrationJobStore";
 import { useGageStore } from "@/stores/calibration/GageStore";
 import { useFormulationStore } from "@/stores/calibration/FormulationStore";
 import { useOptimizationStore } from "@/stores/calibration/OptimizationStore";
@@ -177,7 +176,7 @@ const { resetFormulationStore, loadFormulationModels } = useFormulationStore();
 const { hardResetTuningStore } = useTuningStore();
 const { resetOptimizationStore, loadOptimizationTabStaticData } = useOptimizationStore();
 const { hardResetRunStatusStore } = useRunStatusStore();
-const { addToastRecord } = generalStore();
+const { addToastRecord, resetGeneralStore } = generalStore();
 
 const formulationStore = useFormulationStore;
 const { formulationTabData } = storeToRefs(formulationStore());
@@ -197,7 +196,7 @@ const doneHindcastJobs = ref<number | null>(null);
 const doneHindcastVerificationJobs = ref<number | null>(null);
 
 onMounted(async () => {
-  popupActive.value = false;
+  resetGeneralStore();
   preFilterList.value = {};
   resetGageStore();
   resetFormulationStore();

@@ -49,7 +49,6 @@ const { getForecastTabIndex, setForecastTabIndex } = generalStore();
 import { useVerificationStore } from '@/stores/forecast/VerificationStore';
 const { verificationJobId } = storeToRefs(useVerificationStore());
 
-// Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getForecastTabIndex());
 
 // Activate new tab
@@ -59,7 +58,6 @@ const tabChanged = (tabNum: number) => {
     setForecastTabIndex(tabNum);
   } 
 };
-
 onUnmounted(() => {
   verificationJobId.value = undefined;
 })
