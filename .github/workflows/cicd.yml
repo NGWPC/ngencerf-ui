@@ -104,7 +104,7 @@ jobs:
 
           # base image metadata for Dockerfile labels
           BASE_NAME="${{ env.BASE_REPO }}:${{ env.BASE_TAG }}"
-          BASE_INSPECT=$(skopeo inspect "docker://${BASE_NAME}" 2>/dev/null || echo '{}')
+          BASE_INSPECT=$(skopeo inspect --override-os linux --override-arch amd64 "docker://${BASE_NAME}" 2>/dev/null || echo '{}')
           BASE_DIGEST=$(echo "$BASE_INSPECT" | jq -r '.Digest // "unknown"')
           BASE_REVISION=$(echo "$BASE_INSPECT" | jq -r '.Labels["org.opencontainers.image.revision"] // "unknown"')
 
