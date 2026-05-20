@@ -64,6 +64,7 @@ export const useUserDataStore = defineStore(
     const selectedBulkJobAction = ref<number>(0);
     const selectedBulkJobActionScope = ref<boolean>(false);
     const preFilterList = ref<DynamicObject>({});
+    const startTab = ref<number>(1);
 
     const lastServerError = ref<ServerStatus>();
 
@@ -276,7 +277,7 @@ export const useUserDataStore = defineStore(
      */
     async function fetchUserCalibrationJobCounts() {
       return await makeProtectedApiCall<CalibrationJobsList>(
-        `${ngencerfBaseUrl}/calibration/get_calibration_jobs_summary/`,
+        `${ngencerfBaseUrl}/calibration/get_jobs_summary/`,
         {
           method: "POST",
           headers: {
@@ -606,6 +607,7 @@ export const useUserDataStore = defineStore(
       selectedBulkJobAction,
       selectedBulkJobActionScope,
       preFilterList,
+      startTab,
       lastServerError,
       userCalibrationJobsListData,
       userCalibrationRunData,

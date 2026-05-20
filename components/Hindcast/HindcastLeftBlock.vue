@@ -49,7 +49,7 @@ const { getHindcastTabIndex, setHindcastTabIndex } = generalStore();
 import { useVerificationStore } from '@/stores/forecast/VerificationStore';
 const { verificationJobId } = storeToRefs(useVerificationStore());
 
-// Default to Tab 1, HeadwaterBasinGage
+// Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getHindcastTabIndex());
 
 // Activate new tab
@@ -61,5 +61,4 @@ const tabChanged = (tabNum: number) => {
 onUnmounted(() => {
   verificationJobId.value = undefined;
 })
-
 </script>

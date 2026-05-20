@@ -28,7 +28,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
                         <!-- Running Processes Card -->
                         <div class="bg-teal-100 text-teal-800 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoCalibrationAndFilter({'status': 'Running'})">
+                            @click="gotoMenuAndFilter('MainMenuCalibration', 1, {'status': 'Running'})">
                             <i class="pi pi-sync text-teal-600 text-3xl mb-1"
                                 :class="{ 'pi-spin': runningCalibrationJobs > 0 }"></i>
                                 <div class="text-3xl sm:text-4xl font-extrabold text-teal-800">
@@ -41,7 +41,7 @@
 
                         <!-- Ready to Run Card -->
                         <div class="bg-green-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoCalibrationAndFilter({'status': 'Ready'})">
+                            @click="gotoMenuAndFilter('MainMenuCalibration', 1, {'status': 'Ready'})">
                             <i class="pi pi-play-circle text-green-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-green-600">
                                 {{ readyCalibrationJobs }}
@@ -53,7 +53,7 @@
 
                         <!-- Setups to Complete Card -->
                         <div class="bg-amber-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoCalibrationAndFilter({'status': 'Saved'})">
+                            @click="gotoMenuAndFilter('MainMenuCalibration', 1, {'status': 'Saved'})">
                             <i class="pi pi-sliders-h text-amber-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-amber-600">
                                 {{ savedCalibrationJobs }}
@@ -65,7 +65,7 @@
 
                         <!-- Running Forecasts Card -->
                         <div class="bg-teal-100 text-teal-800 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoForecastAndFilter({'status': 'Running'})">
+                            @click="gotoMenuAndFilter('MainMenuForecast', 2, {'status': 'Running'})">
                             <i class="pi pi-sync text-teal-600 text-3xl mb-1"
                                 :class="{ 'pi-spin': runningForecastJobs > 0 }"></i>
                                 <div class="text-3xl sm:text-4xl font-extrabold text-teal-800">
@@ -78,7 +78,7 @@
 
                         <!-- Completed Forecasts Card -->
                         <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoForecastAndFilter({'status': 'Done'})">
+                            @click="gotoMenuAndFilter('MainMenuForecast', 2, {'status': 'Done'})">
                             <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneForecastJobs }}
@@ -90,7 +90,7 @@
 
                         <!-- Completed Forecast Verifications Card -->
                         <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoForecastVerificationAndFilter({'status': 'Done'})">
+                            @click="gotoMenuAndFilter('MainMenuForecast', 6, {'status': 'Done'})">
                             <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneForecastVerificationJobs }}
@@ -102,7 +102,7 @@
 
                         <!-- Running Hindcasts Card -->
                         <div class="bg-teal-100 text-teal-800 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoHindcastAndFilter({'status': 'Running'})">
+                            @click="gotoMenuAndFilter('MainMenuHindcast', 2, {'status': 'Running'})">
                             <i class="pi pi-sync text-teal-600 text-3xl mb-1"
                                 :class="{ 'pi-spin': runningHindcastJobs > 0 }"></i>
                                 <div class="text-3xl sm:text-4xl font-extrabold text-teal-800">
@@ -115,7 +115,7 @@
 
                         <!-- Completed Hindcasts Card -->
                         <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoHindcastAndFilter({'status': 'Done'})">
+                            @click="gotoMenuAndFilter('MainMenuHindcast', 2, {'status': 'Done'})">
                             <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneHindcastJobs }}
@@ -127,7 +127,7 @@
 
                         <!-- Completed Hindcasts Verifications Card -->
                         <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                            @click="gotoHindcastVerificationAndFilter({'status': 'Done'})">
+                            @click="gotoMenuAndFilter('MainMenuHindcast', 6, {'status': 'Done'})">
                             <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
                                 {{ doneHindcastVerificationJobs }}
@@ -181,7 +181,7 @@ const { addToastRecord } = generalStore();
 
 const formulationStore = useFormulationStore;
 const { formulationTabData } = storeToRefs(formulationStore());
-const { statusTypeFilterList, preFilterList } = storeToRefs(useUserDataStore());
+const { statusTypeFilterList, preFilterList, startTab } = storeToRefs(useUserDataStore());
 const { fetchUserCalibrationJobCounts } = useUserDataStore();
 
 const { getUserFullName } = useUserDataStore()
@@ -198,6 +198,7 @@ const doneHindcastVerificationJobs = ref<number | null>(null);
 
 onMounted(async () => {
   popupActive.value = false;
+  preFilterList.value = {};
   resetGageStore();
   resetFormulationStore();
   resetOptimizationStore();
@@ -225,29 +226,10 @@ onMounted(async () => {
   }
 })
 
-const gotoCalibrationAndFilter = (filterList: DynamicObject={}) => {
+const gotoMenuAndFilter = (menuElement: string, tabNumber: number, filterList: DynamicObject={}) => {
   preFilterList.value = filterList;
-  const e = document.getElementById('MainMenuCalibration');
-  e.click();
-}
-const gotoForecastAndFilter = (filterList: DynamicObject={}) => {
-  preFilterList.value = filterList;
-  const e = document.getElementById('MainMenuForecast');
-  e.click();
-}
-const gotoForecastVerificationAndFilter = (filterList: DynamicObject={}) => {
-  preFilterList.value = filterList;
-  const e = document.getElementById('MainMenuForecast');
-  e.click();
-}
-const gotoHindcastAndFilter = (filterList: DynamicObject={}) => {
-  preFilterList.value = filterList;
-  const e = document.getElementById('MainMenuHindcast');
-  e.click();
-}
-const gotoHindcastVerificationAndFilter = (filterList: DynamicObject={}) => {
-  preFilterList.value = filterList;
-  const e = document.getElementById('MainMenuHindcast');
-  e.click();
+  startTab.value = tabNumber;
+  const e = document.getElementById(menuElement);
+  if (e) e.click();
 }
 </script>

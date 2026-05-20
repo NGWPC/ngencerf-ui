@@ -189,6 +189,7 @@
 import { storeToRefs } from "pinia";
 
 import { generalStore } from "@/stores/common/GeneralStore";
+import { useUserDataStore } from "@/stores/common/UserDataStore"
 import { useEvaluationCalibrationRunStore } from "@/stores/evaluation/EvaluationCalibrationRunStore";
 import { useEvaluationRunStatusStore } from '@/stores/evaluation/EvaluationRunStatusStore';
 import { useForecastStore } from "@/stores/forecast/ForecastStore";
@@ -207,6 +208,8 @@ const {
   getHindcastTabIndex,
   getMenuIndex,
 } = generalStore();
+
+const { startTab } = storeToRefs(useUserDataStore());
 
 const {
   selectedCalibrationCompareRuns,
@@ -235,24 +238,37 @@ const tabNotCompleted = ref(false);
 const tabClicked = (event: Event) => {
   event.preventDefault();
   const ele: HTMLElement = event.currentTarget as HTMLElement;
-
+  let tabNumber = Number(ele.getAttribute("data-tab"));
   nextTick(() => {
-    // Send the selected tab info to the active tab set with emit
-    if (currentMenu.value === 1) {
-      currentCalibrationTab.value = Number(ele.getAttribute("data-tab"));
-      emit("tabNumber", currentCalibrationTab.value);
-    } else if (currentMenu.value === 2) {
-      currentEvaluationTab.value = Number(ele.getAttribute("data-tab"));
-      emit("tabNumber", currentEvaluationTab.value);
-    } else if (currentMenu.value === 3) {
-      currentForecastTab.value = Number(ele.getAttribute("data-tab"));
-      emit("tabNumber", currentForecastTab.value);
-    } else if (currentMenu.value === 4) {
-      currentHindcastTab.value = Number(ele.getAttribute("data-tab"));
-      emit("tabNumber", currentHindcastTab.value);
-    }
+    goToTab(tabNumber);
   })
 }
+
+const goToTab = (tabNumber: number) => {
+  // Send the selected tab info to the active tab set with emit
+  if (currentMenu.value === 1) {
+    currentCalibrationTab.value = tabNumber;
+    emit("tabNumber", currentCalibrationTab.value);
+  } else if (currentMenu.value === 2) {
+    currentEvaluationTab.value = tabNumber;
+    emit("tabNumber", currentEvaluationTab.value);
+  } else if (currentMenu.value === 3) {
+    currentForecastTab.value = tabNumber;
+    emit("tabNumber", currentForecastTab.value);
+  } else if (currentMenu.value === 4) {
+    currentHindcastTab.value = tabNumber;
+    emit("tabNumber", currentHindcastTab.value);
+  }
+}
+
+onMounted( () => {
+  if (startTab?.value > 1) {
+    nextTick(() => {
+      goToTab(startTab.value);
+      startTab.value = 1;
+    })
+  }
+})
 </script>
 <style lang="scss" scoped>
 @use "@/assets/styles/global.scss";

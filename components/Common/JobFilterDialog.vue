@@ -158,7 +158,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getCurrentInstance, defineExpose, ref } from 'vue';
+import { getCurrentInstance, ref } from 'vue';
 const instance = getCurrentInstance();
 
 import Button from "primevue/button";
@@ -430,6 +430,7 @@ onMounted(() => {
     });
     nextTick(async () => {
       refreshJobList();
+      preFilterList.value = {};
     });
   }
   if (instance?.vnode?.props?.onBulkJobAction) {
@@ -439,7 +440,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   resetFilters(false);
-  preFilterList.value = {};
   clearGageList();
 })
 
