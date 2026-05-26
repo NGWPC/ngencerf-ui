@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: ./Dockerfile.production-pw
       args:
-        NGENCERF_BASE_URL: https://${pw_platform_host}${basepath}/api/
+        NGENCERF_BASE_URL: ${pw_platform_host:+https://${pw_platform_host}${basepath}/api/}
     image: ghcr.io/ngwpc/ngencerf-ui:${NGENCERF_UI_TAG:-latest}
     ports:
-      - "${ngencerf_port}:3000"
+      - "${ngencerf_port:-3000}:3000"
     environment:
       - NUXT_HOST=0.0.0.0
       - NUXT_PORT=3000

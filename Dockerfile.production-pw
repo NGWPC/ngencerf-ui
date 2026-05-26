@@ -83,7 +83,7 @@ COPY . .
 
 # override NGENCERF URL to facilitate Parallel Works sessions sharing
 ARG NGENCERF_BASE_URL
-ENV NGENCERF_BASE_URL=${NGENCERF_BASE_URL}
+ENV NGENCERF_BASE_URL=${NGENCERF_BASE_URL:-http://localhost:8000}
 
 RUN set -eux; \
     npm run build
