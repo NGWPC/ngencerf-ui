@@ -35,8 +35,8 @@ for arg in "$@"; do
 Usage: ./runUi.sh [--clean] [--help]
 
 Runs ngencerf-ui locally in dev mode, first syncing your environment to the
-repo. It installs and switches to the Node version in .nvmrc (via nvm) only if
-it differs. If anything has drifted (Node switched, node_modules missing, or
+repo. If your Node differs from .nvmrc it switches to that version via nvm,
+installing it first if you don't already have it. If anything has drifted (Node switched, node_modules missing, or
 package-lock.json changed) it wipes node_modules/.nuxt/.output and runs
 `npm ci` for a fresh, clean install. If you are already in sync it starts the
 dev server without reinstalling or deleting anything.
@@ -67,7 +67,7 @@ if [[ "$current_node" != "$required_node" ]]; then
         echo "Install it: https://github.com/nvm-sh/nvm#installing-and-updating" >&2
         exit 1
     fi
-    echo "Installing and switching to Node ${required_node} via nvm..."
+    echo "Switching to Node ${required_node} via nvm (installing it first if not already present)..."
     # nvm's scripts reference unset variables; relax `set -u` while we use it.
     set +u
     \. "$NVM_DIR/nvm.sh"
