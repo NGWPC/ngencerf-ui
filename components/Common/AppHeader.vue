@@ -466,12 +466,14 @@ onBeforeRouteLeave(async(to, from) => {
   // allow the second navigation attempt through
   if (allowNavigation.value) {
     allowNavigation.value = false
+    setMenuIndexByRoute(to.path.split('/')[1]);
     return true
   }
 
   const errors = await validateCurrentTab()
 
   if (!errors.error) {
+    setMenuIndexByRoute(to.path.split('/')[1]);
     return true
   }
 
@@ -481,6 +483,26 @@ onBeforeRouteLeave(async(to, from) => {
 
   return false
 })
+
+const setMenuIndexByRoute = (path: string) => {
+  switch(path) {
+    case 'calibration':
+      setMenuIndex(1);
+      break;
+    case 'evaluation':
+      setMenuIndex(2);
+      break;
+    case 'forecast':
+      setMenuIndex(3);
+      break;
+    case 'hindcast':
+      setMenuIndex(4);
+      break;
+    default:
+      setMenuIndex(0);
+      break;
+  }
+}
 
 const showTabNavDialog = (body: string[]) => {
   if (navDialogOpened.value) return
