@@ -418,8 +418,6 @@ let mainLeftAreaElement: HTMLElement | null = null;
 let dataTableElement: HTMLElement | null = null;
 
 onMounted(async () => {
-  hilightTab(CalibrationTabs.tab_tuningControls);
-
   toast.removeAllGroups();
 
   mainLeftAreaElement = document.getElementById("MainLeftDataArea") as HTMLElement;
@@ -494,6 +492,10 @@ onMounted(async () => {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'No Calibration Job ID', detail: 'No calibration job ID found. Please go back to the Calibration Runs tab and select a job.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
   }
+  
+  nextTick(() => {
+    hilightTab(CalibrationTabs.tab_tuningControls);
+  });
 
   isLoading.value = false;
 });

@@ -287,7 +287,6 @@ onMounted(async() => {
   }
   setUserSelection();
   
-  hilightTab(CalibrationTabs.tab_optimizationMetrics);
   toast.removeAllGroups();
   if (ele) { ele.scrollTo(0, 0); }
   
@@ -308,6 +307,10 @@ onMounted(async() => {
     showMetricPeakFlow.value = true;
     uiPeakFlowThreshold.value = userCalibrationRunData.value?.peak_flow_threshold;
   }
+
+  nextTick(() => {
+    hilightTab(CalibrationTabs.tab_optimizationMetrics);
+  });
 
   isLoading.value = false;
 })
