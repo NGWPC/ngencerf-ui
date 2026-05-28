@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# runUi.sh — run ngencerf-ui locally in dev mode.
+# runUI.sh — run ngencerf-ui locally in dev mode.
 #
 # Brings your local environment into sync with what the repo declares, then
 # starts the dev server. It only does work when something has actually drifted:
@@ -32,7 +32,7 @@ for arg in "$@"; do
         --clean) clean=1 ;;
         -h|--help)
             cat <<'EOF'
-Usage: ./runUi.sh [--clean] [--help]
+Usage: ./runUI.sh [--clean] [--help]
 
 Runs ngencerf-ui locally in dev mode, first syncing your environment to the
 repo. If your Node differs from .nvmrc it switches to that version via nvm,

@@ -6,7 +6,7 @@ A [Nuxt 4](https://nuxt.com/) (Vue 3) application for the ngencerf platform.
 
 - **Node.js** — pinned in [`.nvmrc`](.nvmrc) (currently **24.16.0**). Manage versions with
   [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating). You don't have to switch
-  Node by hand for local development — `./runUi.sh` reads `.nvmrc` and installs/switches for you. To do it
+  Node by hand for local development — `./runUI.sh` reads `.nvmrc` and installs/switches for you. To do it
   manually:
 
   ```bash
@@ -34,15 +34,15 @@ You can run it directly on your machine or in Docker.
 **Development** (hot reload, `http://localhost:3000`):
 
 ```bash
-./runUi.sh
+./runUI.sh
 ```
 
-`runUi.sh` is the dev launcher. It first syncs your environment to the repo: it switches Node to `.nvmrc`
+`runUI.sh` is the dev launcher. It first syncs your environment to the repo: it switches Node to `.nvmrc`
 via nvm (installing it if needed), and does a clean `npm ci` whenever Node was switched, `node_modules` is
 missing, or `package-lock.json` changed. If you're already in sync it just starts the dev server without
 reinstalling anything. Use `--clean` to force a fresh install, `--help` for usage.
 
-**Why prefer `./runUi.sh` over running `npm install` by hand?** It keeps a tiny bookkeeping file inside
+**Why prefer `./runUI.sh` over running `npm install` by hand?** It keeps a tiny bookkeeping file inside
 `node_modules` that remembers which `package-lock.json` it last installed from. Each time you run it, it
 checks two things:
 
@@ -54,9 +54,9 @@ checks two things:
 If everything already matches, it skips straight to starting the dev server — no reinstalling, nothing
 deleted.
 
-If you install packages by hand (`npm install` or `npm ci`) outside of `./runUi.sh`, the bookkeeping file
-isn't updated. Nothing breaks, but the next time you run `./runUi.sh` it will do one extra clean reinstall
-to catch up. Sticking with `./runUi.sh` keeps your environment in sync automatically and avoids that extra
+If you install packages by hand (`npm install` or `npm ci`) outside of `./runUI.sh`, the bookkeeping file
+isn't updated. Nothing breaks, but the next time you run `./runUI.sh` it will do one extra clean reinstall
+to catch up. Sticking with `./runUI.sh` keeps your environment in sync automatically and avoids that extra
 wait.
 
 **Production** (build the optimized output, then serve it on `http://localhost:3000`):
@@ -100,7 +100,7 @@ inside the running container for troubleshooting, run `docker compose exec ngenc
 
 After pulling changes that touch `.nvmrc`, `package.json`, or `package-lock.json`:
 
-- **Local dev:** just run `./runUi.sh` — it detects the drift (Node version and/or dependencies) and does a
+- **Local dev:** just run `./runUI.sh` — it detects the drift (Node version and/or dependencies) and does a
   clean reinstall before starting. Nothing to delete by hand.
 - **Local prod:** `npm ci && npm run build && npm run start`.
 - **Docker:** re-run the compose command with `--build` to rebuild the image.
