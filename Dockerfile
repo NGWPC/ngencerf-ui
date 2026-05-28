@@ -56,8 +56,8 @@ RUN set -eux; \
     rm -rf /var/cache/dnf
 
 # set node and npm versions
-ARG NODE_VERSION=22.17.0
-ARG NPM_VERSION=10.9.2
+ARG NODE_VERSION=24.16.0
+ARG NPM_VERSION=11.13.0
 ARG NODE_TAR_URL="https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz"
 
 # install node
@@ -80,6 +80,12 @@ RUN set -eux; \
     npm ci
 
 COPY . .
+
+# override NGENCERF URL to facilitate Parallel Works sessions sharing
+# (no-op for the standard build: when this arg is not passed the app falls back
+# to its default base URL — see nuxt.config.ts)
+ARG NGENCERF_BASE_URL
+ENV NGENCERF_BASE_URL=${NGENCERF_BASE_URL}
 
 RUN set -eux; \
     npm run build
