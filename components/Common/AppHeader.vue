@@ -439,20 +439,13 @@ const displayHelp = () => {
 
 const MenuChanged = (e: MouseEvent) => {
     nextTick(() => {
-        const currentMenu = getMenuIndex();
         let ele = e.currentTarget as HTMLElement;
         if (!ele) {
             ele = e.target as HTMLElement;
         }
         const m = ele.getAttribute('data-menu');
-        const tabs = document.getElementsByClassName("tabs");
-        const tab = <HTMLElement>tabs[0];
         if (m && e) {
-            if (currentMenu && currentMenu.toString() === m) {
-                if (tab) { tab.click(); }
-            } else {
-                setMenuIndex(parseInt(m, 10));
-            }
+            setMenuIndex(parseInt(m, 10));
         }
     });
 }

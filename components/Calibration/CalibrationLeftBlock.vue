@@ -39,8 +39,9 @@ import CalibrationRunStatus from '@/components/Calibration/RunStatus.vue';
 import CalibrationCalibrationRunsTab from '@/components/Calibration/PreviousCalibrationRuns.vue';
 
 const { getCalibrationTabIndex, setCalibrationTabIndex } = generalStore();
-// Default to Tab 1, HeadwaterBasinGage
+
 const activeTab = ref(getCalibrationTabIndex());
+
 // Activate new tab
 const tabChanged = (tabNum: number) => {
   if (activeTab.value !== tabNum) {

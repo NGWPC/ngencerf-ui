@@ -19,12 +19,12 @@ export const generalStore = defineStore(
 
     const gitInfo = ref<Record<string, GitData>>({});
 
-    const calibrationTabIndex = ref("1");
-    const evaluationTabIndex = ref("1");
-    const forecastTabIndex = ref("1");
-    const hindcastTabIndex = ref("1");
+    const calibrationTabIndex = ref("0");
+    const evaluationTabIndex = ref("0");
+    const forecastTabIndex = ref("0");
+    const hindcastTabIndex = ref("0");
 
-    const menuIndex = ref("1");
+    const menuIndex = ref("0");
 
     const calibrationJobId = ref<number>(0);
     // user selected valiation run id from evaluate tab
@@ -131,11 +131,11 @@ export const generalStore = defineStore(
       popupActive.value = false;
 
       // Also reset current menu/tab index so that user doesn't get redirected to a tab from the previous session
-      menuIndex.value = '1';
-      calibrationTabIndex.value = '1';
-      evaluationTabIndex.value = '1';
-      forecastTabIndex.value = '1';
-      hindcastTabIndex.value = '1';
+      menuIndex.value = '0';
+      calibrationTabIndex.value = '0';
+      evaluationTabIndex.value = '0';
+      forecastTabIndex.value = '0';
+      hindcastTabIndex.value = '0';
     }
 
     return {
