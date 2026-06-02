@@ -921,12 +921,39 @@ onUnmounted(() => {
 #PlotGraphSliderBox {
   position: absolute;
   border: 1px solid #000000;
-  background-color: #ffffff;
-  opacity: 0.5;
+  background: rgba(255,255,255,0.5);
   z-index: 2;
   left: 0px;
   right: 0px;
   height: 100%;
+}
+
+#PlotGraphSliderBox::before,
+#PlotGraphSliderBox::after {
+    content: "⋮";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: absolute;
+    top: 0;
+    width: 14px;
+    height: 100%;
+
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+
+    background: rgba(70,70,70,.9);
+    cursor: ew-resize;
+}
+
+#PlotGraphSliderBox::before {
+    left: -7px;
+}
+
+#PlotGraphSliderBox::after {
+    right: -7px;
 }
 
 #PlotGraphSliderDateRange {
