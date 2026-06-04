@@ -410,22 +410,20 @@ const buildContextMenu = computed(() => {
       contextMenuOptions.push(cmExportRun.value);
     }
     // multi-job actions
+    if (selectedCalibrationRuns.value.some(run =>
+        !['Submitted','Running'].includes(run.status) && !run.is_archived && !run.is_locked
+      )) {
+      // only allow these actions if a selected job is not Submitted, Running, Archived, or Locked
+      contextMenuOptions.push(cmDeleteRun.value);
+      contextMenuOptions.push(cmArchiveRun.value);
+    }
     if (selectedCalibrationRuns.value.some(run => run.is_archived)) {
       contextMenuOptions.push(cmUnarchiveRun.value);
-    }
-    if (!selectedCalibrationRuns.value.some(run => run.status === 'Submitted') && !selectedCalibrationRuns.value.some(run => run.status === 'Running')) {
-      // only allow these actions if none of the selected jobs are Submitted or Running
-      if (selectedCalibrationRuns.value.some(run => !run.is_locked)) {
-        contextMenuOptions.push(cmDeleteRun.value);
-      }
-      if (selectedCalibrationRuns.value.some(run => !run.is_archived)) {
-        contextMenuOptions.push(cmArchiveRun.value);
-      }
     }
     if (selectedCalibrationRuns.value.some(run => run.is_locked)) {
       contextMenuOptions.push(cmUnlockRun.value);
     }
-    if (selectedCalibrationRuns.value.some(run => !run.is_locked)) {
+    if (selectedCalibrationRuns.value.some(run => !run.is_locked && !run.is_archived)) {
       contextMenuOptions.push(cmLockRun.value);
     }
   }
@@ -772,18 +770,10 @@ const changeSelectedCalibrationRunStatus = (jobStatusAction: number) => {
 
   // for lock and unlock, no need to confirm, just do it
   if (jobStatusAction === JobStatusAction.lock) {
-    if (selectedCalibrationRunIDs.value.length > 1) {
-      acceptMultipleLock(true)
-    } else {
-      acceptLock(selectedCalibrationRunIDs.value[0], true)
-    }
+    acceptMultipleLock(true);
   }
   else if (jobStatusAction === JobStatusAction.unlock) {
-    if (selectedCalibrationRunIDs.value.length > 1) {
-      acceptMultipleLock(false)
-    } else {
-      acceptLock(selectedCalibrationRunIDs.value[0], false)
-    }
+    acceptMultipleLock(false);
   }
   else {
     let confirmMessage = "Are you sure you want to " + ty.toLowerCase() + " "
@@ -811,25 +801,13 @@ const changeSelectedCalibrationRunStatus = (jobStatusAction: number) => {
       },
       accept: () => {
         if (jobStatusAction === JobStatusAction.delete) {
-          if (selectedCalibrationRunIDs.value.length > 1) {
-            acceptMultipleDelete()
-          } else {
-            acceptDelete(selectedCalibrationRunIDs.value[0])
-          }
+          acceptMultipleDelete();
         }
         else if (jobStatusAction === JobStatusAction.archive) {
-          if (selectedCalibrationRunIDs.value.length > 1) {
-            acceptMultipleArchive(true)
-          } else {
-            acceptArchive(selectedCalibrationRunIDs.value[0], true)
-          }
+          acceptMultipleArchive(true);
         }
         else if (jobStatusAction === JobStatusAction.unarchive) {
-          if (selectedCalibrationRunIDs.value.length > 1) {
-            acceptMultipleArchive(false)
-          } else {
-            acceptArchive(selectedCalibrationRunIDs.value[0], false)
-          }
+          acceptMultipleArchive(false);
         }
       },
       reject: () => {
@@ -840,51 +818,7 @@ const changeSelectedCalibrationRunStatus = (jobStatusAction: number) => {
 }
 
 /**
- * Accept the deletion of a single job
- */
-const acceptDelete = (selectedRunId: number) => {
-  isLoading.value = true;
-  deleteCalibrationRun(selectedRunId).then(async (response) => {
-    toast.removeAllGroups();
-    if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
-      toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: 'Delete Job', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: 'Delete Job', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      refreshJobList();
-      isLoading.value = false;
-    } else {
-      useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Delete Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
-        toast.add(tMsg); addToastRecord(tMsg);
-      });
-      isLoading.value = false;
-    }
-  });
-  selectedCalibrationRuns.value = undefined;
-  selectedBulkJobAction.value = 0;
-}
-
-/**
- * Accept the deletion of multiple jobs
+ * Accept the deletion of one or more jobs
  */
 const acceptMultipleDelete = () => {
   isLoading.value = true;
@@ -893,28 +827,18 @@ const acceptMultipleDelete = () => {
   let deleteAllJobs = selectedCalibrationRunsList.value.length === calibrationRunListTotalSize.value;
   deleteCalibrationRun(selectedCalibrationRunIDs.value).then(async (response) => {
     if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
       toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: 'Delete Multiple Jobs', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
+      response._data?.summaries.forEach(summary => {
+        const tMsg: ToastMessageOptions = { severity: summary.message_type, 
+          summary: 'Delete Job' + (selectedCalibrationRunIDs.value.length > 1 ? 's' : ''), 
+          detail: summary.message, 
+          life: 
+            summary.message_type === 'error' ? ToastTimeout.timeoutError :
+            summary.message_type === 'warn' ? ToastTimeout.timeoutWarn :
+            ToastTimeout.timeoutSuccess
+        };
         toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: 'Delete Multiple Jobs', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
+      })
       if (jobFilterRef.value && deleteAllJobs) {
         // if we just deleted the entire list, clear filters and inform the user
         jobFilterRef.value.resetFilters();
@@ -942,53 +866,7 @@ const acceptMultipleDelete = () => {
 }
 
 /**
- * Accept archiving of a single job
- */
-const acceptArchive = (selectedRunId: number, archiveJob: boolean) => {
-  isLoading.value = true;
-  archiveCalibrationRun(selectedRunId, archiveJob).then(async (response) => {
-    toast.removeAllGroups();
-    if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
-      toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: (archiveJob ? 'Archive' : 'Un-Archive') + ' Job', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: (archiveJob ? 'Archive' : 'Un-Archive') + ' Job', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      refreshJobList();
-      isLoading.value = false;
-    } else {
-      useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Archive Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
-        toast.add(tMsg); addToastRecord(tMsg);
-      });
-      isLoading.value = false;
-    }
-  });
-
-  selectedCalibrationRuns.value = undefined;
-  selectedBulkJobAction.value = 0;
-  isLoading.value = false;
-}
-
-/**
- * Accept archiving of multiple jobs
+ * Accept archiving of one or more jobs
  */
 const acceptMultipleArchive = (archiveJob: boolean) => {
   isLoading.value = true;
@@ -997,28 +875,18 @@ const acceptMultipleArchive = (archiveJob: boolean) => {
   let archiveAllJobs = selectedCalibrationRunsList.value.length === calibrationRunListTotalSize.value && archiveJob;
   archiveCalibrationRun(selectedCalibrationRunIDs.value, archiveJob).then(async (response) => {
     if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
       toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: archiveJob ? 'Archive' : 'Un-Archive' + ' Multiple Jobs', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
+      response._data?.summaries.forEach(summary => {
+        const tMsg: ToastMessageOptions = { severity: summary.message_type, 
+          summary: (archiveJob ? 'Archive' : 'Un-Archive') + ' Job' + (selectedCalibrationRunIDs.value.length > 1 ? 's' : ''), 
+          detail: summary.message, 
+          life: 
+            summary.message_type === 'error' ? ToastTimeout.timeoutError :
+            summary.message_type === 'warn' ? ToastTimeout.timeoutWarn :
+            ToastTimeout.timeoutSuccess
+        };
         toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: archiveJob ? 'Archive' : 'Un-Archive' + ' Multiple Jobs', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
+      })
       if (archiveAllJobs && !includeArchivedJobs.value) 
       {
         // if we just archived the entire list and we're not showing archived jobs, inform the user
@@ -1046,60 +914,28 @@ const acceptMultipleArchive = (archiveJob: boolean) => {
 
 
 /**
- * Accept locking of a single job
+ * Accept locking of one or more jobs
  */
-const acceptLock = (selectedRunId: number, lock: boolean) => {
-  lockCalibrationRun(selectedRunId, lock).then(async (response) => {
-    toast.removeAllGroups();
-    if (response.status === 200) {
-      /* const tMsg: ToastMessageOptions = { severity: 'success', 
-        summary: 'Calibration Job ' + (lock ? 'Locked' : 'Unlocked'), detail: 'Job ' + selectedRunId + ' ' + (lock ? 'Locked' : 'Unlocked'), life: ToastTimeout.timeoutSuccess };
-      toast.add(tMsg); addToastRecord(tMsg); */
-      refreshJobList();
-    } else {
-      useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Lock Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
-        toast.add(tMsg); addToastRecord(tMsg);
-      });
-    }
-  });
-  selectedCalibrationRuns.value = undefined;
-  selectedBulkJobAction.value = 0;
-}
-
-/**
- * Accept locking of multiple jobs
- */
-const acceptMultipleLock = (lock: boolean) => {
+const acceptMultipleLock = (lockJob: boolean) => {
   const sortedNumbers = formatMultJobNumbers([...selectedCalibrationRunIDs.value].sort((a, b) => a - b));
-  lockCalibrationRun(selectedCalibrationRunIDs.value, lock).then(async (response) => {
+  lockCalibrationRun(selectedCalibrationRunIDs.value, lockJob).then(async (response) => {
     if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
       toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: lock ? 'Lock' : 'Unlock' + ' Multiple Jobs', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
+      response._data?.summaries.forEach(summary => {
+        const tMsg: ToastMessageOptions = { severity: summary.message_type, 
+          summary: (lockJob ? 'Lock' : 'Unlock') + ' Job' + (selectedCalibrationRunIDs.value.length > 1 ? 's' : ''), 
+          detail: summary.message,  
+          life: 
+            summary.message_type === 'error' ? ToastTimeout.timeoutError :
+            summary.message_type === 'warn' ? ToastTimeout.timeoutWarn :
+            ToastTimeout.timeoutSuccess
+        };
         toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: lock ? 'Lock' : 'Unlock' + ' Multiple Jobs', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
+      })
       refreshJobList();
     } else {
       useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: (lock ? 'Lock' : 'Unlock') + ' Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
+        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: (lockJob ? 'Lock' : 'Unlock') + ' Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
         toast.add(tMsg); addToastRecord(tMsg);
       });
     }
