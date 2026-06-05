@@ -109,6 +109,9 @@
           :totalSize="evaluationRunListTotalSize" :totalPages="evaluationRunListTotalPages"
           v-model:currentPage="evaluationRunListCurrentPage"
           @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
+          @BulkJobAction="bulkJobAction()" :showBulkActions="showBulkActions" 
+          :selected-jobs="selectedCalibrationRunIDs" :all-jobs="allCalibrationRuns" :visible-jobs="visibleCalibrationRuns"
+          @SelectAllJobs="selectAllJobs()" @SelectVisibleJobs="selectVisibleJobs()" @DeselectAllJobs="deselectAllJobs()"
           @UpdateGageList="updateGageList()" ref="jobFilterDialog" />
 
           <ConfirmDialog></ConfirmDialog>
@@ -126,11 +129,12 @@
           </div>
           
           <DataTable id="EvalRunTable" table-style="min-width: 50rem" scrollable scroll-height="400px"
-            :value="userEvaluationRunListData" v-model:selection="selectedCalibrationRun" 
+            :value="userEvaluationRunListData" :rowStyle="rowStyle" dataKey="calibration_run_id" 
+            v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="true" 
+            v-model:contextMenuSelection="contextMenuSelection" contextMenu @rowContextmenu="onRowContextMenu"
             v-model:sortField="evaluationRunListSort.field" v-model:sortOrder="evaluationRunListSort.direction"
-            selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onEvalCalibrationRowSelect" @rowUnselect="onEvalCalibrationRowUnSelect"
-            @rowContextmenu="onRowContextMenu" class="boxed">
+            class="boxed">
             <Column :pt="ptColumn" field="calibration_run_id" sortable> 
               <template #header>
                 <div class="column-header">
@@ -300,6 +304,13 @@
 
         </div>
 
+        <div id="MultJobOpsDlg" v-if="showHideMultOps">
+          <MultipleJobOperations ref="multiJobRef" :cal-jobs="selectedCalibrationRunIDs"
+            :cal-job-list="selectedCalibrationRunsList" :cal-job-text="selectedCalibrationRunsText"
+            @DeleteSelectedJobs="acceptMultipleDelete()" @ArchiveSelectedJobs="acceptMultipleArchive(true)" 
+            @CloseMultJobWindow="closeMultJobsWindow"/>
+        </div>
+
       </div>
     </div>
 
@@ -326,6 +337,7 @@ import { generalStore } from "@/stores/common/GeneralStore"
 
 import MessagesGroup from "@/components/Common/MessagesGroup.vue";
 import JobFilterDialog from "@/components/Common/JobFilterDialog.vue"
+import MultipleJobOperations from "@/components/Common/MultipleJobOperations.vue"
 import Paging from "../Common/Paging.vue";
 
 import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
@@ -400,6 +412,7 @@ const {
   resetUserSelectedEvalValidationRun,
   resetUserSelectedEvalCompareRun,
   fetchUserValidatedCalibrationJobsListData,
+  fetchUserValidatedCalibrationJobsListDataIDsOnly,
   fetchUserValidatedCalibrationJobsListDataForComparison,
   clearUserCalibrationRunData,
   setSelectedCalibrationRunId,
@@ -411,14 +424,58 @@ const {
 const { validationStatusCheckingIntervalId, validationRunningTimeIntervalId } = storeToRefs(useEvaluationRunStatusStore());
 const { hardResetEvaluationRunStatusStore } = useEvaluationRunStatusStore();
 
-const { userCalibrationRunData, gotoCalibrationRunId, includeArchivedJobs, uiGageList } = storeToRefs(useUserDataStore());
+const { userCalibrationRunData, gotoCalibrationRunId, includeArchivedJobs, selectedBulkJobAction, uiGageList } = storeToRefs(useUserDataStore());
 
 const { isLoading, calibrationJobId } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
 
 const toast = useToast();
+
+const selectedCalibrationRuns = ref<CalibrationJobListItem | CalibrationJobListItem[]>();
+const contextMenuSelection = ref(null);
+
+const allCalibrationRuns = ref<number[]>([]);
+const visibleCalibrationRuns = ref<number[]>([]);
+
+const showHideMultOps = ref<boolean>(false);
+
+const disableFilters = computed(() => {
+  return showHideMultOps.value;
+});
+
+const showBulkActions = computed(() => {
+  // let JobFilterDialogue know based on our job list what bulk actions to allow
+  // always include the placeholder option
+  let actionValues = [0];
+  if (userEvaluationRunListData.value.some(run => run.is_archived === false && run.is_locked === false)) {
+    // only allow delete and archive if there are unarchived jobs
+    actionValues.push(1);
+    actionValues.push(2);
+  }
+  return actionValues;
+});
+
+const closeMultJobsWindow = () => {
+  selectedCalibrationRuns.value = undefined;
+  showHideMultOps.value = false;
+};
+
+const selectedCalibrationRunsList = computed(() => {
+  return Array.isArray(selectedCalibrationRuns.value) ? selectedCalibrationRuns.value : 
+    (selectedCalibrationRuns?.value ? [selectedCalibrationRuns.value] : []);
+})
+
+const selectedCalibrationRunIDs = computed(() => {
+  return selectedCalibrationRunsList.value.map(run => run?.calibration_run_id).sort((a, b) => a - b);
+})
+
+const selectedCalibrationRunsText = computed(() => {
+  if (selectedCalibrationRunIDs.value.length === 0) return '';
+  if (selectedCalibrationRunIDs.value.length === 1) return selectedCalibrationRunIDs.value[0];
+  return `${selectedCalibrationRunIDs.value.slice(0, -1).join(', ')} and ${selectedCalibrationRunIDs.value[selectedCalibrationRunIDs.value.length - 1]}`;
+})
+
 //this model is for highlighting purpose
-const selectedCalibrationRun = ref<ValidatedCalibrationRunListItem>();
 const selectedCalibrationValidationRun = ref<CalibrationValidationJobData>();
 
 const jobName = "Job Name";
@@ -508,10 +565,49 @@ watch(evaluationRunListCurrentPage, async () => {
   }
 });
 
+
 const refreshJobList = async () => {
   isLoading.value = true;
+  // changing filters clears previous selections
+  selectedCalibrationRuns.value = undefined;
   await fetchUserValidatedCalibrationJobsListData();
+  visibleCalibrationRuns.value = userEvaluationRunListData.value.map(job => job.calibration_run_id);
+  if (evaluationRunListTotalPages.value > 1) {
+    allCalibrationRuns.value = await fetchUserValidatedCalibrationJobsListDataIDsOnly();
+  } else {
+    allCalibrationRuns.value = visibleCalibrationRuns.value;
+  }
   isLoading.value = false;
+}
+
+const selectAllJobs = () => {
+  // select all jobs on ALL pages
+  selectedCalibrationRuns.value = userEvaluationRunListData.value;
+}
+
+const selectVisibleJobs = () => {
+  // select all jobs on current page only
+  selectedCalibrationRuns.value = userEvaluationRunListData.value;
+}
+
+const deselectAllJobs = () => {
+  selectedCalibrationRuns.value = undefined;
+}
+
+const bulkJobAction = async () => {
+  if (selectedCalibrationRunsList.value.length > 0) {
+    showHideMultOps.value = true;
+    // wait a tick for the multi-job menu to display so that it only shows the confirm button
+    nextTick(async () => {
+      if (multiJobRef.value) {
+        // ask the user to confirm the action - MultipleJobOperations will take care of the rest
+        multiJobRef.value.confirmAction(selectedBulkJobAction.value);
+      }
+    });
+  } else {
+    const tMsg: ToastMessageOptions = { severity: "error", summary: 'No Jobs Selected.', detail: 'A bulk action cannot be applied when no jobs are selected.', life: ToastTimeout.timeoutError };
+    toast.add(tMsg); addToastRecord(tMsg);
+  }
 }
 
 const updateGageList = async() => {
@@ -524,10 +620,32 @@ const binaryValueBodyTemplate = (rowData: any) => {
 };
 
 const onRowContextMenu = (event: any) => {
+  const clickedRow = event.data;
+
+  // Only select the clicked row for context menu purposes
+  contextMenuSelection.value = clickedRow;
+
+  // Preserve previous selection; don't overwrite selectedCalibrationRuns
+  // Optionally, if you want to auto-select the row if it wasn't already selected:
+  if (Array.isArray(selectedCalibrationRuns.value)) {
+    const alreadySelected = selectedCalibrationRuns.value.some(
+      row => row.calibration_run_id === clickedRow.calibration_run_id
+    );
+    if (!alreadySelected) {
+      selectedCalibrationRuns.value.push(clickedRow);
+    }
+  } else if (selectedCalibrationRuns.value && selectedCalibrationRuns.value !== clickedRow) {
+    selectedCalibrationRuns.value = [selectedCalibrationRuns.value,clickedRow];
+  } else {
+    selectedCalibrationRuns.value = [clickedRow];
+  }
+  
+  // Show context menu
+  crContextMenu.value.show(event.originalEvent);
+
   cmCalibrationRun.value = [];
   const crRowData = event.data as ValidatedCalibrationRunListItem;
-  if (selectedCalibrationRun && selectedCalibrationRun.value?.calibration_run_id === crRowData.calibration_run_id) {
-    crContextMenu.value.show(event.originalEvent);
+  if (selectedCalibrationRunIDs?.value?.length === 1 && selectedCalibrationRunIDs.value[0] === crRowData.calibration_run_id) {
     contextMenuJob.value = parseInt(event.originalEvent.currentTarget.children[0].textContent);
     if (crRowData.validation_runs > 1) {
       cmCalibrationRun.value.push({ label: 'Select Validation Run', icon: 'pi pi-search', command: () => viewSelectedCalibrationValidationRuns(crRowData.calibration_run_id) })
@@ -537,21 +655,22 @@ const onRowContextMenu = (event: any) => {
     }
     if (crRowData.validation_runs >= 1) {
       cmCalibrationRun.value.push({ label: 'Compare Permutations', icon: 'pi pi-arrows-h', command: () => viewSelectedGageCalibrationRuns(crRowData.calibration_run_id, crRowData.gage_id) });
-      if (!['Submitted','Running'].includes(selectedCalibrationRun?.value?.status) && !crRowData.modules?.some(item => item.toLowerCase() === 'lstm')) {
+      if (!['Submitted','Running'].includes(crRowData.status) && !crRowData.modules?.some(item => item.toLowerCase() === 'lstm')) {
         cmCalibrationRun.value.push({ label: 'New Validation Run', icon: 'pi pi-chevron-circle-right', command: () => viewSelectAlternateIteration(crRowData.calibration_run_id) });
       }
     }
     cmCalibrationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })
-    if (selectedCalibrationRun.value?.is_downloadable) {
+    if (crRowData.is_downloadable) {
       cmCalibrationRun.value.push({ label: 'Download Results', icon: 'pi pi-download', command: () => downloadSelectedCalibrationData() });
     }
     cmCalibrationRun.value.push({ label: 'Export Calibration Config', icon: 'pi pi-file-export', command: () => exportSelectedCalibrationData() });
-    if (!['Submitted','Running'].includes(selectedCalibrationRun?.value?.status) && !selectedCalibrationRun?.value?.is_locked) {
-      cmCalibrationRun.value.push({ label: 'Delete', icon: 'pi pi-trash', command: () => deleteSelectedCalibrationRun() });
-    }
-    if (!['Submitted','Running'].includes(selectedCalibrationRun?.value?.status) && !selectedCalibrationRun.value?.is_archived) {
-      cmCalibrationRun.value.push({ label: 'Archive', icon: 'pi pi-folder', command: () => archiveSelectedCalibrationRun(true) });
-    }
+  }
+  // multi-job actions
+  if (selectedCalibrationRuns.value.some(run =>
+    !['Submitted','Running'].includes(run.status) && !run.is_archived && !run.is_locked
+  )) {
+    cmCalibrationRun.value.push({ label: 'Delete', icon: 'pi pi-trash', command: () => changeSelectedCalibrationRunStatus(JobStatusAction.delete) });
+    cmCalibrationRun.value.push({ label: 'Archive', icon: 'pi pi-folder', command: () => changeSelectedCalibrationRunStatus(JobStatusAction.archive) });
   }
 };
 
@@ -773,20 +892,41 @@ const navigateToEvaluation = (event: any) => {
 }
 
 const returnCalibrationJobList = (event: any) => {
-  selectedCalibrationRun.value = selectedCalibrationValidationRun.value = undefined;
+  selectedCalibrationRuns.value = selectedCalibrationValidationRun.value = undefined;
   resetUserSelectedEvalValidationRun();
   uiCompareGageId.value = 'All';
   resetUserSelectedEvalCompareRun();
   clearUserCalibrationRunData();
 }
 
-const confirmDelete = useConfirm();
-const deleteSelectedCalibrationRun = () => {
-  const selectedRunId = contextMenuJob.value as number;
-  let confirmMessage = "Are you sure you want to delete this calibration run? All associated validation job will also be deleted."
-  confirmDelete.require({
+const confirmAction = useConfirm();
+const changeSelectedCalibrationRunStatus = (jobStatusAction: number) => {
+  let ty = "";
+  let label = "";
+  if (jobStatusAction === JobStatusAction.delete) {
+    ty = "Delete"
+    label = "DELETE"
+  } else if (jobStatusAction === JobStatusAction.archive) {
+    ty = "Archive"
+    label = "ARCHIVE"
+  }
+
+  if (selectedCalibrationRunIDs.value.length === 0) return;
+
+  let confirmMessage = "Are you sure you want to " + ty.toLowerCase() + " "
+  if (selectedCalibrationRunIDs.value.length > 10) {
+    confirmMessage += "the " + selectedCalibrationRunIDs.value.length + " selected calibration runs?";
+  } else if (selectedCalibrationRunIDs.value.length > 1) {
+    confirmMessage += "calibration runs " + selectedCalibrationRunsText.value + "?";
+  } else {
+    const selectedRunName = (selectedCalibrationRuns.value[0].job_name) ? " titled '" + selectedCalibrationRuns.value[0].job_name + "'" : " (untitled)";
+    confirmMessage += "calibration run " + selectedCalibrationRunIDs.value[0] + selectedRunName + "?";
+    if (selectedCalibrationRuns.value[0].status === "Running") confirmMessage += " The running calibration will be aborted."
+  }
+
+  confirmAction.require({
     message: confirmMessage,
-    header: 'Confirm Delete',
+    header: 'Confirm ' + ty,
     icon: 'pi pi-exclamation-triangle',
     rejectProps: {
       label: 'Cancel',
@@ -794,57 +934,122 @@ const deleteSelectedCalibrationRun = () => {
       outlined: true
     },
     acceptProps: {
-      label: 'DELETE RUN',
+      label: label
     },
-    accept: () => acceptDelete(selectedRunId),
+    accept: () => {
+      if (jobStatusAction === JobStatusAction.delete) {
+        acceptMultipleDelete();
+      }
+      else if (jobStatusAction === JobStatusAction.archive) {
+        acceptMultipleArchive(true);
+      }
+    },
     reject: () => {
       //do nothing
     }
   })
 }
-const acceptDelete = (selectedRunId: number) => {
-  deleteCalibrationRun(selectedRunId).then(response => {
+
+/**
+ * Accept the deletion of one or more jobs
+ */
+const acceptMultipleDelete = () => {
+  isLoading.value = true;
+  const sortedNumbers = formatMultJobNumbers([...selectedCalibrationRunIDs.value].sort((a, b) => a - b));
+  // keep track of whether we're archiving the entire list
+  let deleteAllJobs = selectedCalibrationRunsList.value.length === evaluationRunListTotalSize.value;
+  deleteCalibrationRun(selectedCalibrationRunIDs.value).then(async (response) => {
     if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
       toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: 'Delete Job', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
+      response._data?.summaries.forEach(summary => {
+        const tMsg: ToastMessageOptions = { severity: summary.message_type, 
+          summary: 'Delete Job' + (selectedCalibrationRunIDs.value.length > 1 ? 's' : ''), 
+          detail: summary.message, 
+          life: 
+            summary.message_type === 'error' ? ToastTimeout.timeoutError :
+            summary.message_type === 'warn' ? ToastTimeout.timeoutWarn :
+            ToastTimeout.timeoutSuccess
+        };
         toast.add(tMsg); addToastRecord(tMsg);
+      })
+      if (jobFilterRef.value && deleteAllJobs) {
+        // if we just deleted the entire list, clear filters and inform the user
+        jobFilterRef.value.resetFilters();
+        const tMsg: ToastMessageOptions = { 
+          severity: "info", 
+          summary: 'All Jobs Deleted', 
+          detail: 'All jobs in your filtered list were deleted. Resetting filters to show your remaining jobs.', 
+          life: ToastTimeout.timeoutInfo 
+        };
+        toast.add(tMsg); addToastRecord(tMsg);
+      } else {
+        refreshJobList();
       }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: 'Delete Job', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      } 
-      fetchUserValidatedCalibrationJobsListData();
-      resetUserSelectedEvalValidationRun();
+      isLoading.value = false;
     } else {
       useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Delete Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
+        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Delete Calibration Jobs Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
         toast.add(tMsg); addToastRecord(tMsg);
       });
+      isLoading.value = false;
     }
   });
-  //selectedCalibrationRun.value = undefined;
+  selectedCalibrationRuns.value = undefined;
+  selectedBulkJobAction.value = 0;
+}
 
+/**
+ * Accept archiving of one or more jobs
+ */
+const acceptMultipleArchive = (archiveJob: boolean) => {
+  isLoading.value = true;
+  const sortedNumbers = formatMultJobNumbers([...selectedCalibrationRunIDs.value].sort((a, b) => a - b));
+  // keep track of whether we're archiving the entire list
+  let archiveAllJobs = selectedCalibrationRunsList.value.length === evaluationRunListTotalSize.value && archiveJob;
+  archiveCalibrationRun(selectedCalibrationRunIDs.value, archiveJob).then(async (response) => {
+    if (response.status === 200) {
+      toast.removeAllGroups();
+      response._data?.summaries.forEach(summary => {
+        const tMsg: ToastMessageOptions = { severity: summary.message_type, 
+          summary: (archiveJob ? 'Archive' : 'Un-Archive') + ' Job' + (selectedCalibrationRunIDs.value.length > 1 ? 's' : ''), 
+          detail: summary.message, 
+          life: 
+            summary.message_type === 'error' ? ToastTimeout.timeoutError :
+            summary.message_type === 'warn' ? ToastTimeout.timeoutWarn :
+            ToastTimeout.timeoutSuccess
+        };
+        toast.add(tMsg); addToastRecord(tMsg);
+      })
+      if (archiveAllJobs && !includeArchivedJobs.value) 
+      {
+        // if we just archived the entire list and we're not showing archived jobs, inform the user
+        const tMsg: ToastMessageOptions = { 
+          severity: "info", 
+          summary: 'All Jobs Archived', 
+          detail: 'All jobs in your filtered list were archived. Click "Include Archived" to see them.', 
+          life: ToastTimeout.timeoutInfo 
+        };
+        toast.add(tMsg); addToastRecord(tMsg);
+      }
+      refreshJobList();
+      isLoading.value = false;
+    } else {
+      useApiErrorResponsePreprocess(response).forEach(message => {
+        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: (archiveJob ? 'Archive' : 'Un-Archive') + ' Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
+        toast.add(tMsg); addToastRecord(tMsg);
+      });
+      isLoading.value = false;
+    }
+  });
+  selectedCalibrationRuns.value = undefined;
+  selectedBulkJobAction.value = 0;
 }
 
 /**
  * Export user's calibration job configuration data to a JSON file
  */
 const exportSelectedCalibrationData = async () => {
-  const selectedRunId = selectedCalibrationRun.value.calibration_run_id;
+  const selectedRunId = selectedCalibrationRunIDs.value[0];
   isLoading.value = true;
   const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Export Calibration Config', detail: 'Request to export Calibration Job ID ' + selectedRunId + ' has been processed.', life: ToastTimeout.timeoutInfo };
   toast.add(tMsg); addToastRecord(tMsg);
@@ -863,8 +1068,8 @@ const exportSelectedCalibrationData = async () => {
  * Download all files in user's calibration job folder to a zip file
  */
 const downloadSelectedCalibrationData = async () => {
-  const selectedRunId = selectedCalibrationRun.value.calibration_run_id;
-  if (selectedCalibrationRun.value.is_downloadable) {
+  const selectedRunId = selectedCalibrationRunIDs.value[0];
+  if (selectedCalibrationRuns.value[0].is_downloadable) {
     //isLoading.value = true;
     const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Downloading Zip File for Calibration Job ID ' + selectedRunId, detail: 'Generating zip file. You may continue other ngenCERF activities and the file will be saved when ready.', life: ToastTimeout.timeoutInfo };
     toast.add(tMsg); addToastRecord(tMsg);
@@ -895,64 +1100,6 @@ watch(calibrationDownloadJobID, () => {
   }
 });
 
-const confirmArchive = useConfirm();
-const archiveSelectedCalibrationRun = () => {
-  const selectedRunId = contextMenuJob.value as number;
-  let confirmMessage = "Are you sure you want to Archive this calibration run? Unarchiving must be done from the Calibration workflow."
-  confirmArchive.require({
-    message: confirmMessage,
-    header: 'Confirm Archive',
-    icon: 'pi pi-exclamation-triangle',
-    rejectProps: {
-      label: 'Cancel',
-      severity: 'secondary',
-      outlined: true
-    },
-    acceptProps: {
-      label: "ARCHIVE RUN",
-    },
-    accept: () => acceptArchive(selectedRunId),
-    reject: () => {
-      //do nothing
-    }
-  })
-}
-const acceptArchive = (selectedRunId: number) => {
-  archiveCalibrationRun(selectedRunId, true).then(async (response) => {
-    if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
-      toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: 'Archive Job', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: 'Archive Job', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      refreshJobList();
-    } else {
-      useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Archive Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
-        toast.add(tMsg); addToastRecord(tMsg);
-      });
-    }
-  });
-  selectedCalibrationRun.value = undefined;
-}
-
 const toggleMessagesGroup = () => {
   if (showMessagesGroup.value) {
     showMessagesGroup.value = false;
@@ -967,6 +1114,10 @@ const rowStyle = (data: any) => {
     return { backgroundColor: 'white' }
   }
 }
+
+onBeforeUnmount(() => {
+  selectedCalibrationRuns.value = undefined;
+});
 </script>
 
 <style lang="scss" scoped>

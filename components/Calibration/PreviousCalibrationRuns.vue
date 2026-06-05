@@ -495,8 +495,8 @@ const showBulkActions = computed(() => {
   // let JobFilterDialogue know based on our job list what bulk actions to allow
   // always include the placeholder option
   let actionValues = [0];
-  if (userCalibrationJobsListData.value.some(run => run.is_archived === false)) {
-    // only allow delete and archive if there are unarchived jobs
+  if (userCalibrationJobsListData.value.some(run => run.is_archived === false && run.is_locked === false)) {
+    // only allow delete and archive if there are unarchived, unlocked jobs
     actionValues.push(1);
     actionValues.push(2);
   }
