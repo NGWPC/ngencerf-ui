@@ -9,7 +9,7 @@
     </div>
   </Transition>
   <client-only>
-    <div class="pr-2">
+    <div class="pr-2 text-center">
       <div class="flex mt-2">
         <div class="w-full">
           <h1 class="pt-3 mb-8 text-3xl font-bold text-center">
@@ -28,6 +28,9 @@
             :totalSize="calibrationRunsForHindcastListTotalSize" :totalPages="calibrationRunsForHindcastListTotalPages"
             v-model:currentPage="calibrationRunsForHindcastListCurrentPage"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
+            :showBulkActions="showBulkActions" v-model:selected-jobs="selectedCalibrationRuns" 
+            :all-job-ids="allCalibrationRunIds" :visible-job-ids="visibleCalibrationRunIds"
+            :delete-jobs="deleteCalibrationRun" :archive-jobs="archiveCalibrationRun" :lock-jobs="lockCalibrationRun"
             @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
           <ConfirmDialog></ConfirmDialog>
@@ -45,11 +48,12 @@
           </div>
 
           <DataTable id="CalibrationRunForHindcastTable" :value="calibrationRunsForHindcast" 
-            scrollable scroll-height="400px" table-style="min-width: 50rem"
+            scrollable scroll-height="400px" :rowStyle="rowStyle" table-style="min-width: 50rem"
             v-model:sortField="calibrationRunsForHindcastListSort.field" v-model:sortOrder="calibrationRunsForHindcastListSort.direction"
-            v-model:selection="calibrationRunForHindcast" selectionMode="single" :rowStyle="rowStyle"
-            @rowSelect="oncalibrationRunForHindcastRowSelect" @rowUnselect="oncalibrationRunForHindcastRowUnSelect"
-            @rowContextmenu="onRowContextMenu" class="boxed">
+            v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="true" 
+            v-model:contextMenuSelection="contextMenuSelection" contextMenu @rowContextmenu="onRowContextMenu"
+            @rowSelect="onCalibrationRunForHindcastRowSelect" @rowUnselect="onCalibrationRunForHindcastRowUnSelect"
+            dataKey="calibration_run_id" class="boxed">
             <Column :pt="ptColumn" field="calibration_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -222,12 +226,20 @@ import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
 import { hilightTab } from '@/composables/TabHilight';
 import { HindcastTabs } from "@/composables/NgencerfEnums";
 
-const { deleteCalibrationRun, archiveCalibrationRun, exportJob, getCalibrationJobZip } = useCalibrationJobStore();
+const { 
+  deleteCalibrationRun, 
+  archiveCalibrationRun, 
+  lockCalibrationRun,
+  exportJob, 
+  getCalibrationJobZip 
+} = useCalibrationJobStore();
 
 const { addToastRecord } = generalStore();
 
 const evaluationCalibrationRunStore = useEvaluationCalibrationRunStore();
 const showMessagesGroup = ref<boolean>(false);
+
+const jobFilterRef = ref(null);
 
 const ptColumn = ref({
   columnHeaderContent: { style: { "justify-content": "center" } },
@@ -249,6 +261,7 @@ const {
 } = storeToRefs(HindcastStore);
 const { 
   getCalibrationJobsForHindcast, 
+  fetchCalibrationJobsForHindcastIdsOnly,
   resetUserSelectedHindcastCalibrationRun, 
   hardResetHindcastStore,
   resetFilters,
@@ -267,24 +280,53 @@ const { calibrationDownloadJobID } = storeToRefs(useCalibrationJobStore());
 
 const cmCalibrationRun = ref<DataTableContextMenuOption[]>([]);
 const onRowContextMenu = (event: any) => {
+  const clickedRow = event.data;
+
+  // Only select the clicked row for context menu purposes
+  contextMenuSelection.value = clickedRow;
+
+  // Preserve previous selection; don't overwrite selectedCalibrationRuns
+  // Optionally, if you want to auto-select the row if it wasn't already selected:
+  if (Array.isArray(selectedCalibrationRuns.value)) {
+    const alreadySelected = selectedCalibrationRuns.value.some(
+      row => row.calibration_run_id === clickedRow.calibration_run_id
+    );
+    if (!alreadySelected) {
+      selectedCalibrationRuns.value.push(clickedRow);
+    }
+  } else if (selectedCalibrationRuns.value && selectedCalibrationRuns.value !== clickedRow) {
+    selectedCalibrationRuns.value = [selectedCalibrationRuns.value,clickedRow];
+  } else {
+    selectedCalibrationRuns.value = [clickedRow];
+  }
+  
+  // Show context menu
+  crContextMenu.value.show(event.originalEvent);
+
   cmCalibrationRun.value = [];
-  const crRowData = event.data as calibrationRunForHindcast;
+  const crRowData = event.data as CalibrationRunForHindcast;
+
+  // only set calibrationRunForHindcast if we have a single row selected
+  calibrationRunForHindcast.value = selectedCalibrationRuns.value.length === 1 ? selectedCalibrationRuns.value[0] : undefined; 
   if (calibrationRunForHindcast && calibrationRunForHindcast.value?.calibration_run_id === crRowData.calibration_run_id) {
-    crContextMenu.value.show(event.originalEvent);
-    //hindcastJobId.value = parseInt(event.originalEvent.currentTarget.children[0].textContent);
-    setSelectedCalibrationRunId(parseInt(event.originalEvent.currentTarget.children[0].textContent));
+    setSelectedCalibrationRunId(crRowData.calibration_run_id);
     cmCalibrationRun.value.push({ label: 'Run New Hindcast', icon: 'pi pi-chevron-circle-right', command: () => navigateToSetupHindcast() });
     cmCalibrationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })
     if (calibrationRunForHindcast.value?.is_downloadable) {
       cmCalibrationRun.value.push({ label: 'Download Results', icon: 'pi pi-download', command: () => downloadSelectedCalibrationData() });
     }
     cmCalibrationRun.value.push({ label: 'Export Calibration Config', icon: 'pi pi-file-export', command: () => exportSelectedCalibrationData() });
-    if (!calibrationRunForHindcast?.value?.status.includes('Submitted') && !calibrationRunForHindcast?.value?.status.includes('Running') && !calibrationRunForHindcast?.value?.is_locked) {
-      cmCalibrationRun.value.push({ label: 'Delete', icon: 'pi pi-trash', command: () => deleteSelectedCalibrationRun() });
-    }
-    if (!calibrationRunForHindcast?.value?.status.includes('Submitted') && !calibrationRunForHindcast?.value?.status.includes('Running') && !calibrationRunForHindcast.value?.is_archived) {
-      cmCalibrationRun.value.push({ label: 'Archive', icon: 'pi pi-folder', command: () => archiveSelectedCalibrationRun(true) });
-    }
+  }
+  // multi-job actions
+  if (selectedCalibrationRuns.value.some(run =>
+    !['Submitted','Running'].includes(run.status) && !run.is_archived && !run.is_locked
+  )) {
+    cmCalibrationRun.value.push({ label: 'Delete', icon: 'pi pi-trash', command: () => jobFilterRef.value.changeSelectedJobStatus(JobStatusAction.delete) });
+    cmCalibrationRun.value.push({ label: 'Archive', icon: 'pi pi-folder', command: () => jobFilterRef.value.changeSelectedJobStatus(JobStatusAction.archive) });
+    cmCalibrationRun.value.push({ label: 'Lock', icon: 'pi pi-lock', command: () => jobFilterRef.value.changeSelectedJobStatus(JobStatusAction.lock) });
+  }
+  if (selectedCalibrationRuns.value.some(run => run.is_locked )) {
+    cmCalibrationRun.value.push({ label: 'Unlock', icon: 'pi pi-unlock', command: () => jobFilterRef.value.changeSelectedJobStatus(JobStatusAction.unlock) });
   }
 };
 
@@ -306,6 +348,33 @@ const { userCalibrationRunData, uiGageList } = storeToRefs(useUserDataStore());
 const { calibrationRunsForHindcast, calibrationRunForHindcast, hindcastRunGageList } = storeToRefs(useHindcastStore());
 
 const { setSelectedCalibrationRunId, resetSelectedCalibrationRunId, fetchHindcastGageList } = useHindcastStore();
+
+const selectedCalibrationRuns = ref<CalibrationRunForHindcast[]>();
+const contextMenuSelection = ref(null);
+
+const allCalibrationRunIds = ref<number[]>([]);
+const visibleCalibrationRunIds = ref<number[]>([]);
+
+const showBulkActions = computed(() => {
+  // let JobFilterDialogue know based on our job list what bulk actions to allow
+  // always include the placeholder option
+  let actionValues = [0];
+  if (calibrationRunsForHindcast.value.some(run => run.is_archived === false && run.is_locked === false)) {
+    // only allow delete and archive if there are unarchived, unlocked jobs
+    actionValues.push(1);
+    actionValues.push(2);
+  }
+  // un-archive is not allowed here since we do not show archived jobs
+  if (calibrationRunsForHindcast.value.some(run => run.is_locked === false && run.is_archived === false)) {
+    // only allow lock if there are unlocked jobs that are not archived
+    actionValues.push(4);
+  }
+  if (calibrationRunsForHindcast.value.some(run => run.is_locked === true)) {
+    // only allow unlock if there are locked jobs
+    actionValues.push(5);
+  }
+  return actionValues;
+});
 
 onMounted(async () => {
   isLoading.value = true;
@@ -329,6 +398,12 @@ onMounted(async () => {
     resetUserSelectedHindcastCalibrationRun();
     await getCalibrationJobsForHindcast();
     updateGageList();
+    visibleCalibrationRunIds.value = calibrationRunsForHindcast.value.map(job => job.calibration_run_id);
+    if (calibrationRunsForHindcastListTotalPages.value > 1) {
+      allCalibrationRunIds.value = await fetchCalibrationJobsForHindcastIdsOnly();
+    } else {
+      allCalibrationRunIds.value = visibleCalibrationRunIds.value;
+    }
     isLoading.value = false;
   });
 });
@@ -355,6 +430,12 @@ watch(calibrationRunsForHindcastListCurrentPage, () => {
 const refreshJobList = async () => {
   isLoading.value = true;
   await getCalibrationJobsForHindcast();
+  visibleCalibrationRunIds.value = calibrationRunsForHindcast.value.map(job => job.calibration_run_id);
+  if (calibrationRunsForHindcastListTotalPages.value > 1) {
+    allCalibrationRunIds.value = await fetchCalibrationJobsForHindcastIdsOnly();
+  } else {
+    allCalibrationRunIds.value = visibleCalibrationRunIds.value;
+  }
   isLoading.value = false;
 }
 
@@ -367,7 +448,7 @@ const viewCalibrationDetails = async (calibration_run_id: number) => {
   })
 }
 
-const oncalibrationRunForHindcastRowSelect = async (event: any) => {
+const onCalibrationRunForHindcastRowSelect = async (event: any) => {
   //isLoading.value = true;
   const rowData = event.data as calibrationRunForHindcast;
   setSelectedCalibrationRunId(rowData.calibration_run_id);
@@ -377,7 +458,7 @@ const oncalibrationRunForHindcastRowSelect = async (event: any) => {
   //isLoading.value = false;
 }
 
-const oncalibrationRunForHindcastRowUnSelect = async (event: DataTableRowClickEvent) => {
+const onCalibrationRunForHindcastRowUnSelect = async (event: DataTableRowClickEvent) => {
   //hindcastJobId.value = 0;
   resetSelectedCalibrationRunId();
 }
@@ -411,124 +492,6 @@ const rowStyle = (data: any) => {
   if (!['Saved', 'Ready'].includes(data.status)) {
     return { backgroundColor: 'white' }
   }
-}
-
-const confirmDelete = useConfirm();
-
-const deleteSelectedCalibrationRun = () => {
-  const selectedRunId = calibrationRunForHindcast.value?.calibration_run_id as number;
-  let confirmMessage = "Are you sure you want to delete this run?"
-  confirmDelete.require({
-    message: confirmMessage,
-    header: 'Confirm Delete',
-    icon: 'pi pi-exclamation-triangle',
-    rejectProps: {
-      label: 'Cancel',
-      severity: 'secondary',
-      outlined: true
-    },
-    acceptProps: {
-      label: 'DELETE RUN',
-    },
-    accept: () => acceptDelete(selectedRunId),
-    reject: () => {
-      //do nothing
-    }
-  })
-};
-
-const acceptDelete = (selectedRunId: number) => {
-  deleteCalibrationRun(selectedRunId).then(response => {
-    if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
-      toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: 'Delete Job', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: 'Delete Job', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      } 
-      getCalibrationJobsForHindcast();
-    } else {
-      useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Delete Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
-        toast.add(tMsg); addToastRecord(tMsg);
-      });
-    }
-  });
-  calibrationRunForHindcast.value = undefined;
-};
-
-const confirmArchive = useConfirm();
-const archiveSelectedCalibrationRun = () => {
-  const selectedRunId = calibrationRunForHindcast.value?.calibration_run_id as number;
-  let confirmMessage = "Are you sure you want to Archive this calibration run? Unarchiving must be done from the Calibration workflow."
-  confirmArchive.require({
-    message: confirmMessage,
-    header: 'Confirm Archive',
-    icon: 'pi pi-exclamation-triangle',
-    rejectProps: {
-      label: 'Cancel',
-      severity: 'secondary',
-      outlined: true
-    },
-    acceptProps: {
-      label: "ARCHIVE RUN",
-    },
-    accept: () => acceptArchive(selectedRunId),
-    reject: () => {
-      //do nothing
-    }
-  })
-}
-const acceptArchive = (selectedRunId: number) => {
-  archiveCalibrationRun(selectedRunId, true).then(async (response) => {
-    if (response.status === 200) {
-      let successMessages: string[] = [];
-      let failureMessages: string[] = [];
-      response._data?.jobs.forEach(job => {
-        if (job.success) {
-          successMessages.push(job.message);
-        } else {
-          failureMessages.push(job.message);
-        }
-      });
-      toast.removeAllGroups();
-      if (successMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'success', 
-          summary: 'Archive Job', detail: successMessages.join('\n'), 
-          life: ToastTimeout.timeoutSuccess};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      if (failureMessages.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'error', 
-          summary: 'Archive Job', detail: failureMessages.join('\n'), 
-          life: ToastTimeout.timeoutError};
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-      getCalibrationJobsForHindcast();
-    } else {
-      useApiErrorResponsePreprocess(response).forEach(message => {
-        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Archive Calibration Job Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
-        toast.add(tMsg); addToastRecord(tMsg);
-      });
-    }
-  });
-  selectedCalibrationRun.value = undefined;
 }
 
 /**

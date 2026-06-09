@@ -338,7 +338,6 @@ const bulkJobActionsListDisplay = computed(() => {
     });
   }
   // otherwise, allow all bulk actions
-  console.log('bulkJobActionsList:',bulkJobActionsList);
   return bulkJobActionsList;
 })
 

@@ -1,7 +1,7 @@
 // @ts-check
 import { defineStore, storeToRefs } from "pinia";
 
-import type { SelectOption, CalibrationValidationRunData, ValidatedevaluationRunList, CalibrationValidationJobList, CalibrationRunValidationParameterData } from "@/composables/NgencerfModels";
+import type { SelectOption, CalibrationValidationRunData, ValidatedEvaluationRunList, CalibrationValidationJobList, CalibrationRunValidationParameterData } from "@/composables/NgencerfModels";
 
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 import { generalStore } from "@/stores/common/GeneralStore";
@@ -152,7 +152,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
         include_archived: includeArchivedJobs.value
       }
     }
-    const runListDataResult = await makeProtectedApiCall<ValidatedevaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
+    const runListDataResult = await makeProtectedApiCall<ValidatedEvaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${getAccessToken()}`,
@@ -219,12 +219,6 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
   async function fetchUserValidatedCalibrationJobsListDataIdsOnly() {
     // apply user's filters without paging, since we want the entire list
     let requestBody = {
-      limit: evaluationRunListPageSize.value,
-      offset: (evaluationRunListCurrentPage.value - 1) * evaluationRunListPageSize.value,
-      sort: {
-        field: evaluationRunListSort.value.field,
-        direction: evaluationRunListSort.value.direction === -1 ? 'desc' : 'asc'
-      },
       filters: {
         domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
         gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
@@ -260,9 +254,10 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
         ,
         status: statusTypeFilterList.value,
         include_archived: includeArchivedJobs.value
-      }
+      },
+      ids_only: true
     }
-    const runListDataResult = await makeProtectedApiCall<ValidatedevaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
+    const runListDataResult = await makeProtectedApiCall<ValidatedEvaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${getAccessToken()}`,
@@ -288,7 +283,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
         gage_id: uiCompareGageId.value && uiCompareGageId.value !== "All" ? uiCompareGageId.value: "",
       }
     }
-    const runListDataResult = await makeProtectedApiCall<ValidatedevaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
+    const runListDataResult = await makeProtectedApiCall<ValidatedEvaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${getAccessToken()}`,

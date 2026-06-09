@@ -356,7 +356,6 @@ const cmCompareRun = ref<DataTableContextMenuOption[]>([]);
 const userDataStore = useUserDataStore();
 const evaluationCalibrationRunStore = useEvaluationCalibrationRunStore();
 
-const multiJobRef = ref(null);
 const jobFilterRef = ref(null);
 
 const ptColumn = ref({
@@ -436,12 +435,6 @@ const contextMenuSelection = ref(null);
 const allCalibrationRunIds = ref<number[]>([]);
 const visibleCalibrationRunIds = ref<number[]>([]);
 
-const showMultiOps = ref<boolean>(false);
-
-const disableFilters = computed(() => {
-  return showMultiOps.value;
-});
-
 const showBulkActions = computed(() => {
   // let JobFilterDialogue know based on our job list what bulk actions to allow
   // always include the placeholder option
@@ -481,6 +474,13 @@ onMounted(async() => {
 
   await fetchUserValidatedCalibrationJobsListData();
   updateGageList();
+
+  visibleCalibrationRunIds.value = userEvaluationRunListData.value.map(job => job.calibration_run_id);
+  if (evaluationRunListTotalPages.value > 1) {
+    allCalibrationRunIds.value = await fetchUserValidatedCalibrationJobsListDataIdsOnly();
+  } else {
+    allCalibrationRunIds.value = visibleCalibrationRunIds.value;
+  }
 
   if(gotoCalibrationRunId.value) {
     userSelectedEvalCalibrationRunId.value = gotoCalibrationRunId.value;
