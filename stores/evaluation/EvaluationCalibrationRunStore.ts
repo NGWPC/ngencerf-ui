@@ -216,7 +216,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
    * fetch list of calibration job IDs only (for bulk actions)
    * @return {void}
    */
-  async function fetchUserValidatedCalibrationJobsListDataIDsOnly() {
+  async function fetchUserValidatedCalibrationJobsListDataIdsOnly() {
     // apply user's filters without paging, since we want the entire list
     let requestBody = {
       limit: evaluationRunListPageSize.value,
@@ -546,7 +546,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
     setSelectedCalibrationRunId,
     loadSelectedCalibrationRun,
     fetchUserValidatedCalibrationJobsListData,
-    fetchUserValidatedCalibrationJobsListDataIDsOnly,
+    fetchUserValidatedCalibrationJobsListDataIdsOnly,
     fetchUserValidatedCalibrationJobsListDataForComparison,
     queryGetPlotNamesForComparison,
     queryGetPlotsForComparison,

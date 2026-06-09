@@ -370,7 +370,7 @@ export const useUserDataStore = defineStore(
      * fetch list of calibration job IDs only (for bulk actions)
      * @return {void}
      */
-    async function fetchUserCalibrationJobsListIDsOnly() {
+    async function fetchUserCalibrationJobsListIdsOnly() {
       // apply user's filters without paging, since we want the entire list
       let requestBody = {
         filters: {
@@ -411,7 +411,7 @@ export const useUserDataStore = defineStore(
         },
         ids_only: true
       }
-      const jobsListIDsResult =
+      const jobsListIdsResult =
         await makeProtectedApiCall<CalibrationJobsList>(
           `${ngencerfBaseUrl}/calibration/get_calibration_jobs/`,
           {
@@ -424,7 +424,7 @@ export const useUserDataStore = defineStore(
           }
         );
 
-      return jobsListIDsResult?._data?.jobs ?? [];
+      return jobsListIdsResult?._data?.jobs ?? [];
     }
 
     /**
@@ -643,7 +643,7 @@ export const useUserDataStore = defineStore(
       getRefreshToken,
       fetchUserCalibrationJobCounts,
       fetchUserCalibrationJobsListData,
-      fetchUserCalibrationJobsListIDsOnly,
+      fetchUserCalibrationJobsListIdsOnly,
       fetchGageList,
       getValidationJobs,
       queryUserCalibrationRunData,
