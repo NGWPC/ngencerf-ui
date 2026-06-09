@@ -49,7 +49,7 @@
             v-model:sortField="calibrationRunsForForecastListSort.field" v-model:sortOrder="calibrationRunsForForecastListSort.direction"
             v-model:selection="calibrationRunForForecast" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onCalibrationRunForForecastRowSelect" @rowUnselect="onCalibrationRunForForecastRowUnSelect"
-            @rowContextmenu="onRowContextMenu" class="boxed">
+            @rowContextmenu="onRowContextMenu" @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="calibration_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -226,6 +226,13 @@ const { deleteCalibrationRun, archiveCalibrationRun, exportJob, getCalibrationJo
 
 const { addToastRecord } = generalStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const evaluationCalibrationRunStore = useEvaluationCalibrationRunStore();
 const showMessagesGroup = ref<boolean>(false);
 
@@ -262,7 +269,7 @@ const crContextMenu = ref(); //calibration run context menu
 //this model is for highlighting purpose
 const selectedCalibrationRun = ref<CalibrationRunForForecast>();
 
-const { isLoading } = storeToRefs(generalStore());
+const { isLoading, calibrationJobId } = storeToRefs(generalStore());
 const { calibrationDownloadJobID } = storeToRefs(useCalibrationJobStore());
 
 const cmCalibrationRun = ref<DataTableContextMenuOption[]>([]);
@@ -273,7 +280,7 @@ const onRowContextMenu = (event: any) => {
     crContextMenu.value.show(event.originalEvent);
     //forecastJobId.value = parseInt(event.originalEvent.currentTarget.children[0].textContent);
     setSelectedCalibrationRunId(parseInt(event.originalEvent.currentTarget.children[0].textContent));
-    cmCalibrationRun.value.push({ label: 'Run New Forecast', icon: 'pi pi-chevron-circle-right', command: () => navigateToSetupForecast() });
+    cmCalibrationRun.value.push({ label: 'Run New Forecast', icon: 'pi pi-chevron-circle-right', command: () => goToSetupForecast() });
     cmCalibrationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })
     if (calibrationRunForForecast.value?.is_downloadable) {
       cmCalibrationRun.value.push({ label: 'Download Results', icon: 'pi pi-download', command: () => downloadSelectedCalibrationData() });
@@ -287,6 +294,10 @@ const onRowContextMenu = (event: any) => {
     }
   }
 };
+
+const onRowDblClick = (event: any) => {
+  goToSetupForecast(event);
+}
 
 const {
   loadCalibrationDataComplete,
@@ -391,15 +402,15 @@ watch(() => userCalibrationRunData.value, (updatedRunData, initialRunData) => {
   }
 });
 
-const navigateToSetupForecast = async () => {
+const goToSetupForecast = async (event: any=null) => {
+  if (event) {
+    calibrationRunForForecast.value = event.data;
+    setSelectedCalibrationRunId(event.data.calibration_run_id);
+  }
   if (calibrationRunForForecast?.value?.calibration_run_id && calibrationRunForForecast.value.calibration_run_id > 0) {
     forecastJobId.value = undefined;
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Setup Forecast Tab"]');
-    if (e) {
-      e.click();
-    } else {
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: 'Setup Forecast Tab not found', life: ToastTimeout.timeoutError};
-      toast.add(tMsg); addToastRecord(tMsg);
+    if (props.callGoToTab) {
+      props.callGoToTab(3);
     }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Calibration Job', detail: 'Please select a calibration job first.', life: ToastTimeout.timeoutWarn };

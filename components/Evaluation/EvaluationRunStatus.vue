@@ -115,6 +115,8 @@
       </div>
     </div>
 
+    <DynamicDialog />
+
     <!-- DISPLAY LOGS -->
     <div v-if="iterationValidationRunId && validationStatus" class="pl-6 pt-4">
       <label for="DisplayOptions" class="pr-2 pt-3">Display </label>
@@ -147,11 +149,22 @@ import { useLogStore } from '@/stores/common/LogStore';
 
 import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
 import { hilightTab } from '@/composables/TabHilight';
+import { useDialog } from 'primevue/usedialog';
 
 const toast = useToast();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const runButtonDisabled = ref<boolean>(true);
 const cancelButtonDisabled = ref<boolean>(true);
+
+const dialog = useDialog();
+const nextPrevDialogOpened = ref<boolean>(false);
 
 const { evaluateValidationRunId, evaluateIterationRunId } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
@@ -286,14 +299,29 @@ const cancelRun = async () => {
 
 const navigateToEvaluation = (event: any) => {
   if (evaluateValidationRunId.value > 0) {
-    const tabs = document.getElementsByClassName("tabs");
-    const e = <HTMLElement>tabs[EvaluationTabs.tab_evaluate];
-    e.click();
+    if (props.callGoToTab) {
+      props.callGoToTab(2);
+    }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Missing Validation Job', detail: 'Please select a validation job first.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
   }
 }
+
+const validateTab = (tabNumber?: number) => {
+  let error = false;
+  let text = [];
+  // assume they've run the job if Run button is disabled
+  if (!runButtonDisabled.value) {
+    error = true;
+    text.push("Are you sure you want to leave without running this Validation? It will not be saved.");
+  }
+  return { error: error, text: text }
+}
+
+defineExpose({
+  validateTab
+});
 
 onUnmounted(() => {
   isMounted.value = false;

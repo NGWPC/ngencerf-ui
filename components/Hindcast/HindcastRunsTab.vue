@@ -47,7 +47,7 @@
             v-model:sortField="hindcastRunListSort.field" v-model:sortOrder="hindcastRunListSort.direction"
             v-model:selection="selectedHindcastJob" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onHindcastRowSelect" @rowUnselect="onHindcastRowUnSelect" @rowContextmenu="onRowContextMenu"
-            class="boxed">
+            @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="hindcast_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -236,6 +236,13 @@ const crContextMenu = ref(); //calibration run context menu
 
 const { addToastRecord } = generalStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 // watch for sort order change - reset current page to 1
 watch(hindcastRunListSort, async() => {
   hindcastRunListCurrentPage.value = 1;
@@ -264,12 +271,12 @@ const onRowContextMenu = (event: any) => {
   if (selectedHindcastJob && selectedHindcastJob.value?.hindcast_run_id === crRowData.hindcast_run_id) {
     crContextMenu.value.show(event.originalEvent);
     setSelectedHindcastRunId(parseInt(event.originalEvent.currentTarget.children[0].textContent));
-    cmHindcastRun.value.push({ label: 'View Status', icon: 'pi pi-gauge', command: () => navigateToHindcastRunStatus() });
+    cmHindcastRun.value.push({ label: 'View Status', icon: 'pi pi-gauge', command: () => goToHindcastRunStatus() });
     if (crRowData.hindcast_status === 'Done') {
-      cmHindcastRun.value.push({ label: 'View Results', icon: 'pi pi-chart-line', command: () => navigateToHindcastResults() });
+      cmHindcastRun.value.push({ label: 'View Results', icon: 'pi pi-chart-line', command: () => goToHindcastResults() });
     }
     if (crRowData.calibration_run_id) {
-      cmHindcastRun.value.push({ label: 'Run New Hindcast', icon: 'pi pi-chevron-circle-right', command: () => navigateToSetupHindcast() });
+      cmHindcastRun.value.push({ label: 'Run New Hindcast', icon: 'pi pi-chevron-circle-right', command: () => goToSetupHindcast() });
       if (crRowData.hindcast_status === 'Done') {
         cmHindcastRun.value.push({ label: 'Run New Verification', icon: 'pi pi-bars', command: () => createNewVerification() });
       }
@@ -282,6 +289,10 @@ const onRowContextMenu = (event: any) => {
 };
 
 const isMounted = ref(false);
+
+const onRowDblClick = (event: any) => {
+  goToHindcastRunStatus(event);
+}
 
 onMounted(async () => {
   isLoading.value = true;
@@ -341,58 +352,51 @@ const viewCalibrationDetails = async (calibration_run_id: number) => {
   })
 }
 
-const navigateToSetupHindcast = (new_hindcast: boolean=true) => {
+const goToSetupHindcast = (new_hindcast: boolean=true) => {
   isLoading.value = true;
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Setup Hindcast Tab"]');
-
-    if (e) {
-      // set userCalibrationRunData
-      await loadSelectedCalibrationRun(selectedHindcastJob?.value?.calibration_run_id as number);
-      if (new_hindcast) {
-        calibrationRunForHindcast.value.hindcast_run_id = undefined;
-        calibrationRunForHindcast.value.hindcast_status = undefined;
-        calibrationRunForHindcast.value.configuration = undefined;
-        calibrationRunForHindcast.value.cycle_date = undefined;
-        if (calibrationRunForHindcast.value?.cold_start) {
-          calibrationRunForHindcast.value.cold_start.cold_start_date = undefined;
-        }
-        hindcastJobId.value = undefined;
+    // set userCalibrationRunData
+    await loadSelectedCalibrationRun(selectedHindcastJob?.value?.calibration_run_id as number);
+    if (new_hindcast) {
+      calibrationRunForHindcast.value.hindcast_run_id = undefined;
+      calibrationRunForHindcast.value.hindcast_status = undefined;
+      calibrationRunForHindcast.value.configuration = undefined;
+      calibrationRunForHindcast.value.cycle_date = undefined;
+      if (calibrationRunForHindcast.value?.cold_start) {
+        calibrationRunForHindcast.value.cold_start.cold_start_date = undefined;
       }
-      isLoading.value = false;
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Setup Hindcast Tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+      hindcastJobId.value = undefined;
+    }
+    if (props.callGoToTab) {
+      props.callGoToTab(3);
     }
     isLoading.value = false;
   });
 }
 
-const navigateToHindcastRunStatus = () => {
+const goToHindcastRunStatus = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedHindcastRowData(event.data);
+  }
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Hindcast Run/Status Tab"]');
-
-    if (e) {
-      await loadSelectedCalibrationRun(selectedHindcastJob?.value?.calibration_run_id as number);
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Run/Status tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+    await loadSelectedCalibrationRun(selectedHindcastJob?.value?.calibration_run_id as number);
+    if (props.callGoToTab) {
+      props.callGoToTab(4);
     }
     isLoading.value = false;
   });
 }
 
-const navigateToHindcastResults = () => {
+const goToHindcastResults = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedHindcastRowData(event.data);
+  }
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Hindcast Results Tab"]');
-
-    if (e) {
-      await loadSelectedCalibrationRun(selectedHindcastJob?.value?.calibration_run_id as number);
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Results tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+    await loadSelectedCalibrationRun(selectedHindcastJob?.value?.calibration_run_id as number);
+    if (props.callGoToTab) {
+      props.callGoToTab(5);
     }
     isLoading.value = false;
   });
@@ -439,18 +443,14 @@ const acceptDelete = (selectedRunId: number) => {
 
 const createNewVerification = async () => {
   // Just go to Run/Status with the selected hindcast - no need to create anything new yet
-  navigateToVerificationJobStatus();
+  goToVerificationJobStatus();
 }
 
-const navigateToVerificationJobStatus = () => {
+const goToVerificationJobStatus = () => {
   isLoading.value = true;
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Verification Run/Status Tab"]');
-
-    if (e) {
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Verification Run/Status Tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+    if (props.callGoToTab) {
+      props.callGoToTab(7);
     }
     isLoading.value = false;
   });

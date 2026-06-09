@@ -188,7 +188,7 @@
       <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
         <div class="col-span-1">
           <Button v-if="optMetDataHasChanged && !userCalibrationRunData?.modules?.includes('LSTM')" class="ngenButtonDiv-yellow" title="Revert All Changes"
-            @click="restorePage()" aria-label="Revert All Changes">Revert</Button>
+            @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
         </div>
       </span>
       <div class="col-span-4">&nbsp;</div>
@@ -261,6 +261,17 @@ const toast = useToast();
 const { isLoading } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  },
+  callNavDialog: {
+    type: Function,
+    required: false,
+  },
+});
+
 const selectedMetric = ref<OptimizationMetricData>();
 const cbCategoricalDisabled = ref<boolean>(false);
 const cbEventBasedDisabled = ref<boolean>(false);
@@ -276,7 +287,6 @@ onMounted(async() => {
   }
   setUserSelection();
   
-  hilightTab(CalibrationTabs.tab_optimizationMetrics);
   toast.removeAllGroups();
   if (ele) { ele.scrollTo(0, 0); }
   
@@ -297,6 +307,10 @@ onMounted(async() => {
     showMetricPeakFlow.value = true;
     uiPeakFlowThreshold.value = userCalibrationRunData.value?.peak_flow_threshold;
   }
+
+  nextTick(() => {
+    hilightTab(CalibrationTabs.tab_optimizationMetrics);
+  });
 
   isLoading.value = false;
 })
@@ -464,7 +478,7 @@ const updateJobData = () => {
   }
 };
 
-const validateTab = () => {
+const validateTab = (tabNumber?: number) => {
   let error = false;
   let text = [];
   if (!userCalibrationRunData?.value?.modules.includes('LSTM')) {
@@ -512,7 +526,7 @@ const validateTab = () => {
   return { error: error, text: text }
 }
 
-const restorePage = async () => {
+const restoreTab = async () => {
   await fetchUserCalibrationRunData();
   if (userCalibrationRunData.value) {
     uiOptimization.value = userCalibrationRunData?.value?.optimization;
@@ -543,71 +557,26 @@ const restorePage = async () => {
 
 const goNextTab = () => {
   const errors = validateTab();
-  if (errors.error) {
-    showPrevNextDialog(errors.text, true);
-  } else {
-    gotoNext();
+  if (props.callNavDialog && errors.error) {
+    props.callNavDialog(errors.text, true, 6);
+  } else if (props.callGoToTab) {
+    props.callGoToTab(6);
   }
 };
 
 const goPrevTab = () => {
   const errors = validateTab();
-  if (errors.error) {
-    showPrevNextDialog(errors.text, false);
-  } else {
-    gotoPrev();
+  if (props.callNavDialog && errors.error) {
+    props.callNavDialog(errors.text, false, 4);
+  } else if (props.callGoToTab) {
+    props.callGoToTab(4);
   }
 };
 
-const gotoNext = () => {
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[CalibrationTabs.tab_runStatus];
-  e.click();
-}
-
-const gotoPrev = () => {
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[CalibrationTabs.tab_tuningControls];
-  e.click();
-}
-
-const showPrevNextDialog = (body: string[], next: boolean) => {
-  if (!nextPrevDialogOpened.value) {
-    dialog.open(MoveNextPrevDialog, {
-      props: {
-        header: "Unsaved changes!",
-        style: {
-          width: 'auto',
-        },
-        modal: true,
-      },
-      data: {
-        body: body,
-        direction: next
-      },
-      onClose: (opt) => {
-        nextPrevDialogOpened.value = false;
-        handleNextPrevDialogClose(opt);
-      },
-
-    })
-    nextPrevDialogOpened.value = true
-  }
-}
-
-const handleNextPrevDialogClose = (opt: any) => {
-  if (opt.data && opt.data.moveToNextResponse) {
-    restorePage();
-    if (opt.data.goNext) {
-      gotoNext();
-    } else {
-      gotoPrev();
-    }
-  }
-  if (opt.type && opt.type === 'dialog-close') {
-    return;
-  }
-}
+defineExpose({
+  validateTab,
+  restoreTab
+});
 
 onUnmounted(async () => {
   optMetDataHasChanged.value = false;

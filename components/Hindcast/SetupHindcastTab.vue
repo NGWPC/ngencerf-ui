@@ -83,6 +83,7 @@
             </Column>
         </DataTable>
     </div>
+    <DynamicDialog />
     <div v-if="calibrationRunForHindcast?.hindcast_status && !['Saved','Ready'].includes(calibrationRunForHindcast?.hindcast_status)" class="text-normal mt-2 mx-auto text-center">
       This hindcast has already been run. Click Next to see status.
       <Button class="ngenButtonDiv ml-6 font-normal h-8" title="Next Button" aria-label="Next Button"
@@ -219,6 +220,7 @@ import { useHindcastStore } from '@/stores/hindcast/HindcastStore';
 import { generalStore } from '~/stores/common/GeneralStore';
 
 import { hilightTab } from '@/composables/TabHilight';
+import { useDialog } from 'primevue/usedialog';
 
 import MessagesGroup from "../Common/MessagesGroup.vue";
 
@@ -250,6 +252,13 @@ const {
 
 const { loadHindcastTab, getColdStartJobsForConfiguration, createAndRunHindcastJob } = useHindcastStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const minCycleDate = ref<any>();
 const maxCycleDate = ref<any>();
 const cycleHour = ref<number>();
@@ -259,6 +268,10 @@ const coldStartHour = ref<number>();
 const coldStartHourList = ref<number[]>(Array.from({ length: 24 }, (_, index) => index));
 
 let intervalCycleListOptions = [1,3,6,12,18,24,36,48,60,72,84,96,108,120,180,240]
+
+const dialog = useDialog();
+const nextPrevDialogOpened = ref<boolean>(false);
+
 /**
  * Disable row if hindcast configuration is not active
  */
@@ -274,7 +287,6 @@ const rowStyle = (data: any) => {
         color: calibrationRunForHindcast?.value?.hindcast_status && calibrationRunForHindcast?.value?.hindcast_status !== 'Ready' ? 'grey' : 'black'
     };
 };
-
 
 onMounted(async () => {
     toast.removeAllGroups(); // clear all toast messages
@@ -538,11 +550,27 @@ const goToRunStatusTab = async() => {
         return false;
       }
     }
+    if (props.callGoToTab) {
+      props.callGoToTab(4);
+    }
   }
-  const allTabs = document.getElementsByClassName("tabs");
-  const e = allTabs[HindcastTabs.tab_hindcastRunStatus] as HTMLElement;
-  e.click();
 };
+
+const validateTab = (tabNumber?: number) => {
+  let error = false;
+  let text = [];
+  // configuration has to be picked first, so just check for that.
+  // ignore if they're actually clicking through to Run/Status
+  if (hindcastConfiguration.value && tabNumber !== 4) {
+    error = true;
+    text.push("Are you sure you want to abandon this Hindcast? It will not be saved.");
+  }
+  return { error: error, text: text }
+}
+
+defineExpose({
+  validateTab
+});
 </script>
 
 <style lang="scss" scoped>

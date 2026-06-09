@@ -47,7 +47,7 @@
             v-model:sortField="forecastRunListSort.field" v-model:sortOrder="forecastRunListSort.direction"
             v-model:selection="selectedForecastJob" selectionMode="single" :rowStyle="rowStyle"
             @rowSelect="onForecastRowSelect" @rowUnselect="onForecastRowUnSelect" @rowContextmenu="onRowContextMenu"
-            class="boxed">
+            @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="forecast_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -236,6 +236,13 @@ const crContextMenu = ref(); //calibration run context menu
 
 const { addToastRecord } = generalStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 // watch for sort order change - reset current page to 1
 watch(forecastRunListSort, async() => {
   forecastRunListCurrentPage.value = 1;
@@ -264,12 +271,12 @@ const onRowContextMenu = (event: any) => {
   if (selectedForecastJob && selectedForecastJob.value?.forecast_run_id === crRowData.forecast_run_id) {
     crContextMenu.value.show(event.originalEvent);
     setSelectedForecastRunId(parseInt(event.originalEvent.currentTarget.children[0].textContent));
-    cmForecastRun.value.push({ label: 'View Status', icon: 'pi pi-gauge', command: () => navigateToForecastRunStatus() });
+    cmForecastRun.value.push({ label: 'View Status', icon: 'pi pi-gauge', command: () => goToForecastRunStatus() });
     if (crRowData.forecast_status === 'Done') {
-      cmForecastRun.value.push({ label: 'View Results', icon: 'pi pi-chart-line', command: () => navigateToForecastResults() });
+      cmForecastRun.value.push({ label: 'View Results', icon: 'pi pi-chart-line', command: () => goToForecastResults() });
     }
     if (crRowData.calibration_run_id) {
-      cmForecastRun.value.push({ label: 'Run New Forecast', icon: 'pi pi-chevron-circle-right', command: () => navigateToSetupForecast() });
+      cmForecastRun.value.push({ label: 'Run New Forecast', icon: 'pi pi-chevron-circle-right', command: () => goToSetupForecast() });
       if (crRowData.forecast_status === 'Done') {
         cmForecastRun.value.push({ label: 'Run New Verification', icon: 'pi pi-bars', command: () => createNewVerification() });
       }
@@ -280,6 +287,10 @@ const onRowContextMenu = (event: any) => {
     }
   }
 };
+
+const onRowDblClick = (event: any) => {
+  goToForecastRunStatus(event);
+}
 
 onMounted(async () => {
   isLoading.value = true;
@@ -339,58 +350,51 @@ const viewCalibrationDetails = async (calibration_run_id: number) => {
   })
 }
 
-const navigateToSetupForecast = (new_forecast: boolean=true) => {
+const goToSetupForecast = (new_forecast: boolean=true) => {
   isLoading.value = true;
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Setup Forecast Tab"]');
-
-    if (e) {
-      // set userCalibrationRunData
-      await loadSelectedCalibrationRun(selectedForecastJob?.value?.calibration_run_id as number);
-      if (new_forecast) {
-        calibrationRunForForecast.value.forecast_run_id = undefined;
-        calibrationRunForForecast.value.forecast_status = undefined;
-        calibrationRunForForecast.value.configuration = undefined;
-        calibrationRunForForecast.value.cycle_date = undefined;
-        if (calibrationRunForForecast.value?.cold_start) {
-          calibrationRunForForecast.value.cold_start.cold_start_date = undefined;
-        }
-        forecastJobId.value = undefined;
+    // set userCalibrationRunData
+    await loadSelectedCalibrationRun(selectedForecastJob?.value?.calibration_run_id as number);
+    if (new_forecast) {
+      calibrationRunForForecast.value.forecast_run_id = undefined;
+      calibrationRunForForecast.value.forecast_status = undefined;
+      calibrationRunForForecast.value.configuration = undefined;
+      calibrationRunForForecast.value.cycle_date = undefined;
+      if (calibrationRunForForecast.value?.cold_start) {
+        calibrationRunForForecast.value.cold_start.cold_start_date = undefined;
       }
-      isLoading.value = false;
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Setup Forecast Tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+      forecastJobId.value = undefined;
+    }
+    isLoading.value = false;
+    if (props.callGoToTab) {
+      props.callGoToTab(3);
+    }
+  });
+}
+
+const goToForecastRunStatus = (event: any=null) => {
+  isLoading.value = true;
+  if (event) {
+    setSelectedForecastRowData(event.data);
+  }
+  nextTick(async () => {
+    await loadSelectedCalibrationRun(selectedForecastJob?.value?.calibration_run_id as number);
+    if (props.callGoToTab) {
+      props.callGoToTab(4);
     }
     isLoading.value = false;
   });
 }
 
-const navigateToForecastRunStatus = () => {
+const goToForecastResults = (event: any=null) => {
   isLoading.value = true;
+  if (event) {
+    setSelectedForecastRowData(event.data);
+  }
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Forecast Run/Status Tab"]');
-
-    if (e) {
-      await loadSelectedCalibrationRun(selectedForecastJob?.value?.calibration_run_id as number);
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Run/Status tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
-    }
-    isLoading.value = false;
-  });
-}
-
-const navigateToForecastResults = () => {
-  isLoading.value = true;
-  nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Forecast Results Tab"]');
-
-    if (e) {
-      await loadSelectedCalibrationRun(selectedForecastJob?.value?.calibration_run_id as number);
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Results tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+    await loadSelectedCalibrationRun(selectedForecastJob?.value?.calibration_run_id as number);
+    if (props.callGoToTab) {
+      props.callGoToTab(5);
     }
     isLoading.value = false;
   });
@@ -437,18 +441,14 @@ const acceptDelete = (selectedRunId: number) => {
 
 const createNewVerification = async () => {
   // Just go to Run/Status with the selected forecast - no need to create anything new yet
-  navigateToVerificationJobStatus();
+  goToVerificationJobStatus();
 }
 
-const navigateToVerificationJobStatus = () => {
+const goToVerificationJobStatus = () => {
   isLoading.value = true;
   nextTick(async () => {
-    const e: HTMLElement | null = document.querySelector('.tabs[title="Verification Run/Status Tab"]');
-
-    if (e) {
-      e.click();
-    } else {
-      toast.add({ severity: 'error', summary: 'Error', detail: 'Verification Run/Status Tab not found', life: ToastTimeout.timeoutError } as ToastMessageOptions);
+    if (props.callGoToTab) {
+      props.callGoToTab(7);
     }
     isLoading.value = false;
   });

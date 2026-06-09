@@ -4,8 +4,9 @@
         <div id="TopBar">&nbsp;</div>
         <div class="grid grid-cols-12 gap-1" style="height: 80px">
             <div v-if="isUserLoggedIn()" id="PgmName" class="col-span-2 mt-6">
-                <NuxtLink title="Link to Landing Page" to="LandingPage"
-                    oncontextmenu="return false;">ngenCERF</NuxtLink>
+                <NuxtLink id="MainMenuLandingPage" to="LandingPage">
+                  ngenCERF
+                </NuxtLink>
             </div>
             <div v-else id="PgmName" class="col-span-2 mt-6">
                 <div>ngenCERF</div>
@@ -14,27 +15,30 @@
 
                 <ul v-show="userLoggedIn && location.name !== 'Login'" id="MainMenu">
                     <li aria-label="Calibration" title="Calibration">
-                        <NuxtLink id="MainMenuCalibration" :class="location.name === 'Calibration' ? 'isActive' : ''"
-                            to="calibration" data-menu='1' @click="MenuChanged"
-                            oncontextmenu="return false;">Calibration</NuxtLink>
+                      <NuxtLink id="MainMenuCalibration" :class="location.name === 'Calibration' ? 'isActive' : ''"
+                        to="calibration">
+                        Calibration
+                      </NuxtLink>
                     </li>
                     <li aria-label="Evaluation" title="Evaluation">
-                        <NuxtLink id="MainMenuEvaluation" :class="location.name === 'Evaluation' ? 'isActive' : ''"
-                            to="evaluation" data-menu='2' @click="MenuChanged"
-                            oncontextmenu="return false;">Evaluation</NuxtLink>
+                      <NuxtLink id="MainMenuEvaluation" :class="location.name === 'Evaluation' ? 'isActive' : ''"
+                        to="evaluation">
+                        Evaluation
+                      </NuxtLink>
                     </li>
                     <li aria-label="Forecast" title="Forecast">
-                        <NuxtLink id="MainMenuForecast" :class="location.name === 'Forecast' ? 'isActive' : ''"
-                            to="forecast" data-menu='3' @click="MenuChanged"
-                            oncontextmenu="return false;">Forecast</NuxtLink>
+                      <NuxtLink id="MainMenuForecast" :class="location.name === 'Forecast' ? 'isActive' : ''"
+                        to="forecast">
+                        Forecast
+                      </NuxtLink>
                     </li>
                     <li aria-label="Hindcast" title="Hindcast">
-                        <NuxtLink id="MainMenuHindcast" :class="location.name === 'Hindcast' ? 'isActive' : ''"
-                            to="hindcast" data-menu='4' @click="MenuChanged"
-                            oncontextmenu="return false;">Hindcast</NuxtLink>
+                      <NuxtLink id="MainMenuHindcast" :class="location.name === 'Hindcast' ? 'isActive' : ''"
+                        to="hindcast">
+                        Hindcast
+                      </NuxtLink>
                     </li>
                 </ul>
-
             </div>
 
             <div id="Circles" class="col-span-2">
@@ -191,7 +195,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
 import ContextMenu from 'primevue/contextmenu';
 import Swal from 'sweetalert2';
 
@@ -200,6 +204,12 @@ import { generalStore } from "@/stores/common/GeneralStore";
 
 import { useLogout, useLogoutListen } from "@/composables/UseEventBus";
 import { getErrorTextFromStatus } from "@/utils/CommonHelpers";
+
+import { useDialog } from "primevue/usedialog";
+import MoveNextPrevDialog from "../Common/MoveNextPrevDialog.vue";
+
+const dialog = useDialog();
+const navDialogOpened = ref<boolean>(false);
 
 const LazyAboutBox = defineAsyncComponent(() => import("@/components/Common/AboutBox.vue"))
 const LazyErrorLog = defineAsyncComponent(() => import("@/components/Common/ErrorLog.vue"))
@@ -243,7 +253,18 @@ const LazyHindcastVerificationRunsHelp = defineAsyncComponent(() => import("@/co
 const LazyHindcastVerificationRunStatusHelp = defineAsyncComponent(() => import("@/components/Help/Hindcast/VerificationRunStatusHelp.vue"));
 const LazyHindcastVerificationResultsHelp = defineAsyncComponent(() => import("@/components/Help/Hindcast/VerificationResultsHelp.vue"));
 
-const { popupActive, allowPasswordChange } = storeToRefs(generalStore());
+const props = defineProps({
+  callTabValidator: {
+    type: Function,
+    required: false,
+  },
+  callTabRestore: {
+    type: Function,
+    required: false,
+  }
+});
+
+const { popupActive } = storeToRefs(generalStore());
 
 const emit = defineEmits(["logoutEvent"]);
 
@@ -251,13 +272,16 @@ const accountOverlay = ref();
 const aboutOverlay = ref();
 const errorOverlay = ref();
 
-const { getMenuIndex, setMenuIndex, getCalibrationTabIndex, getEvaluationTabIndex, getForecastTabIndex, getHindcastTabIndex } = generalStore();
+const { getMenuIndex, setMenuIndex, getCalibrationTabIndex, getEvaluationTabIndex, getForecastTabIndex, getHindcastTabIndex, validateCurrentTab } = generalStore();
 
 const { isUserLoggedIn, getUserInitials, setIsTokenExpired, getIsTokenExpired } = useUserDataStore();
 
 const { userInitials, lastServerError } = storeToRefs(useUserDataStore());
 
 const location = useRoute();
+const router = useRouter();
+const pendingRoute = ref<any>(null);
+const allowNavigation = ref<boolean>(false);
 
 const userLoggedIn = ref<boolean>();
 
@@ -396,7 +420,7 @@ useLogoutListen('logoutEvent', (evStr: string) => {
         setIsTokenExpired();
         let err = (lastServerError?.value) ? getErrorTextFromStatus(lastServerError?.value?.status) + ' ' : '';
         useLogout("logoutEvent", "logout");
-        navigateTo('login');
+        destination('login');
         setTimeout(() => {
             Swal.fire({
                 width: 500,
@@ -413,7 +437,7 @@ const logoutUser = async () => {
     if (!popupActive.value) {
         if (confirm("Are you sure you want to logout?")) {
             useLogout("logoutEvent", "logout");
-            await navigateTo('login');
+            await destination('login');
         }
     }
 }
@@ -437,19 +461,89 @@ const displayHelp = () => {
     }
 }
 
-const MenuChanged = (e: MouseEvent) => {
-    nextTick(() => {
-        let ele = e.currentTarget as HTMLElement;
-        if (!ele) {
-            ele = e.target as HTMLElement;
-        }
-        const m = ele.getAttribute('data-menu');
-        if (m && e) {
-            setMenuIndex(parseInt(m, 10));
-        }
-    });
+onBeforeRouteLeave(async(to, from) => {
+  // IMPORTANT:
+  // allow the second navigation attempt through
+  if (allowNavigation.value) {
+    allowNavigation.value = false
+    setMenuIndexByRoute(to.path.split('/')[1]);
+    return true
+  }
+
+  const errors = await validateCurrentTab()
+
+  if (!errors.error) {
+    setMenuIndexByRoute(to.path.split('/')[1]);
+    return true
+  }
+
+  pendingRoute.value = to
+
+  showTabNavDialog(errors.text)
+
+  return false
+})
+
+const setMenuIndexByRoute = (path: string) => {
+  switch(path) {
+    case 'calibration':
+      setMenuIndex(1);
+      break;
+    case 'evaluation':
+      setMenuIndex(2);
+      break;
+    case 'forecast':
+      setMenuIndex(3);
+      break;
+    case 'hindcast':
+      setMenuIndex(4);
+      break;
+    default:
+      setMenuIndex(0);
+      break;
+  }
 }
 
+const showTabNavDialog = (body: string[]) => {
+  if (navDialogOpened.value) return
+
+  navDialogOpened.value = true
+
+  dialog.open(MoveNextPrevDialog, {
+    props: {
+      header: 'Unsaved changes!',
+      modal: true,
+      style: {
+        width: 'auto'
+      }
+    },
+
+    data: {
+      body,
+      direction: true
+    },
+
+    onClose: async (opt) => {
+
+      navDialogOpened.value = false
+
+      if (opt?.data?.moveToNextResponse && pendingRoute.value) {
+
+        if (props.callTabRestore) {
+          props.callTabRestore()
+        }
+
+        // bypass next guard execution
+        allowNavigation.value = true
+
+        const route = pendingRoute.value
+        pendingRoute.value = null
+
+        await router.push(route.fullPath)
+      }
+    }
+  })
+}
 </script>
 
 <style lang="scss" scoped>

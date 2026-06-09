@@ -88,10 +88,8 @@ const { selectedModuleValues, formulationIsCalibratable, moduleProperties } = st
 const { loadFormulationTabData, setUserSelection } = useFormulationStore();
 const { tuningParametersAreValid } = storeToRefs(useTuningStore());
 const { validateTuningParameters } = useTuningStore();
-const { addToastRecord } = generalStore();
+const { addToastRecord, validateCurrentTab, currentTabNavGo, showCurrentTabNavDialog } = generalStore();
 const toast = useToast();
-
-const currentCalibrationTab = ref(getCalibrationTabIndex());
 
 const emit = defineEmits(["tabNumber"]);
 
@@ -133,16 +131,15 @@ const checkStartEndTimeValues = () => {
 
 const tabClicked = (event: Event) => {
   event.preventDefault();
-  const ele = event.currentTarget as HTMLElement;
-  const allTabs = document.getElementsByClassName("tabs");
-  const tabNum = Number(ele.getAttribute("data-tab")) - 1;
-  const e = allTabs[tabNum] as HTMLElement;
-  e.click();
-
-  // Send the selected tab info to the active tab set with emit
-  if (getMenuIndex() === 2) {
-    currentCalibrationTab.value = Number(ele.getAttribute("data-tab"));
-    emit("tabNumber", currentCalibrationTab.value);
+  const ele: HTMLElement = event.currentTarget as HTMLElement;
+  const tabNumber = Number(ele.getAttribute("data-tab"));
+  if (tabNumber !== getCalibrationTabIndex()) {
+    const errors = validateCurrentTab();
+    if (errors.error) {
+      showCurrentTabNavDialog(errors.text, true, tabNumber);
+    } else {
+      currentTabNavGo(tabNumber);
+    }
   }
-}
+};
 </script>

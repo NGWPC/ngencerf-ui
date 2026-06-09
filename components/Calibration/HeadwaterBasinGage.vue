@@ -129,7 +129,7 @@
             <span v-if="jobNameHasChanged || (gageHasChanged && userCalibrationRunData?.gage !== null) || gageDataSourceHasChanged">
               <div class="col-span-1 mr-3">
                 <Button class="ngenButtonDiv-yellow" title="Revert All Changes"
-                  @click="gageSelectionReset()" aria-label="Revert All Changes">Revert</Button>
+                  @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
               </div>
             </span>
             <span v-else>
@@ -199,6 +199,18 @@ const { loadGageTabStaticData, fetchSelectedGageData, saveGageTabData, resetUser
   saveUserForcingFiles, saveUserObservationalFile, saveUserGeopackageFile } = useGageStore();
 const { calibrationJobId, gageHasChanged, gageDataSourceHasChanged } = storeToRefs(generalStore());
 const { submitTimeDate } = storeToRefs(useRunStatusStore());
+
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  },
+  callNavDialog: {
+    type: Function,
+    required: false,
+  }
+});
+
 const toast = useToast();
 const dialog = useDialog();
 const fileUploadDialogOpened = ref<boolean>(false);
@@ -253,7 +265,7 @@ onMounted(async() => {
       submitTimeDate.value = new Date(userCalibrationRunData.value.submit_date);
     }
     if (userCalibrationRunData?.value?.gage?.gage_id) {
-      gageSelectionReset();
+      restoreTab();
     } else {
       selectedForcingValue.value = resetData.value.forcing_source;
       selectedObservationalValue.value = resetData.value.observational_source;
@@ -307,7 +319,7 @@ const onGageSelectionChange = () => {
 /**
  * Resets the Gage to the previous gage if it was changed and not saved.
  */
-const gageSelectionReset = () => {
+const restoreTab = () => {
   jobNameInput.value = userCalibrationRunData?.value?.job_name ?? "";
   selectedDomainValue.value = getSavedDomainValue.value ?? '';
   selectedGageValue.value = userCalibrationRunData?.value?.gage?.gage_id ? userCalibrationRunData.value.gage.gage_id : '';
@@ -519,12 +531,6 @@ const showGeopackageFileUploadDialog = (headerText: string) => {
   }
 }
 
-const gotoNext = () => {
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[CalibrationTabs.tab_formulation];
-  e.click();
-}
-
 /**
  * follow section waiting further detail to be implemented
  */
@@ -658,7 +664,7 @@ const resetTabData = () => {
   }
 };
 
-const validateTab = () => {
+const validateTab = (tabNumber?: number) => {
   let error = false;
   let text = [];
   /* Check if Job Name changed */
@@ -693,46 +699,17 @@ const validateTab = () => {
 
 const goNextTab = () => {
   const errors = validateTab();
-  if (errors.error) {
-    showPrevNextDialog(errors.text, true);
-  } else {
-    gotoNext();
+  if (props.callNavDialog && errors.error) {
+    props.callNavDialog(errors.text, true, 3);
+  } else if (props.callGoToTab) {
+    props.callGoToTab(3);
   }
-
 };
 
-const showPrevNextDialog = (body: string[], next: boolean) => {
-  if (!nextPrevDialogOpened.value) {
-    dialog.open(MoveNextPrevDialog, {
-      props: {
-        header: "Unsaved changes!",
-        style: {
-          width: 'auto',
-        },
-        modal: true,
-      },
-      data: {
-        body: body,
-        direction: next
-      },
-      onClose: (opt) => {
-        nextPrevDialogOpened.value = false;
-        handleNextPrevDialogClose(opt);
-      },
-    })
-    nextPrevDialogOpened.value = true
-  }
-}
-
-const handleNextPrevDialogClose = (opt: any) => {
-  if (opt.data && opt.data.moveToNextResponse) {
-    gageSelectionReset();
-    gotoNext();
-  }
-  if (opt.type && opt.type === 'dialog-close') {
-    return;
-  }
-}
+defineExpose({
+  validateTab,
+  restoreTab
+});
 
 </script>
 <style lang="scss" scoped>

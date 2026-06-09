@@ -290,7 +290,7 @@
       <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
         <div class="col-span-1 mr-3">
           <Button v-if="tuningDataHasChanged || calibratableParametersHaveChanged" class="ngenButtonDiv-yellow" title="Revert All Changes"
-            @click="restorePage()" aria-label="Revert All Changes">Revert</Button>
+            @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
         </div>
       </span>
       <span v-else>
@@ -388,6 +388,17 @@ const {
   tuningParametersAreValid
 } = storeToRefs(tuningStore);
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  },
+  callNavDialog: {
+    type: Function,
+    required: false,
+  },
+});
+
 const toast = useToast();
 const selectedParameter = ref<any>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -407,8 +418,6 @@ let mainLeftAreaElement: HTMLElement | null = null;
 let dataTableElement: HTMLElement | null = null;
 
 onMounted(async () => {
-  hilightTab(CalibrationTabs.tab_tuningControls);
-
   toast.removeAllGroups();
 
   mainLeftAreaElement = document.getElementById("MainLeftDataArea") as HTMLElement;
@@ -483,6 +492,10 @@ onMounted(async () => {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'No Calibration Job ID', detail: 'No calibration job ID found. Please go back to the Calibration Runs tab and select a job.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
   }
+  
+  nextTick(() => {
+    hilightTab(CalibrationTabs.tab_tuningControls);
+  });
 
   isLoading.value = false;
 });
@@ -1237,7 +1250,7 @@ const saveTuningData = () => {
   }
 };
 
-const validateTab = () => {
+const validateTab = (tabNumber?: number) => {
   /* Check the DateTimes */
   let error = false;
   let text = [];
@@ -1296,7 +1309,7 @@ const compareTimeEntries = (txtDT: string, dT: Date) => {
   return new Date(dT).getTime() !== new Date(txtDT).getTime();
 }
 
-const restorePage = async () => {
+const restoreTab = async () => {
   // reset calibration times
   if (userCalibrationRunData?.value?.calibration_times) {
     const { simulation_start_time, simulation_end_time, calibration_start_time, calibration_end_time } = userCalibrationRunData.value.calibration_times;
@@ -1322,73 +1335,23 @@ const restorePage = async () => {
   tuningDataHasChanged.value = false;
 }
 
-const gotoNext = () => {
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[CalibrationTabs.tab_optimizationMetrics];
-  e.click();
-}
-
-const gotoPrev = () => {
-  const tabs = document.getElementsByClassName("tabs");
-  const e = <HTMLElement>tabs[CalibrationTabs.tab_formulation];
-  e.click();
-};
-
 const goNextTab = () => {
   const errors = validateTab();
-  if (errors.error) {
-    showPrevNextDialog(errors.text, true);
-  } else {
-    gotoNext();
+  if (props.callNavDialog && errors.error) {
+    props.callNavDialog(errors.text, true, 54);
+  } else if (props.callGoToTab) {
+    props.callGoToTab(5);
   }
 };
 
 const goPrevTab = () => {
   const errors = validateTab();
-  if (errors.error) {
-    showPrevNextDialog(errors.text, false);
-  } else {
-    gotoPrev();
+  if (props.callNavDialog && errors.error) {
+    props.callNavDialog(errors.text, false, 3);
+  } else if (props.callGoToTab) {
+    props.callGoToTab(3);
   }
 };
-
-const showPrevNextDialog = (body: string[], next: boolean) => {
-  if (!nextPrevDialogOpened.value) {
-    dialog.open(MoveNextPrevDialog, {
-      props: {
-        header: "Unsaved changes!",
-        style: {
-          width: 'auto',
-        },
-        modal: true,
-      },
-      data: {
-        body: body,
-        direction: next
-      },
-      onClose: (opt) => {
-        nextPrevDialogOpened.value = false;
-        handleNextPrevDialogClose(opt);
-      },
-
-    })
-    nextPrevDialogOpened.value = true
-  }
-}
-
-const handleNextPrevDialogClose = (opt: any) => {
-  if (opt.data && opt.data.moveToNextResponse) {
-    restorePage();
-    if (opt.data.goNext) {
-      gotoNext();
-    } else {
-      gotoPrev();
-    }
-  }
-  if (opt.type && opt.type === 'dialog-close') {
-    return;
-  }
-}
 
 const rowClass = () => {
   return [{ "pointer-events-none": !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status) }];
@@ -1435,6 +1398,11 @@ const checkInitialValueOutOfRange = (parameterName: string, initialValue: number
     toast.add(tMsg); addToastRecord(tMsg);
   }
 }
+
+defineExpose({
+  validateTab,
+  restoreTab
+});
 
 onUnmounted(async () => {
   saveTuningTabRequestBody.value = {};

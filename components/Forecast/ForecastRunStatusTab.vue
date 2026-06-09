@@ -125,6 +125,8 @@
       </div>
     </div>
 
+    <DynamicDialog />
+
     <!--LOGGING SECTION-->
     <div v-if="!(forecastJobId && overallColdStartForecastStatus) || ['Saved','Ready'].includes(overallColdStartForecastStatus)" 
       class="col-span-5 p-2 border-t border-[#d9d9d9] flex flex-col items-center" id="LoggingSection">
@@ -226,17 +228,27 @@ import { useForecastStore } from '@/stores/forecast/ForecastStore';
 import { useLogStore } from '@/stores/common/LogStore';
 
 import { hilightTab } from '@/composables/TabHilight';
+import { useDialog } from 'primevue/usedialog';
 import { isValidDate } from '@/utils/CommonHelpers';
 import { calculateElapsedTime } from '@/utils/TimeHelpers';
 
 const { isLoading } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
-
 const toast = useToast();
+
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
 
 const runButtonDisabled = ref<boolean>(true);
 const cancelButtonDisabled = ref<boolean>(true);
 const showMessagesGroup = ref<boolean>(false);
+
+const dialog = useDialog();
+const nextPrevDialogOpened = ref<boolean>(false);
 
 const { fetchUserCalibrationRunData } = useUserDataStore();
 const { userCalibrationRunData, ngenLogLevel, forcingLogLevel, logLevels } = storeToRefs(useUserDataStore());
@@ -498,22 +510,37 @@ const cancelForecastRun = async () => {
 };
 
 /**
- * Go to the Status Run tab
- */
-const goToResultsTab = () => {
-  const allTabs = document.getElementsByClassName("tabs");
-  const e = allTabs[ForecastTabs.tab_forecastResults] as HTMLElement;
-  e.click();
-};
-
-/**
  * Go to the Setup Forecast Tab
  */
 const goToSetupForecastTab = () => {
-    const allTabs = document.getElementsByClassName("tabs");
-    const e = allTabs[ForecastTabs.tab_setupForecast] as HTMLElement;
-    e.click();
+  if (props.callGoToTab) {
+    props.callGoToTab(3);
+  }
 };
+
+/**
+ * Go to the Status Run tab
+ */
+const goToResultsTab = () => {
+  if (props.callGoToTab) {
+    props.callGoToTab(5);
+  }
+};
+
+const validateTab = (tabNumber?: number) => {
+  let error = false;
+  let text = [];
+  // assume they've run the job if Run button is disabled
+  if (!runButtonDisabled.value && tabNumber !== 3) {
+    error = true;
+    text.push("Are you sure you want to leave without running this Forecast? It will not be saved.");
+  }
+  return { error: error, text: text }
+}
+
+defineExpose({
+  validateTab
+});
 
 onUnmounted(() => {
   // make sure page clears all log data when the user leaves

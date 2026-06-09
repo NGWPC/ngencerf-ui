@@ -16,13 +16,13 @@
               Headwater Basin Gage
               <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
             </div>
-            <div data-tab="3" class="tabs prevent-select" @click="tabClicked" aria-label="Formulation tab"
-              title="Formulation tab">
+            <div data-tab="3" class="tabs prevent-select" @click="tabClicked" 
+              aria-label="Formulation tab" title="Formulation tab">
               Formulation
               <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
             </div>
-            <div data-tab="4" class="tabs prevent-select" @click="tabClicked" aria-label="Tuning Controls tab"
-              title="Tuning Controls tab">
+            <div data-tab="4" class="tabs prevent-select" @click="tabClicked" 
+              aria-label="Tuning Controls tab" title="Tuning Controls tab">
               Tuning Controls
               <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
             </div>
@@ -31,8 +31,8 @@
               Optimization / Metrics
               <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
             </div>
-            <div data-tab="6" class="tabs prevent-select" @click="tabClicked" aria-label="Status Run tab"
-              title="Status Run tab">
+            <div data-tab="6" class="tabs prevent-select" @click="tabClicked" 
+              aria-label="Status Run tab" title="Status Run tab">
               Status / Run
               <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
             </div>
@@ -196,6 +196,12 @@ import { useForecastStore } from "@/stores/forecast/ForecastStore";
 import { useVerificationStore } from "~/stores/forecast/VerificationStore";
 import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
 
+import { useDialog } from "primevue/usedialog";
+import MoveNextPrevDialog from "../Common/MoveNextPrevDialog.vue";
+
+const dialog = useDialog();
+const navDialogOpened = ref<boolean>(false);
+
 const {
   calibrationJobId,
   evaluateValidationRunId,
@@ -250,13 +256,40 @@ const currentMenu = ref(getMenuIndex());
 // temporary. Will be replaced by logic from each tabuserCalibrationRunData
 const tabNotCompleted = ref(false);
 
+const props = defineProps({
+  callTabValidator: {
+    type: Function,
+    required: false,
+  },
+  callTabRestore: {
+    type: Function,
+    required: false,
+  }
+});
+
+onMounted( () => {
+  if (startTab?.value > 1) {
+    goToTab(startTab.value);
+    startTab.value = 1;
+  } else if (currentTab.value === 0) {
+    goToTab(1);
+  }
+})
+
 const tabClicked = (event: Event) => {
   event.preventDefault();
   const ele: HTMLElement = event.currentTarget as HTMLElement;
-  let tabNumber = Number(ele.getAttribute("data-tab"));
-  nextTick(() => {
+  const tabNumber = Number(ele.getAttribute("data-tab"));
+  if (props.callTabValidator) {
+    const errors = props.callTabValidator(tabNumber);
+    if (errors.error) {
+      showTabNavDialog(errors.text, true, tabNumber);
+    } else {
+      goToTab(tabNumber);
+    }
+  } else {
     goToTab(tabNumber);
-  })
+  }
 }
 
 const goToTab = (tabNumber: number) => {
@@ -278,14 +311,45 @@ const goToTab = (tabNumber: number) => {
   emit("tabNumber", tabNumber);
 }
 
-onMounted( () => {
-  if (startTab?.value > 1) {
-    goToTab(startTab.value);
-    startTab.value = 1;
-  } else if (currentTab.value === 0) {
-    goToTab(1);
+const showTabNavDialog = (body: string[], next: boolean, tabNumber: number) => {
+  if (!navDialogOpened.value) {
+    dialog.open(MoveNextPrevDialog, {
+      props: {
+        header: "Unsaved changes!",
+        style: {
+          width: 'auto',
+        },
+        modal: true,
+      },
+      data: {
+        body: body,
+        direction: next
+      },
+      onClose: (opt) => {
+        navDialogOpened.value = false;
+        handleTabNavDialogClose(opt, tabNumber);
+      },
+    })
+    navDialogOpened.value = true;
   }
-})
+}
+
+const handleTabNavDialogClose = (opt: any, tabNumber: number) => {
+  if (opt.data && opt.data.moveToNextResponse) {
+    if (props.callTabRestore) {
+      props.callTabRestore();
+    }
+    goToTab(tabNumber);
+  }
+  if (opt.type && opt.type === 'dialog-close') {
+    return;
+  }
+}
+
+defineExpose({
+  showTabNavDialog,
+  goToTab
+});
 </script>
 <style lang="scss" scoped>
 @use "@/assets/styles/global.scss";

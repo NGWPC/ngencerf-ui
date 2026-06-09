@@ -1,31 +1,31 @@
 <template>
   <!-- ForecastLeftBlock.vue -->
   <div>
-    <Tabs @tabNumber="tabChanged" />
+    <Tabs @tabNumber="tabChanged" ref="navRef" :call-tab-validator="validateCurrentTab" />
     <div class="shrink-0">
       <span v-if="activeTab === 1">
-        <PreviousCalibrationRuns />
+        <PreviousCalibrationRuns :call-go-to-tab="currentTabNavGo" />
       </span>
       <span v-else-if="activeTab === 2">
-        <ForecastRunsTab />
+        <ForecastRunsTab :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 3">
-        <SetupForecastTab />
+        <SetupForecastTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 4">
-        <ForecastRunStatusTab />
+        <ForecastRunStatusTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 5">
-        <ForecastResultsTab />
+        <ForecastResultsTab/>
       </span>
       <span v-if="activeTab === 6">
-        <VerificationRunsTab />
+        <VerificationRunsTab :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 7">
-        <VerificationRunStatusTab />
+        <VerificationRunStatusTab ref="tabRef" :call-go-to-tab="currentTabNavGo"/>
       </span>
       <span v-else-if="activeTab === 8">
-        <VerificationResultsTab />
+        <VerificationResultsTab/>
       </span>
     </div>
   </div>
@@ -44,11 +44,10 @@ import VerificationRunsTab from "./VerificationRunsTab.vue"
 import VerificationRunStatusTab from "./VerificationRunStatusTab.vue"
 import VerificationResultsTab from "./VerificationResultsTab.vue"
 
-const { getForecastTabIndex, setForecastTabIndex } = generalStore();
+const { tabRef, navRef } = storeToRefs(generalStore());
+const { getForecastTabIndex, setForecastTabIndex, validateCurrentTab, currentTabNavGo, showCurrentTabNavDialog } = generalStore();
 
-import { useVerificationStore } from '@/stores/forecast/VerificationStore';
-const { verificationJobId } = storeToRefs(useVerificationStore());
-
+// Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getForecastTabIndex());
 
 // Activate new tab
@@ -58,7 +57,4 @@ const tabChanged = (tabNum: number) => {
     setForecastTabIndex(tabNum);
   } 
 };
-onUnmounted(() => {
-  verificationJobId.value = undefined;
-})
 </script>

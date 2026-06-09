@@ -83,6 +83,7 @@
             </Column>
         </DataTable>
     </div>
+    <DynamicDialog />
     <div v-if="calibrationRunForForecast?.forecast_status && !['Saved','Ready'].includes(calibrationRunForForecast?.forecast_status)" class="text-normal mt-2 mx-auto text-center">
       This forecast has already been run. Click Next to see status.
       <Button class="ngenButtonDiv ml-6 font-normal h-8" title="Next Button" aria-label="Next Button"
@@ -171,6 +172,7 @@ import { useForecastStore } from '@/stores/forecast/ForecastStore';
 import { generalStore } from '~/stores/common/GeneralStore';
 
 import { hilightTab } from '@/composables/TabHilight';
+import { useDialog } from 'primevue/usedialog';
 
 import MessagesGroup from "../Common/MessagesGroup.vue";
 
@@ -197,12 +199,22 @@ const {
 
 const { loadForecastTab } = useForecastStore();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const minCycleDate = ref<any>();
 const maxCycleDate = ref<any>();
 const cycleHour = ref<number>();
 const cycleHourList = ref<number[]>([]);
 const coldStartHour = ref<number>();
 const coldStartHourList = ref<number[]>(Array.from({ length: 24 }, (_, index) => index));
+
+const dialog = useDialog();
+const nextPrevDialogOpened = ref<boolean>(false);
 
 /**
  * Disable row if forecast configuration is not active
@@ -219,7 +231,6 @@ const rowStyle = (data: any) => {
         color: calibrationRunForForecast?.value?.forecast_status && calibrationRunForForecast?.value?.forecast_status !== 'Ready' ? 'grey' : 'black'
     };
 };
-
 
 onMounted(async () => {
     toast.removeAllGroups(); // clear all toast messages
@@ -343,10 +354,26 @@ const goToRunStatusTab = () => {
           }
         }
     }
-    const allTabs = document.getElementsByClassName("tabs");
-    const e = allTabs[ForecastTabs.tab_forecastRunStatus] as HTMLElement;
-    e.click();
+    if (props.callGoToTab) {
+      props.callGoToTab(4);
+    }
 };
+
+const validateTab = (tabNumber?: number) => {
+  let error = false;
+  let text = [];
+  // configuration has to be picked first, so just check for that.
+  // ignore if they're actually clicking through to Run/Status
+  if (forecastConfiguration.value && tabNumber !== 4) {
+    error = true;
+    text.push("Are you sure you want to abandon this Forecast? It will not be saved.");
+  }
+  return { error: error, text: text }
+}
+
+defineExpose({
+  validateTab
+});
 </script>
 
 <style lang="scss" scoped>
