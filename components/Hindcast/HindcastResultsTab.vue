@@ -105,7 +105,8 @@
           <div id="PlotGraphSliderContainer" class="flex flex-row justify-center" :class="plotGraphSliderCursor">
             <div id="PlotGraphSlider" ref="plotGraphSlider" @mousedown="sliderDragStart" @mousemove="sliderDragChange"
               @mouseup="sliderDragEnd" @mouseleave="sliderDragCancel">
-              <div id="PlotGraphSliderBox" ref="plotGraphSliderBox"></div>
+              <div id="PlotGraphSliderBox" ref="plotGraphSliderBox"
+                :style="{ '--handle-color': plotGraphSliderColor }"></div>
             </div>
           </div>
           <div id="PlotGraphSliderDateRange">
@@ -245,6 +246,7 @@ const plotGraphSlider = ref<HTMLElement>();
 const plotGraphSliderData = ref<any[]>([]);
 const plotGraphSliderOptions = ref<DynamicObject>({});
 const plotGraphSliderBox = ref(null);
+const plotGraphSliderColor = ref<string>('grey');
 const plotGraphSliderCursor = ref<string>('cursor-grab');
 const plotGraphSliderHelpDisplay = ref<string>('');
 const sliderBoxPosition = ref<DynamicObject>({});
@@ -919,42 +921,33 @@ onUnmounted(() => {
 }
 
 #PlotGraphSliderBox {
-  position: absolute;
-  border: 1px solid #000000;
-  background: rgba(255,255,255,0.5);
-  z-index: 2;
-  left: 0px;
-  right: 0px;
-  height: 100%;
+    position: absolute;
+    border: 1px solid #000;
+    background: rgba(255,255,255,0.5);
+    z-index: 2;
+    left: 0;
+    right: 0;
+    height: 100%;
 }
 
 #PlotGraphSliderBox::before,
 #PlotGraphSliderBox::after {
-    content: "⋮";
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
+    content: "";
     position: absolute;
-    top: 0;
-    width: 14px;
-    height: 100%;
+    top: 50%;
+    transform: translateY(-50%);
 
-    font-size: 16px;
-    font-weight: bold;
-    color: white;
+    width: 10px;
+    height: 25%;
 
-    background: rgba(70,70,70,.9);
+    background-color: var(--handle-color); /* Solid fill */
+
+    border-radius: 3px; /* Optional: slightly rounded edges */
     cursor: ew-resize;
 }
 
-#PlotGraphSliderBox::before {
-    left: -7px;
-}
-
-#PlotGraphSliderBox::after {
-    right: -7px;
-}
+#PlotGraphSliderBox::before { left: -6px; }
+#PlotGraphSliderBox::after  { right: -6px; }
 
 #PlotGraphSliderDateRange {
   position: relative;
