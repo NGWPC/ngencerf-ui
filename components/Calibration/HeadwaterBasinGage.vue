@@ -30,11 +30,11 @@
                 :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"></Select>
             </div>
 
-            <div class="col-span-1" v-if="getForcingOptionsList.length > 1">
+            <div class="col-span-1" v-if="displayForcingOptionsList.length > 0">
               <label for="Forcing" class="required-label">Forcing Source</label><br />
-              <Select id="Forcing" v-model="selectedForcingValue" :options="getForcingOptionsList" optionLabel="display_name"
-                optionValue="name" class="user-select" @change="uploadForcingDlgOpen($event)"
-                :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
+              <Select id="Forcing" v-model="selectedForcingValue" :options="displayForcingOptionsList" 
+                optionLabel="display_name" optionValue="name" class="user-select" @change="uploadForcingDlgOpen($event)"
+                :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status) || displayForcingOptionsList.length === 1"
                 aria-label="Forcing Source Select" title="Forcing Source Select"></Select>
             </div>
           </div>
@@ -228,6 +228,15 @@ const selectedDomain = computed(() => {
   return '';
 });
 
+const displayForcingOptionsList = computed(() => {
+  if (selectedDomainValue.value !== 'CONUS') {
+    return getForcingOptionsList.value?.filter(option => {
+      return option.name !== 'AORC'
+    });
+  }
+  return getForcingOptionsList.value;
+});
+
 const resetData = ref<GageResetData>({
   external_data_status: {
     observational: false,
@@ -272,6 +281,11 @@ onMounted(async() => {
       selectedGeopackageValue.value = resetData.value.geopackage_source;
     }
     gageDataSourceHasChanged.value = false;
+    if (selectedDomainValue.value === 'CONUS' && selectedForcingValue.value === 'AORC') {
+      nextTick(() => {
+        selectedForcingValue.value = displayForcingOptionsList.value[0].name;
+      });
+    }
     isLoading.value = false;
   });
 })
@@ -290,6 +304,15 @@ watch(selectedDomain, () => {
     selectedDomainValue.value = selectedDomain?.value?.name ?? '';
   }
 });
+
+watch(selectedDomainValue, () => {
+  // update selected orcing source if we have an OCONUS domain and AORC was previously selected
+  if (selectedDomainValue.value !== 'CONUS' && selectedForcingValue.value === 'AORC') {
+    nextTick(() => {
+      selectedForcingValue.value = displayForcingOptionsList.value[0].name;
+    });
+  }
+})
 
 const onDomainSelectionChange = () => {
   gageDataSourceHasChanged.value = true;
