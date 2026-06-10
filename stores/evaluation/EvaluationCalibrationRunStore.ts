@@ -1,7 +1,7 @@
 // @ts-check
 import { defineStore, storeToRefs } from "pinia";
 
-import type { SelectOption, CalibrationValidationRunData, ValidatedevaluationRunList, CalibrationValidationJobList, CalibrationRunValidationParameterData } from "@/composables/NgencerfModels";
+import type { SelectOption, CalibrationValidationRunData, ValidatedEvaluationRunList, CalibrationValidationJobList, CalibrationRunValidationParameterData } from "@/composables/NgencerfModels";
 
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 import { generalStore } from "@/stores/common/GeneralStore";
@@ -152,7 +152,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
         include_archived: includeArchivedJobs.value
       }
     }
-    const runListDataResult = await makeProtectedApiCall<ValidatedevaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
+    const runListDataResult = await makeProtectedApiCall<ValidatedEvaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${getAccessToken()}`,
@@ -213,6 +213,63 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
   }
 
   /**
+   * fetch list of calibration job IDs only (for bulk actions)
+   * @return {void}
+   */
+  async function fetchUserValidatedCalibrationJobsListDataIdsOnly() {
+    // apply user's filters without paging, since we want the entire list
+    let requestBody = {
+      filters: {
+        domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
+        gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
+        module_filter: {
+          modules: modulesFilterList.value,
+          operator: moduleOperator.value === 'All' ? 'and' : 'or'
+        },
+        date_filter:
+            (createdAtStart.value && createdAtEnd.value) ? {
+              start_date: formatISOStringOrDateToYYYYMMDD(createdAtStart.value) + 'T00:00:00',
+              end_date: formatISOStringOrDateToYYYYMMDD(createdAtEnd.value) + 'T23:59:59',
+              operator: "between"
+            } : createdAtStart.value ? {
+              create_date: formatISOStringOrDateToYYYYMMDD(createdAtStart.value) + 'T00:00:00',
+              operator: "after"
+            } : createdAtEnd.value ? {
+              create_date: formatISOStringOrDateToYYYYMMDD(createdAtEnd.value) + 'T23:59:59',
+              operator: "before"
+            } : {}
+          ,
+        id_filter:
+          (jobIdStart.value && jobIdEnd.value) ? {
+            start_id: jobIdStart.value,
+            end_id: jobIdEnd.value,
+            operator: "between"
+          } : jobIdStart.value ? {
+            id: jobIdStart.value,
+            operator: "after"
+          } : jobIdEnd.value ? {
+            id: jobIdEnd.value,
+            operator: "before"
+          } : {}
+        ,
+        status: statusTypeFilterList.value,
+        include_archived: includeArchivedJobs.value
+      },
+      ids_only: true
+    }
+    const runListDataResult = await makeProtectedApiCall<ValidatedEvaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${getAccessToken()}`,
+        "Content-Type": 'application/json'
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    return runListDataResult?._data?.jobs ?? [];
+  }
+
+  /**
    * fetch user created calibration job list data by gage (for compare permutations)
    * @return {void}
    */
@@ -226,7 +283,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
         gage_id: uiCompareGageId.value && uiCompareGageId.value !== "All" ? uiCompareGageId.value: "",
       }
     }
-    const runListDataResult = await makeProtectedApiCall<ValidatedevaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
+    const runListDataResult = await makeProtectedApiCall<ValidatedEvaluationRunList>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${getAccessToken()}`,
@@ -484,6 +541,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
     setSelectedCalibrationRunId,
     loadSelectedCalibrationRun,
     fetchUserValidatedCalibrationJobsListData,
+    fetchUserValidatedCalibrationJobsListDataIdsOnly,
     fetchUserValidatedCalibrationJobsListDataForComparison,
     queryGetPlotNamesForComparison,
     queryGetPlotsForComparison,

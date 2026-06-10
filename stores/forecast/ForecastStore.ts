@@ -474,6 +474,58 @@ export const useForecastStore = defineStore('ForecastStore', () => {
   };
 
   /**
+ * fetch list of calibration job IDs only (for bulk actions)
+ * @return {void}
+ */
+  async function fetchCalibrationJobsForForecastIdsOnly() {
+    // apply user's filters without paging, since we want the entire list
+    let requestBody = {
+      filters: {
+        domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
+        gage_id: uiGageId.value && uiGageId.value !== "All" ? uiGageId.value: "",
+        date_filter:
+            (createdAtStart.value && createdAtEnd.value) ? {
+              start_date: formatISOStringOrDateToYYYYMMDD(createdAtStart.value) + 'T00:00:00',
+              end_date: formatISOStringOrDateToYYYYMMDD(createdAtEnd.value) + 'T23:59:59',
+              operator: "between"
+            } : createdAtStart.value ? {
+              create_date: formatISOStringOrDateToYYYYMMDD(createdAtStart.value) + 'T00:00:00',
+              operator: "after"
+            } : createdAtEnd.value ? {
+              create_date: formatISOStringOrDateToYYYYMMDD(createdAtEnd.value) + 'T23:59:59',
+              operator: "before"
+            } : {}
+          ,
+        id_filter:
+          (jobIdStart.value && jobIdEnd.value) ? {
+            start_id: jobIdStart.value,
+            end_id: jobIdEnd.value,
+            operator: "between"
+          } : jobIdStart.value ? {
+            id: jobIdStart.value,
+            operator: "after"
+          } : jobIdEnd.value ? {
+            id: jobIdEnd.value,
+            operator: "before"
+          } : {}
+        ,
+        include_archived: false,
+      },
+      ids_only: true
+    }
+    const runListDataResult = await makeProtectedApiCall<CalibrationRunsForForecast>(`${ngencerfBaseUrl}/calibration/get_calibration_jobs_for_evaluation/`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${getAccessToken()}`,
+        "Content-Type": 'application/json'
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    return runListDataResult?._data?.jobs ?? [];
+  }
+
+  /**
    * fetch list of gage IDs for calibration runs
    * @return {void}
    */
@@ -732,6 +784,7 @@ export const useForecastStore = defineStore('ForecastStore', () => {
     cancelForecastJob,
     deleteForecastJob,
     getCalibrationJobsForForecast,
+    fetchCalibrationJobsForForecastIdsOnly,
     resetUserSelectedForecastCalibrationRun,
     loadSelectedCalibrationRun,
     setSelectedCalibrationRunId,

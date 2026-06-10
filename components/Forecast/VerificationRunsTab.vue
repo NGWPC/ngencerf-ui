@@ -25,7 +25,7 @@
             :totalSize="verificationRunListTotalSize" :totalPages="verificationRunListTotalPages"
             v-model:currentPage="verificationRunListCurrentPage"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
-            @UpdateGageList="updateGageList()" ref="jobFilterDialog" />
+            @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
           <ConfirmDialog></ConfirmDialog>
           <ContextMenu :pt="{ root: { id: 'cr-context-menu' } }" class="bg-white" ref="vrContextMenu"

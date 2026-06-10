@@ -26,7 +26,7 @@
             :totalSize="hindcastRunListTotalSize" :totalPages="hindcastRunListTotalPages"
             v-model:currentPage="hindcastRunListCurrentPage"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
-            @UpdateGageList="updateGageList()" ref="jobFilterDialog" />
+            @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
           <ConfirmDialog></ConfirmDialog>
           <ContextMenu :pt="{ root: { id: 'cr-context-menu' } }" class="bg-white" ref="crContextMenu"
