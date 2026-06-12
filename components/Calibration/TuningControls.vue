@@ -570,6 +570,15 @@ const calculateTimeValues = () => {
         valSimStartTime.value = valStartTime.value.minus({ months: warmupDuration.value });
       }
     }
+    // now update userCalibrationRunData so we can see changes in real-time in MessagesGroup
+    userCalibrationRunData.value.calibration_times.simulation_start_time = calSimStartTime.value;
+    userCalibrationRunData.value.calibration_times.simulation_end_time = calSimEndTime.value;
+    userCalibrationRunData.value.calibration_times.calibration_start_time = calStartTime.value;
+    userCalibrationRunData.value.calibration_times.calibration_end_time = calEndTime.value;
+    userCalibrationRunData.value.validation_times.simulation_start_time = valSimStartTime.value;
+    userCalibrationRunData.value.validation_times.simulation_end_time = valSimEndTime.value;
+    userCalibrationRunData.value.validation_times.validation_start_time = valStartTime.value;
+    userCalibrationRunData.value.validation_times.validation_end_time = valEndTime.value;
   }
 }
 
@@ -577,10 +586,10 @@ const calculateTimeInputs = () => {
   if (calSimStartTime.value && isValidDateTime(calSimStartTime.value)) {
     if (calStartTime.value && isValidDateTime(calStartTime.value)) {
       // Warmup Duration = Calibration Start - Cal Simulation Start
-      warmupDuration.value = calStartTime.value.diff(calSimStartTime.value, 'months').months;
+      warmupDuration.value = Math.round(calStartTime.value.diff(calSimStartTime.value, 'months').months);
       if (calEndTime.value && isValidDateTime(calEndTime.value)) {
         // Calibration Duration = Calibration End - Calibration Start
-        calibrationDuration.value = calEndTime.value.plus({ hours: 1 }).diff(calStartTime.value, 'months').months;
+        calibrationDuration.value = Math.round(calEndTime.value.plus({ hours: 1 }).diff(calStartTime.value, 'months').months);
       }
     }
     if (calStartTime.value && isValidDateTime(calStartTime.value) && valEndTime.value && isValidDateTime(valEndTime.value)) {
@@ -590,7 +599,7 @@ const calculateTimeInputs = () => {
     }
     if (valStartTime.value && isValidDateTime(valStartTime.value) && valEndTime.value && isValidDateTime(valEndTime.value)) {
       // Validation Duration = Validation End - Validation Start
-      validationDuration.value = valEndTime.value.plus({ hours: 1 }).diff(valStartTime.value, 'months').months;
+      validationDuration.value = Math.round(valEndTime.value.plus({ hours: 1 }).diff(valStartTime.value, 'months').months);
     }
   }
 };
@@ -628,7 +637,6 @@ const minMaxSimStartProps = computed(() => {
     }
     props.maxDate = toPickerDate(props.maxDate);
   }
-  console.log('props:',props);
   return props;
 });
 
