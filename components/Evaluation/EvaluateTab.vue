@@ -1309,14 +1309,14 @@ const drawInteractivePlot = () => {
   if (calData?.value?.validation_times) {
     // create dashed vertical lines for Sim Start, Val Start, Val End
     if (calData?.value?.validation_times.simulation_start_time) {
-      let simStartTime = new Date(calData?.value?.validation_times.simulation_start_time);
-      if (simStartTime < new Date(plotGraphDateLimits.value.start)) {
+      let calSimStartTime = new Date(calData?.value?.validation_times.simulation_start_time);
+      if (calSimStartTime < new Date(plotGraphDateLimits.value.start)) {
         // Don't plot Sim Start Time outside of the range of our usable data
-        simStartTime = new Date(plotGraphDateLimits.value.start);
+        calSimStartTime = new Date(plotGraphDateLimits.value.start);
       }
-      if (simStartTime >= plotGraphLeftEdge && simStartTime <= plotGraphRightEdge) {
-        plotGraphOptions.value.marks.push(Plot.ruleX([simStartTime], { stroke: 'grey', strokeWidth: 2, strokeDasharray: 10 }));
-        plotGraphOptions.value.marks.push(Plot.text([" Sim Start Time "], { x: [simStartTime], frameAnchor: 'top', textAnchor: 'start' }));
+      if (calSimStartTime >= plotGraphLeftEdge && calSimStartTime <= plotGraphRightEdge) {
+        plotGraphOptions.value.marks.push(Plot.ruleX([calSimStartTime], { stroke: 'grey', strokeWidth: 2, strokeDasharray: 10 }));
+        plotGraphOptions.value.marks.push(Plot.text([" Sim Start Time "], { x: [calSimStartTime], frameAnchor: 'top', textAnchor: 'start' }));
       }
     }
     if (calData?.value?.validation_times.validation_start_time) {
