@@ -1,6 +1,10 @@
 <template>
   <div id="OptimizationMetrics" class="mt-4">
-    <div v-if="!userCalibrationRunData?.modules?.includes('LSTM')" class="grid grid-rows-12 gap-1">
+    <div v-if="disableAll" class="text-red-600">
+      Optimization Metrics cannot be set until Tuning Controls are set on the previous tab.
+    </div>
+    <div v-if="!userCalibrationRunData?.modules?.includes('LSTM')" class="grid grid-rows-12 gap-1"
+      :style="`opacity: ${disableAll ? '50%' : '100%'}`">
       <div class="row-span-3">
         <div class="grid grid-cols-2 pt-3 gap-10">
           <div class="col-span-1">
@@ -280,6 +284,10 @@ const cbIsEventBased = ref<boolean>(false);
 const showMetricPeakFlow = ref<boolean>(false);
 const showMetricStreamFlow = ref<boolean>(false);
 const ele = document.getElementById("MainLeftDataArea") as HTMLElement;
+
+const disableAll = computed(() => {
+  return (Object.keys(userCalibrationRunData?.value?.calibration_times).length === 0 || Object.keys(userCalibrationRunData?.value?.validation_times).length === 0);
+});
 
 onMounted(async() => {
   if (!optimizationTabData.value) {
