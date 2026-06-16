@@ -386,6 +386,15 @@ const calibrationDuration = ref<number>(60);
 const validationWindow = ref<string>('after');
 const validationDuration = ref<number>(36);
 
+const calSimStartTimeMin = ref<any>();
+const calSimStartTimeMax = ref<any>();
+const warmupDurationMin = ref<number>();
+const warmupDurationMax = ref<number>();
+const calibrationDurationMin = ref<number>();
+const calibrationDurationMax = ref<number>();
+const validationDurationMin = ref<number>();
+const validationDurationMax = ref<number>();
+
 const cmTuningParameterData = ref([
   { label: 'Delete', icon: 'pi pi-fw-times', command: () => deleteCalibrationTuningParameter(selectedTuningParameterData) }
 ]);
@@ -417,8 +426,7 @@ onMounted(async () => {
       selectedTuningParameterData.value = null;
     }
 
-    // if Tuning Tab static data is not loaded, fetch it
-    await loadTuningTabStaticData();
+    const tuningTabStaticData = await loadTuningTabStaticData();
     tuningStore_data_loading.value = false;
 
     await nextTick();
@@ -473,10 +481,16 @@ onMounted(async () => {
       }
     };
 
-    if (isValidDateTime(calSimStartTime.value)) {
-      // times were successfully set from the server - calculate field values
-      calculateTimeInputs();
-    } else {
+    if (tuningTabStaticData?._data?.time_range) {
+      // default time control inputs based on the server response
+      warmupDuration.value = tuningTabStaticData?._data?.time_range?.warmup_duration
+      calibrationDuration.value = tuningTabStaticData?._data?.time_range?.calibration_duration
+      validationWindow.value = tuningTabStaticData?._data?.time_range?.validation_window
+      validationDuration.value = tuningTabStaticData?._data?.time_range?.validation_duration
+    }
+
+    if (!isValidDateTime(calSimStartTime.value)) {
+      // default start time to the beginning of the date range
       calSimStartTime.value = minMaxSimStartProps.value.minDate;
       calculateTimeValues();
     }
@@ -544,7 +558,7 @@ const normalizeToUtcMidnight = (value: Date | string) => {
 const handleCalSimStartUpdate = (value: any) => {
   console.log('calSimStartTime changed to:', value);
   if (!value) return;
-  
+
   calSimStartTime.value = DateTime.fromJSDate(normalizeToUtcMidnight(value), { zone: 'utc' });
 
   if (calSimStartTime.value != userCalibrationRunData?.value?.calibration_times.simulation_start_time) {
@@ -554,80 +568,43 @@ const handleCalSimStartUpdate = (value: any) => {
   calculateTimeValues();
 };
 
-const calculateTimeValues = () => {
-  if (calSimStartTime.value && isValidDateTime(calSimStartTime.value)) {
-    // Make sure the time is set to 00:00 UTC
-    console.log('calSimStartTime:',calSimStartTime.value.toJSDate());
-    if (warmupDuration.value) {
-      // Calibration Start = Cal Simulation Start + Warmup Duration
-      calStartTime.value = calSimStartTime.value.plus({ months: warmupDuration.value });
-    }
-    if (calStartTime.value && isValidDateTime(calStartTime.value) && calibrationDuration.value) {
-      // Calibration End & Cal Simulation End = Calibration Start + Calibration Duration
-      calEndTime.value = calSimEndTime.value = calStartTime.value.plus({ months: calibrationDuration.value }).minus({ hours: 1 });
-    }
-    if (validationWindow.value === 'after') {
-      // Val Simulation Start = Cal Simulation Start
-      valSimStartTime.value = calSimStartTime.value;
-      if (calEndTime.value && isValidDateTime(calEndTime.value)) {
-        // Validation Start = Calibration End + 1 hour
-        valStartTime.value = calEndTime.value.plus({ hours: 1 });
+const calculateTimeValues = async() => {
+  if (isValidDateTime(calSimStartTime.value)) {
+    const validateTuningTimesResponse = await validateTuningTimes();
+    if (validateTuningTimesResponse.ok) {
+      // set calibration times
+      if (validateTuningTimesResponse?._data?.calibration_times && Object.keys(validateTuningTimesResponse._data.calibration_times).length > 0) {
+        calSimEndTime.value = DateTime.fromISO(validateTuningTimesResponse._data.calibration_times.simulation_end_time, { zone: 'utc' });
+        calStartTime.value = DateTime.fromISO(validateTuningTimesResponse._data.calibration_times.calibration_start_time, { zone: 'utc' });
+        calEndTime.value = DateTime.fromISO(validateTuningTimesResponse._data.calibration_times.calibration_end_time, { zone: 'utc' });
       }
-      if (valStartTime.value && isValidDateTime(valStartTime.value) && validationDuration.value) {
-        // Validation End & Val Simulation End = Validation Start + Validation Duration
-        valEndTime.value = valSimEndTime.value = valStartTime.value.plus({ months: validationDuration.value }).minus({ hours: 1 });;
+
+      // set automatic validation times
+      if (validateTuningTimesResponse?._data?.validation_times && Object.keys(validateTuningTimesResponse._data.validation_times).length > 0) {
+        valSimStartTime.value = DateTime.fromISO(validateTuningTimesResponse._data.validation_times.simulation_start_time, { zone: 'utc' });
+        valSimEndTime.value = DateTime.fromISO(validateTuningTimesResponse._data.validation_times.simulation_end_time, { zone: 'utc' });
+        valStartTime.value = DateTime.fromISO(validateTuningTimesResponse._data.validation_times.validation_start_time, { zone: 'utc' });
+        valEndTime.value = DateTime.fromISO(validateTuningTimesResponse._data.validation_times.validation_end_time, { zone: 'utc' });
+      }
+
+      // set min/max input values
+      if (validateTuningTimesResponse?._data?.time_control_limits && Object.keys(validateTuningTimesResponse._data.validation_times).time_control_limits > 0) {
+        calSimStartTimeMin.value = DateTime.fromISO(validateTuningTimesResponse._data.time_control_limits.simulation_start_time_min, { zone: 'utc' });
+        calSimStartTimeMax.value = DateTime.fromISO(validateTuningTimesResponse._data.time_control_limits.simulation_start_time_max, { zone: 'utc' });
+        warmupDurationMin.value = validateTuningTimesResponse._data.time_control_limits.warmup_duration_min;
+        warmupDurationMax.value = validateTuningTimesResponse._data.time_control_limits.warmup_duration_max;
+        calibrationDurationMin.value = validateTuningTimesResponse._data.time_control_limits.calibration_duration_min;
+        calibrationDurationMax.value = validateTuningTimesResponse._data.time_control_limits.calibration_duration_max;
+        validationDurationMin.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_min;
+        validationDurationMax.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_max;
       }
     } else {
-      if (calStartTime.value && isValidDateTime(calStartTime.value)) {
-        // Validation End = Calibration Start - 1 hour
-        valEndTime.value = calStartTime.value.minus({ hours: 1 });
-      }
-      if (calStartTime.value && isValidDateTime(calStartTime.value)) {
-        // Val Simulation End = Calibration End
-        valSimEndTime.value = calEndTime.value;
-      }
-      if (valEndTime.value && isValidDateTime(valEndTime.value) && validationDuration.value) {
-        // Validation Start = Validation End - Validation Duration
-        valStartTime.value = valEndTime.value.minus({ months: validationDuration.value });
-      }
-      if (valStartTime.value && isValidDateTime(valStartTime.value) && warmupDuration.value) {
-        // Val Simulation Start = Validation Start - Warmup Duration
-        valSimStartTime.value = valStartTime.value.minus({ months: warmupDuration.value });
-      }
+      // TO DO: Show error messages
     }
-    // now update userCalibrationRunData so we can see changes in real-time in MessagesGroup
-    userCalibrationRunData.value.calibration_times.simulation_start_time = calSimStartTime.value;
-    userCalibrationRunData.value.calibration_times.simulation_end_time = calSimEndTime.value;
-    userCalibrationRunData.value.calibration_times.calibration_start_time = calStartTime.value;
-    userCalibrationRunData.value.calibration_times.calibration_end_time = calEndTime.value;
-    userCalibrationRunData.value.validation_times.simulation_start_time = valSimStartTime.value;
-    userCalibrationRunData.value.validation_times.simulation_end_time = valSimEndTime.value;
-    userCalibrationRunData.value.validation_times.validation_start_time = valStartTime.value;
-    userCalibrationRunData.value.validation_times.validation_end_time = valEndTime.value;
+  } else {
+    // TO DO: Toast message saying sim start time is invalid
   }
 }
-
-const calculateTimeInputs = () => {
-  if (calSimStartTime.value && isValidDateTime(calSimStartTime.value)) {
-    if (calStartTime.value && isValidDateTime(calStartTime.value)) {
-      // Warmup Duration = Calibration Start - Cal Simulation Start
-      warmupDuration.value = Math.round(calStartTime.value.diff(calSimStartTime.value, 'months').months);
-      if (calEndTime.value && isValidDateTime(calEndTime.value)) {
-        // Calibration Duration = Calibration End - Calibration Start
-        calibrationDuration.value = Math.round(calEndTime.value.plus({ hours: 1 }).diff(calStartTime.value, 'months').months);
-      }
-    }
-    if (calStartTime.value && isValidDateTime(calStartTime.value) && valEndTime.value && isValidDateTime(valEndTime.value)) {
-      // Validation Window is "before" if Validation Start and End Dates are before Calibration Start
-      // Otherwise let it default to "after"
-      validationWindow.value = valEndTime.value < calStartTime.value ? 'before' : 'after';
-    }
-    if (valStartTime.value && isValidDateTime(valStartTime.value) && valEndTime.value && isValidDateTime(valEndTime.value)) {
-      // Validation Duration = Validation End - Validation Start
-      validationDuration.value = Math.round(valEndTime.value.plus({ hours: 1 }).diff(valStartTime.value, 'months').months);
-    }
-  }
-};
 
 const asDateTime = (v) => {
   if (!v) return null;
@@ -645,145 +622,32 @@ const toPickerDate = (iso) => {
 };
 
 const minMaxSimStartProps = computed(() => {
-  const props = {};
-  if (dateRangeBegin.value) {
-    props.minDate = asDateTime(dateRangeBegin.value);
-    if (validationWindow.value === 'before') {
-      props.minDate = props.minDate.plus({ months: validationDuration.value }).plus({ days: 1});
-    }
-    props.minDate = toPickerDate(props.minDate);
-  }
-  if (dateRangeEnd.value) {
-    // offset the max date so that the calibration cannot end after it
-    props.maxDate = asDateTime(dateRangeEnd.value).minus({ months: warmupDuration.value + calibrationDuration.value});
-    if (validationWindow.value === 'after') {
-      // offset the max date further to account for the validation period
-      props.maxDate = props.maxDate.minus({ months: validationDuration.value }).minus({ days: 1});
-    }
-    props.maxDate = toPickerDate(props.maxDate);
-  }
-  return props;
+  return {
+    minDate: calSimStartTimeMin.value ? new Date(calSimStartTimeMin.value) : undefined,
+    maxDate: calSimStartTimeMax.value ? new Date(calSimStartTimeMax.value) : undefined
+  };
 });
 
-// ================================
-// Unified Duration Constraint Engine
-// ================================
+const minMaxWarmupDurationProps = computed(() => {
+  return {
+    min: warmupDurationMin.value ? warmupDurationMin.value : undefined,
+    max: warmupDurationMax.value ? warmupDurationMax.value : undefined
+  };
+});
 
-const isAfter = computed(() => validationWindow.value === 'after');
+const minMaxCalibrationDurationProps = computed(() => {
+  return {
+    min: calibrationDurationMin.value ? calibrationDurationMin.value : undefined,
+    max: calibrationDurationMax.value ? calibrationDurationMax.value : undefined
+  };
+});
 
-const availableMonthsFromSimStart = () => {
-  if (!dateRangeEnd.value || !calSimStartTime.value || !isValidDateTime(calSimStartTime.value)) {
-    return 0;
-  }
-
-  return asDateTime(dateRangeEnd.value).diff(calSimStartTime.value, 'months').months;
-};
-
-const monthsFromRangeBeginToSimStart = () => {
-  if (!dateRangeBegin.value || !calSimStartTime.value || !isValidDateTime(calSimStartTime.value)) {
-    return 0;
-  }
-
-  return calSimStartTime.value.diff(asDateTime(dateRangeBegin.value), 'months').months;
-};
-
-// --------------------------------
-// CORE CONSTRAINT FUNCTION
-// --------------------------------
-
-const getConstraint = (type) => {
-  const available = availableMonthsFromSimStart();
-
-  const warmup = warmupDuration.value || 0;
-  const calibration = calibrationDuration.value || 0;
-  const validation = validationDuration.value || 0;
-
-  // ============================
-  // WARMUP CONSTRAINTS
-  // ============================
-  if (type === 'warmup') {
-    return {
-      min: 0,
-      max: Math.max(
-        0,
-        Math.floor(
-          available
-          - calibration
-          - (isAfter.value ? validation + 1 : 0)
-        )
-      )
-    };
-  }
-
-  // ============================
-  // CALIBRATION CONSTRAINTS
-  // ============================
-  if (type === 'calibration') {
-    return {
-      min: 1,
-      max: Math.max(
-        1,
-        Math.floor(
-          available
-          - warmup
-          - (isAfter.value ? validation + 1 : 0)
-        )
-      )
-    };
-  }
-
-  // ============================
-  // VALIDATION CONSTRAINTS
-  // ============================
-  if (type === 'validation') {
-    if (isAfter.value) {
-      // Validation extends RIGHT side of timeline
-      return {
-        min: 1,
-        max: Math.max(
-          1,
-          Math.floor(
-            available
-            - warmup
-            - calibration
-            - 1 // gap
-          )
-        )
-      };
-    }
-
-    // BEFORE:
-    // Validation is constrained by LEFT side only
-    return {
-      min: 1,
-      max: Math.max(
-        1,
-        Math.floor(
-          monthsFromRangeBeginToSimStart()
-        )
-      )
-    };
-  }
-
-  // fallback
-  return { min: 0, max: 0 };
-};
-
-// ================================
-// Vue bindings
-// ================================
-
-const minMaxWarmupDurationProps = computed(() =>
-  getConstraint('warmup')
-);
-
-const minMaxCalibrationDurationProps = computed(() =>
-  getConstraint('calibration')
-);
-
-const minMaxValidationDurationProps = computed(() =>
-  getConstraint('validation')
-);
+const minMaxValidationDurationProps = computed(() => {
+  return {
+    min: validationDurationMin.value ? validationDurationMin.value : undefined,
+    max: validationDurationMax.value ? validationDurationMax.value : undefined
+  };
+});
 
 // Convert convertSelectedCalSimStartTimeToDateTimeObject string to Date object
 // VueDatePicker sets calSimStartTime to a string, so we need to convert it to a Date object
@@ -1029,21 +893,14 @@ const AutoValChecked = () => {
 const validateAndBuildRequestBody = (): boolean => {
   saveTuningTabRequestBody.value.calibration_run_id = calibrationJobId.value;
 
-  // only send calibration/validation dates in the payload to the server if ALL are valid
-  if (areCalibrationTimesSet() && areCalibrationTimesValidated() && areValidationTimesSet() && areValidationTimesValidated()) {
-    saveTuningTabRequestBody.value.calibration_times = {
-      simulation_start_time: calSimStartTime.value,
-      simulation_end_time: calSimEndTime.value,
-      calibration_start_time: calStartTime.value,
-      calibration_end_time: calEndTime.value
-    };
-    saveTuningTabRequestBody.value.validation_times = {
-      simulation_start_time: valSimStartTime.value,
-      simulation_end_time: valSimEndTime.value,
-      validation_start_time: valStartTime.value,
-      validation_end_time: valEndTime.value
-    };
-  }
+  // TO DO: How do we know from the last validation call to the server that these are valid?
+  saveTuningTabRequestBody.value.calibration_times = {
+    simulation_start_time: calSimStartTime.value,
+    warmup_duration: warmupDuration.value,
+    calibration_duration: calibrationDuration.value,
+    validation_window: validationWindow.value,
+    validation_duration: validationDuration.value
+  };
 
   saveTuningTabRequestBody.value.automatic_validation = automatic_validation.value;
 
@@ -1281,7 +1138,7 @@ const saveTuningData = () => {
   const handleSaveTuningTab = async () => {
     const saveTuningTabResponse = await saveTuningTabData();
     if (saveTuningTabResponse?.ok) {
-      if (saveTuningTabRequestBody.value?.calibration_times && saveTuningTabRequestBody.value?.validation_times) {
+      if (saveTuningTabRequestBody.value?.time_controls) {
         // times and calibratable parameters were both saved
         const tMsg: ToastMessageOptions = {
           severity: 'success', summary: `Success`,
@@ -1365,24 +1222,10 @@ const saveTuningData = () => {
   const updateJobData = () => {
     if (userCalibrationRunData.value) {
       userCalibrationRunData.value.automatic_validation = saveTuningTabRequestBody.value.automatic_validation;
-      // saveTuningTabRequestBody.value.calibration_times are in Luxon DateTime format. Calling toISO() to convert to string
-      if (saveTuningTabRequestBody.value.calibration_times && Object.keys(saveTuningTabRequestBody.value.calibration_times).length) {
-        userCalibrationRunData.value.calibration_times = {
-          calibration_start_time: saveTuningTabRequestBody.value.calibration_times.calibration_start_time.toISO(),
-          calibration_end_time: saveTuningTabRequestBody.value.calibration_times.calibration_end_time.toISO(),
-          simulation_start_time: saveTuningTabRequestBody.value.calibration_times.simulation_start_time.toISO(),
-          simulation_end_time: saveTuningTabRequestBody.value.calibration_times.simulation_end_time.toISO()
-        }
-      }
-      // saveTuningTabRequestBody.value.validation_times are in Luxon DateTime format. Calling toISO() to convert to string
-
-      if (saveTuningTabRequestBody.value.validation_times && Object.keys(saveTuningTabRequestBody.value.validation_times).length) {
-        userCalibrationRunData.value.validation_times = {
-          validation_start_time: saveTuningTabRequestBody.value.validation_times.validation_start_time.toISO(),
-          validation_end_time: saveTuningTabRequestBody.value.validation_times.validation_end_time.toISO(),
-          simulation_start_time: saveTuningTabRequestBody.value.validation_times.simulation_start_time.toISO(),
-          simulation_end_time: saveTuningTabRequestBody.value.validation_times.simulation_end_time.toISO()
-        }
+      // simulation_start_time is in Luxon DateTime format. Calling toISO() to convert to string
+      if (saveTuningTabRequestBody.value.time_controls && Object.keys(saveTuningTabRequestBody.value.time_controls).length) {
+        userCalibrationRunData.value.time_controls = saveTuningTabRequestBody.value.time_controls;
+        userCalibrationRunData.value.time_controls.simulation_start_time = userCalibrationRunData.value.time_controls.simulation_start_time.toISO();
       }
       
       if (saveTuningTabRequestBody.value.output_variable_to_calibrate) {
@@ -1390,8 +1233,8 @@ const saveTuningData = () => {
       }
       userCalibrationRunData.value.parameters = userSelectedCalibrationTuningParameters.value;
       userCalibrationRunData.value.parameters_selected = userSelectedCalibrationTuningParameters.value.length > 0;
+      userCalibrationRunData.value.last_updated_on = formatISOStringOrDateToYYYYMMDDHHMM(nowUTC());
     }
-    userCalibrationRunData.value.last_updated_on = formatISOStringOrDateToYYYYMMDDHHMM(nowUTC());
   };
 
   if (!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)) {
@@ -1574,6 +1417,10 @@ onUnmounted(async () => {
   valSimEndTime.value = '';
   valStartTime.value = '';
   valEndTime.value = '';
+  warmupDuration.value = 0;
+  calibrationDuration.value = 1;
+  validationWindow.value = 'after';
+  validationDuration.value = 1;
   calibratableParametersHaveChanged.value = false;
   tuningDataHasChanged.value = false;
 })
