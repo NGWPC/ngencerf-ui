@@ -42,6 +42,7 @@ export const useTuningStore = defineStore(
     const dateRangeEnd = ref<any>();
 
     const tuningStore_data_loading = ref(true);
+    const validateTuningTimesRequestBody = ref<any>({});
     const saveTuningTabRequestBody = ref<any>({});
 
     const selectedOutputVariableToCalibrate = ref<string>("Streamflow");
@@ -138,6 +139,24 @@ export const useTuningStore = defineStore(
     }
 
     /**
+     * return validate tuning times response from the server
+     * @returns {GeneralApiSaveResponse}
+     */
+    async function validateTuningTimes() {
+      return await makeProtectedApiCall<any>(
+        `${ngencerfBaseUrl}/calibration/validate_tuning_times/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${getAccessToken()}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(validateTuningTimesRequestBody.value),
+        }
+      );
+    }
+
+    /**
      * Save Tuning Tab data
      * @returns {Promise<any>} SaveTuningTab data
      */
@@ -223,8 +242,10 @@ export const useTuningStore = defineStore(
       automatic_validation,
       calibratableParametersHaveChanged,
       tuningDataHasChanged,
+      validateTuningTimesRequestBody,
       saveTuningTabRequestBody,
       tuningParametersAreValid,
+      validateTuningTimes,
       validateTuningParameters,
       saveTuningTabData,
       clearCalibratableParameters,
