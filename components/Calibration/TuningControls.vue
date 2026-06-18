@@ -53,7 +53,8 @@
                       </th>
                       <td class="text-left pr-2 pb-1 w-1">
                         <InputNumber id="WarmupDuration" v-model="warmupDuration" class="w-20 p-1" 
-                          aria-label="Warmup Duration" title="Warmup Duration" v-bind="minMaxWarmupDurationProps">
+                          aria-label="Warmup Duration" title="Warmup Duration" v-bind="minMaxWarmupDurationProps"
+                          :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">
                         </InputNumber>
                       </td>
                       <td class="text-left pb-1 align-middle whitespace-nowrap">
@@ -68,7 +69,8 @@
                       </th>
                       <td class="text-left pr-2 pb-1 w-1">
                         <InputNumber id="CalibrationDuration" v-model="calibrationDuration" class="w-20 p-1" 
-                          aria-label="Calibration Duration" title="Calibration Duration" v-bind="minMaxCalibrationDurationProps">
+                          aria-label="Calibration Duration" title="Calibration Duration" v-bind="minMaxCalibrationDurationProps"
+                          :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">
                         </InputNumber>
                       </td>
                       <td class="text-left pb-1 align-middle whitespace-nowrap">
@@ -86,7 +88,8 @@
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                           <label v-for="[label, val] in [['Before', 'before'], ['After', 'after']]" :key="label as string"
                             class="flex items-center gap-1.5 cursor-pointer">
-                            <input type="radio" :value="val" v-model="validationWindow" class="accent-blue-600"/>
+                            <input type="radio" :value="val" v-model="validationWindow" class="accent-blue-600"
+                              :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"/>
                             <span>{{ label }}</span>
                           </label>
                         </div>
@@ -100,7 +103,8 @@
                       </th>
                       <td class="text-left pr-2 w-1">
                         <InputNumber id="ValidationDuration" v-model="validationDuration" class="w-20 p-1" 
-                          aria-label="Validation Duration" title="Validation Duration" v-bind="minMaxValidationDurationProps">
+                          aria-label="Validation Duration" title="Validation Duration" v-bind="minMaxValidationDurationProps"
+                          :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">
                         </InputNumber>
                       </td>
                       <td class="text-left align-middle whitespace-nowrap">
@@ -565,6 +569,7 @@ const handleCalSimStartUpdate = (value: any) => {
 };
 
 watch([calSimStartTime, warmupDuration, calibrationDuration, validationWindow, validationDuration], () => {
+  if (!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)) return;
   if (!DateTime.isDateTime(calSimStartTime.value)) return;
   if (!warmupDuration.value) warmupDuration.value = minMaxWarmupDurationProps.value.min;
   if (!calibrationDuration.value) calibrationDuration.value = minMaxCalibrationDurationProps.value.min;
@@ -630,7 +635,6 @@ const calculateTimeValues = async() => {
         validationDurationMin.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_min;
         validationDurationMax.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_max;
       }
-      console.log(minMaxSimStartProps.value);
     } else if (validateTuningTimesResponse._data?.message) {
       // Show error messages
       let errorMessage = validateTuningTimesResponse._data?.message;

@@ -570,7 +570,7 @@ const openSelectedCalibrationRun = async () => {
           } else if (userCalibrationRunData?.value?.modules.length < 2) {
             // Go to Formulation if Modules are not set
             props.callGoToTab(3);
-          } else if (Object.keys(userCalibrationRunData?.value?.calibration_times).length === 0 || Object.keys(userCalibrationRunData?.value?.validation_times).length === 0) {
+          } else if (!userCalibrationRunData?.value?.time_controls?.simulation_start_time) {
             // Go to Tuning Controls if calibration/validation times are not set
             // TO DO: Also check Tuning Parameters for non-LSTM jobs
             props.callGoToTab(4);
