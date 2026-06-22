@@ -1308,6 +1308,9 @@ const validateTab = (tabNumber?: number) => {
 }
 
 const compareTimeEntries = (txtDT: string, dT: Date) => {
+  if(!txtDT || txtDT === '' || !dT) {
+    return true;
+  }
   const dateProps = dT as DatePickerProps;
   if (!txtDT && dateProps.invalid) {
     return false;
