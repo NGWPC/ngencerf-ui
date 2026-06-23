@@ -137,11 +137,10 @@
             <div class="mb-0 font-bold mt-2">Load Calibratable Parameters from File</div>
             <div class="mb-2 font-sm italic mt-0">(file contents added to table below)</div>
             <div id="UploadParams" class=" inline ml-3" style="position: relative;">
-              <input type="file" ref="fileInput" class="hidden" @change="handleFileUpload" />
-              <Button class="ngenButtonDiv-alt" @click="triggerFileInput"
+              <Button class="ngenButtonDiv-alt" @click="uploadTuningParamsDlgOpen"
                 :disabled="!isFormulationDataSaved() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                 aria-label="Load Parameters from File optional" title="Load Parameters from File optional">
-                Select File (optional)</Button>
+                Select File(s) (optional)</Button>
             </div>
           </div>
 
@@ -321,7 +320,10 @@ import { ifEDSErrorsExist } from "@/utils/TuningControlsHelpers";
 import { formatDateForRunOnString } from "@/utils/TimeHelpers";
 import { hilightTab } from '@/composables/TabHilight';
 
+import FileUploadDialog from "../Common/FileUploadDialog.vue";
+
 const dialog = useDialog();
+const fileUploadDialogOpened = ref<boolean>(false);
 const nextPrevDialogOpened = ref<boolean>(false);
 
 const format = formatISOStringOrDateToYYYYMMDDHHMM;
@@ -690,113 +692,140 @@ const minMaxValidationDurationProps = computed(() => {
   };
 });
 
-/**
- * Trigger file input dialog
- */
-const triggerFileInput = () => {
-  if (fileInput.value && isFormulationDataSaved() && isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)) {
-    if (fileInput.value.value) {
-      fileInput.value.value = '';
-    }
-    fileInput.value.click();
+const uploadTuningParamsDlgOpen = () => {
+  showTuningParamsFileUploadDialog('Tuning Parameter Files')
+}
+
+const showTuningParamsFileUploadDialog = (headerText: string) => {
+  if (!fileUploadDialogOpened.value) {
+    dialog.open(FileUploadDialog, {
+      props: {
+        header: `Upload ${headerText}`,
+        style: {
+          width: 'auto',
+        },
+        modal: true,
+      },
+      data: {
+        selectMultiple: true,
+        fileExtension: '.csv',
+        inputName: 'user_parameter_files[]',
+        calibrationRunId: calibrationJobId.value,
+        formFileField: 'user_parameter_files',
+        saveFunction: saveUserTuningParamsFiles
+      },
+      onClose: (opt) => {
+        handleDialogClose(opt)
+      },
+    })
+    fileUploadDialogOpened.value = true
   }
-};
+}
 
-/**
- * Handle parameter file upload
- * @param event
- */
-const handleFileUpload = async (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  const file = target.files?.[0]; // get the first file we see
-  let errorMessage = '';
-  let invalidParameters: any[] = [];
-  if (file) {
-    try {
-      const formData = new FormData();
-      formData.append('user_parameter_file', file);
-      formData.append('calibration_run_id', String(calibrationJobId.value));
+const handleDialogClose = (opt: any) => {
+  if (opt.type === 'dialog-close' && !opt.data) {
+    fileUploadDialogOpened.value = false;
+    return;
+  }
 
-      const response: any = await makeProtectedApiCall<any>(
-        `${ngencerfBaseUrl}/calibration/upload_user_parameters/`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${getAccessToken()}`,
-          },
-          body: formData,
-        });
-      if (response.error && response.error === TokenExpired) {
-        alert("Your session had timed out");
-        navigateTo('login');
-      } else if (response?._data.user_parameter_file) {
-        // Populate the Parameter table with the data from user-uploaded file
-        response._data?.user_parameter_file?.forEach((param: any) => {
-          if (
-            isNotNullOrUndefined(param.param) &&
-            isNotNullOrUndefined(param.min) &&
-            isNotNullOrUndefined(param.max) &&
-            isNotNullOrUndefined(param.init) &&
-            isNotNullOrUndefined(param.model)) {
-            // check if parameter is in the calibrationTuningParameters list and that the module name matches, which is the list of calibratable parameters
-            const isParameterInCalibratableList = calibrationTuningParameters?.value?.some((paramData: any) => paramData.name === param.param && paramData.module === param.model);
-
-            // if parameter is not in the list of calibratable parameters, add it to the list of invalid parameters
-            if (!isParameterInCalibratableList) {
-              invalidParameters.push(param.param);
-            }
-
-            // check if parameter is already in the table
-            const isParameterAlreadyInTable = userSelectedCalibrationTuningParameters?.value?.some((paramData: any) => paramData.name === param.param);
-
-            // if parameter we are adding is already in the table, delete the parameter from the table so we can override it
-            if (isParameterAlreadyInTable) {
-              userSelectedCalibrationTuningParameters.value = userSelectedCalibrationTuningParameters?.value?.filter((paramData: any) => paramData.name !== param.param);
-            }
-
-            // add parameter to the table if it is in the list of calibratable parameters
-            if (isParameterInCalibratableList) {
-              userSelectedCalibrationTuningParameters?.value?.push({
-                name: param.param,
-                minimum: param.min,
-                maximum: param.max,
-                initial_value: param.init,
-                module: param.model, // module?
-              });
-            }
-          } else {
-            errorMessage = response._data?.message;
-            const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Invalid data in parameter file', detail: errorMessage, life: ToastTimeout.timeoutError };
-            toast.add(tMsg); addToastRecord(tMsg);
-          }
-        });
-
-        calibratableParametersHaveChanged.value = true;
-        tuningDataHasChanged.value = true;
-
-        // scroll to the bottom of the page and table
-        scrollToBottom();
-
-        if (invalidParameters.length > 0) {
-          const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Invalid parameters in parameter file', detail: `The following parameters in the uploaded file were not imported because they are not calibratable:\n ${invalidParameters.join(', ')}`, life: ToastTimeout.timeoutWarn };
-          toast.add(tMsg); addToastRecord(tMsg);
-        }
-      } else {
-        errorMessage = response._data?.message;
-        const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Invalid data in parameter file', detail: errorMessage, life: ToastTimeout.timeoutWarn };
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-    } catch (error) {
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'File upload failed', life: ToastTimeout.timeoutError };
+  if (opt && opt.data) {
+    if (opt.data.saveFileResponseResult.status === 200) {
+      const tMsg: ToastMessageOptions = { severity: 'info', summary: `File upload Completed`, detail: opt.data.saveFileResponseResult._data.message, life: ToastTimeout.timeoutInfo };
       toast.add(tMsg); addToastRecord(tMsg);
-      console.error('File upload failed:', error);
+    } else {
+      useApiErrorResponsePreprocess(opt.data.saveFileResponseResult).forEach(message => {
+        const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(opt.data.saveFileResponseResult?.status), summary: 'File upload Failed.', detail: message, life: useApiResponseToastSeverityLife(opt.data.saveFileResponseResult?.status) };
+        toast.add(tMsg); addToastRecord(tMsg);
+      });
     }
   } else {
-    const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'No file selected', life: ToastTimeout.timeoutWarn };
+    const tMsg: ToastMessageOptions = { severity: 'error', summary: `File upload Error`, detail: "There was an error when trying to upload selected file(s).", life: ToastTimeout.timeoutInfo };
     toast.add(tMsg); addToastRecord(tMsg);
-    console.error('No file selected');
   }
-};
+  fileUploadDialogOpened.value = false
+}
+
+/**
+ *
+ * @param formData
+ * @returns {GeneralApiSaveResponse | GeneralErrorResponse}
+ */
+async function saveUserTuningParamsFiles(formData: FormData) {
+  let errorMessage = '';
+  let invalidParameters: any[] = [];
+  const saveUserTuningParamsFilesResponse = await makeProtectedApiCall<
+    GeneralApiSaveResponse | GeneralErrorResponse
+  >(`${ngencerfBaseUrl}/calibration/upload_user_parameters/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getAccessToken()}`,
+    },
+    body: formData,
+  });
+  if (saveUserTuningParamsFilesResponse.error && saveUserTuningParamsFilesResponse.error === TokenExpired) {
+    alert("Your session had timed out");
+    navigateTo('login');
+  } else if (saveUserTuningParamsFilesResponse?._data.user_parameter_files) {
+    // Populate the Parameter table with the data from user-uploaded file
+    saveUserTuningParamsFilesResponse._data?.user_parameter_files?.forEach((file: any) => {
+      file.forEach((param: any) => {
+        if (
+          isNotNullOrUndefined(param.param) &&
+          isNotNullOrUndefined(param.min) &&
+          isNotNullOrUndefined(param.max) &&
+          isNotNullOrUndefined(param.init) &&
+          isNotNullOrUndefined(param.model)) {
+          // check if parameter is in the calibrationTuningParameters list and that the module name matches, which is the list of calibratable parameters
+          const isParameterInCalibratableList = calibrationTuningParameters?.value?.some((paramData: any) => paramData.name === param.param && paramData.module === param.model);
+
+          // if parameter is not in the list of calibratable parameters, add it to the list of invalid parameters
+          if (!isParameterInCalibratableList) {
+            invalidParameters.push(param.param);
+          }
+
+          // check if parameter is already in the table
+          const isParameterAlreadyInTable = userSelectedCalibrationTuningParameters?.value?.some((paramData: any) => paramData.name === param.param);
+
+          // if parameter we are adding is already in the table, delete the parameter from the table so we can override it
+          if (isParameterAlreadyInTable) {
+            userSelectedCalibrationTuningParameters.value = userSelectedCalibrationTuningParameters?.value?.filter((paramData: any) => paramData.name !== param.param);
+          }
+
+          // add parameter to the table if it is in the list of calibratable parameters
+          if (isParameterInCalibratableList) {
+            userSelectedCalibrationTuningParameters?.value?.push({
+              name: param.param,
+              minimum: param.min,
+              maximum: param.max,
+              initial_value: param.init,
+              module: param.model, // module?
+            });
+          }
+        } else {
+          errorMessage = saveUserTuningParamsFilesResponse._data?.message;
+          const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Invalid data in parameter file', detail: errorMessage, life: ToastTimeout.timeoutError };
+          toast.add(tMsg); addToastRecord(tMsg);
+        }
+      });
+    });
+
+    calibratableParametersHaveChanged.value = true;
+    tuningDataHasChanged.value = true;
+
+    // scroll to the bottom of the page and table
+    scrollToBottom();
+
+    if (invalidParameters.length > 0) {
+      const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Invalid parameters in parameter file', detail: `The following parameters in the uploaded file were not imported because they are not calibratable:\n ${invalidParameters.join(', ')}`, life: ToastTimeout.timeoutWarn };
+      toast.add(tMsg); addToastRecord(tMsg);
+    }
+  } else {
+    errorMessage = saveUserTuningParamsFilesResponse._data?.message;
+    const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Invalid data in parameter file', detail: errorMessage, life: ToastTimeout.timeoutWarn };
+    toast.add(tMsg); addToastRecord(tMsg);
+  }
+}
+
 
 /**
  * Add selected calibration tuning parameter to the table when Add / Update button is clicked
