@@ -618,7 +618,6 @@ const startRun = async () => {
         }
       }
     } else {
-      runButtonDisabled.value = false;
       cancelButtonDisabled.value = true;
       const getStatusResponse = await queryGetCalibrationStatus(userCalibrationRunData?.value?.calibration_run_id as number);
       
