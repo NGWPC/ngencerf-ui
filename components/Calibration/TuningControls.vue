@@ -729,11 +729,8 @@ const handleDialogClose = (opt: any) => {
   }
 
   if (opt && opt.data) {
-    if (opt.data?.saveFileResponseResult?.status === 200) {
-      const tMsg: ToastMessageOptions = { severity: 'info', summary: `File upload Completed`, detail: opt.data.saveFileResponseResult._data.message, life: ToastTimeout.timeoutInfo };
-      toast.add(tMsg); addToastRecord(tMsg);
-    } else if (opt.data?.saveFileResponseResult?._data?.message){
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: `File upload Error`, detail: opt.data.saveFileResponseResult._data.message, life: ToastTimeout.timeoutInfo };
+    if (opt.data?.saveFileResponseResult?.status !== 200) {
+      const tMsg: ToastMessageOptions = { severity: 'error', summary: `File upload Error`, detail: opt.data?.saveFileResponseResult?._data?.message, life: ToastTimeout.timeoutInfo };
       toast.add(tMsg); addToastRecord(tMsg);
     }
   } else {
@@ -767,7 +764,7 @@ async function saveUserTuningParamsFiles(formData: FormData) {
     saveUserTuningParamsFilesResponse._data?.parsed_data?.forEach((file: any) => {
       let errorMessage = '';
       let invalidParameters: any[] = [];
-      if (!file.parameters) {
+      if (!file?.parameters) {
         // No parameters were returned for this file, so there was an error when reading it
         errorMessage = file?.message;
         const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Invalid data in parameter file ' + file?.name, detail: errorMessage, life: ToastTimeout.timeoutError };
@@ -808,10 +805,13 @@ async function saveUserTuningParamsFiles(formData: FormData) {
             }
           }
         });
-      }
-      if (invalidParameters.length > 0) {
-        const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Invalid parameters in parameter file ' + file?.name, detail: `The following parameters in the uploaded file were not imported because they are not calibratable:\n ${invalidParameters.join(', ')}`, life: ToastTimeout.timeoutWarn };
-        toast.add(tMsg); addToastRecord(tMsg);
+        if (invalidParameters.length > 0) {
+          const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Invalid parameters in parameter file ' + file?.name, detail: `The following parameters in the uploaded file were not imported because they are not calibratable:\n ${invalidParameters.join(', ')}`, life: ToastTimeout.timeoutWarn };
+          toast.add(tMsg); addToastRecord(tMsg);
+        } else if (file?.message) {
+          const tMsg: ToastMessageOptions = { severity: 'info', summary: `File upload Completed`, detail: file.message, life: ToastTimeout.timeoutInfo };
+          toast.add(tMsg); addToastRecord(tMsg);
+        }
       }
     });
 
