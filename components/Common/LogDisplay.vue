@@ -31,7 +31,7 @@
       </div>
 
       <div v-if="selectedLogDisplay" id="selectedLogDisplay" class="p-2 gray-border overflow-scroll">
-        <div v-html="selectedLogDisplay" class="whitespace-nowrap"></div>
+        <pre class="overflow-auto text-sm">{{ selectedLogDisplay }}</pre>
       </div>
     </div>
   </div>
@@ -125,7 +125,7 @@ watch(selectedLogCurrentPage, async () => {
     if (response?._data) {
       let logText = '';
       for (let t = 0; t < response?._data?.log_data.length; t++) {
-        logText += response?._data?.log_data[t] + '<br/>\n';
+        logText += response?._data?.log_data[t] + '\n';
       }
       selectedLogDisplay.value = logText;
     } else {

@@ -269,7 +269,7 @@
         </div>
 
         <div id="selectedLogDisplay" v-if="selectedLogDisplay" class="p-2 gray-border h-600 overflow-scroll">
-          <div v-html="selectedLogDisplay" class="whitespace-nowrap"></div>
+          <pre class="overflow-auto text-sm">{{ selectedLogDisplay }}</pre>
         </div>
       </div>
     </div>
@@ -1689,7 +1689,7 @@ watch(selectedLogName, async () => {
     if (response?._data?.log_data) {
       let logText = '';
       for (let t = 0; t < response?._data?.log_data.length; t++) {
-        logText += response?._data?.log_data[t] + '<br/>\n';
+        logText += response?._data?.log_data[t] + '\n';
       }
       selectedLogDisplay.value = logText;
       selectedLogTotalSize.value = response?._data?.pagination_metadata?.count;
@@ -1729,7 +1729,7 @@ watch(selectedLogCurrentPage, async () => {
     if (response?._data) {
       let logText = '';
       for (let t = 0; t < response?._data?.log_data.length; t++) {
-        logText += response?._data?.log_data[t] + '<br/>\n';
+        logText += response?._data?.log_data[t] + '\n';
       }
       selectedLogDisplay.value = logText;
     } else {
