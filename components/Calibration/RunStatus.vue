@@ -207,7 +207,7 @@
                 </tr>
                 <tr v-if="selectedLogFilePath !== ''" style="font-size: 0.9em;">
                   <td class="pr-2 pt-3 whitespace-nowrap"><b>Log File Path</b></td>
-                  <td class="pt-3">{{ selectedLogFilePath }}</td>
+                  <td class="pt-3">{{ selectedLogName }}</td>
                 </tr>
               </tbody>
             </table>
@@ -1042,7 +1042,7 @@ const updateLogRefs = async(getLogData: boolean) => {
       } else {
         selectedLogStartRow.value = 1;
       }
-      selectedLogFilePath.value = response?._data?.log_name;
+      selectedLogFilePath.value = response?._data.log_path;
       selectedLogByteOffset.value = response?._data?.byte_offset;
       if (document.getElementById('selectedLogDisplay')) {
         nextTick(async () => {
