@@ -13,7 +13,7 @@
       </div>
       <div v-if="selectedLogFilePath !== ''" style="font-size: 0.9em;">
         <span class="font-bold">Log File Path: </span>
-        <span class="whitespace-nowrap overflow-auto">{{ selectedLogName }}</span>
+        <span class="whitespace-nowrap overflow-auto">{{ selectedLogFilePath }}</span>
       </div>
 
       <div v-if="selectedLogDisplay" class="mt-2">

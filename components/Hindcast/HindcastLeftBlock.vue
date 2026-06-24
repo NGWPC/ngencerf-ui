@@ -33,6 +33,8 @@
 
 <script setup lang="ts">
 import { generalStore } from "@/stores/common/GeneralStore";
+import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
+import { useVerificationStore } from "~/stores/forecast/VerificationStore";
 
 import Tabs from '@/components/Common/Tabs.vue'
 import PreviousCalibrationRuns from "./PreviousCalibrationRuns.vue"
@@ -46,6 +48,8 @@ import VerificationResultsTab from "./VerificationResultsTab.vue"
 
 const { tabRef, navRef } = storeToRefs(generalStore());
 const { getHindcastTabIndex, setHindcastTabIndex, validateCurrentTab, currentTabNavGo, showCurrentTabNavDialog } = generalStore();
+const { hindcastJobId } = storeToRefs(useHindcastStore());
+const { verificationJobId } = storeToRefs(useVerificationStore());
 
 // Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getHindcastTabIndex());
@@ -57,4 +61,9 @@ const tabChanged = (tabNum: number) => {
     setHindcastTabIndex(tabNum);
   } 
 };
+
+onUnmounted(() => {
+  hindcastJobId.value = undefined;
+  verificationJobId.value = undefined;
+})
 </script>

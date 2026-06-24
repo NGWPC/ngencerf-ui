@@ -33,6 +33,8 @@
 
 <script setup lang="ts">
 import { generalStore } from "@/stores/common/GeneralStore";
+import { useForecastStore } from "@/stores/forecast/ForecastStore";
+import { useVerificationStore } from "~/stores/forecast/VerificationStore";
 
 import Tabs from '@/components/Common/Tabs.vue'
 import PreviousCalibrationRuns from '@/components/Forecast/PreviousCalibrationRuns.vue';
@@ -46,6 +48,8 @@ import VerificationResultsTab from "./VerificationResultsTab.vue"
 
 const { tabRef, navRef } = storeToRefs(generalStore());
 const { getForecastTabIndex, setForecastTabIndex, validateCurrentTab, currentTabNavGo, showCurrentTabNavDialog } = generalStore();
+const { forecastJobId } = storeToRefs(useForecastStore());
+const { verificationJobId } = storeToRefs(useVerificationStore());
 
 // Default to Tab 1, PreviousCalibrationRuns
 const activeTab = ref(getForecastTabIndex());
@@ -57,4 +61,9 @@ const tabChanged = (tabNum: number) => {
     setForecastTabIndex(tabNum);
   } 
 };
+
+onUnmounted(() => {
+  forecastJobId.value = undefined;
+  verificationJobId.value = undefined;
+})
 </script>

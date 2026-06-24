@@ -243,13 +243,13 @@
                   v-model="selectedLogName" :options="selectedLogList" optionLabel="display_name" optionValue="name">
                 </Select></td>
             </tr>
-            <tr v-if="selectedLogList.length === 1" style="font-size: 0.9em;">
+            <tr v-if="selectedLogFilePath !== '' && selectedLogList.length === 1" style="font-size: 0.9em;">
               <td class="pr-2 pt-3"><b>Log Name</b></td>
               <td class="pt-3">{{ selectedLogName.split('/').at(-1).split('.')[0] }}</td>
             </tr>
             <tr v-if="selectedLogFilePath !== ''" style="font-size: 0.9em;">
               <td class="pr-2 pt-3"><b>Log File Path</b></td>
-              <td class="pt-3">{{ selectedLogName }}</td>
+              <td class="pt-3">{{ selectedLogFilePath }}</td>
             </tr>
           </tbody>
         </table>
@@ -1700,7 +1700,7 @@ watch(selectedLogName, async () => {
       } else {
         selectedLogEndRow.value = logDataPageSize.value;
       }
-      selectedLogFilePath.value = response?._data?.log_path;
+      selectedLogFilePath.value = response?._data?.log_name;
     } else {
       toast.removeAllGroups();
       const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Log file unavailable', life: ToastTimeout.timeoutError };
