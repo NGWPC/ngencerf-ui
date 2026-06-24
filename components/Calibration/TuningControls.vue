@@ -125,7 +125,8 @@
           <div>
             <div class="font-bold required-label">Output Variable To Calibrate</div>
             <Select id="OutputVariable" class="varInputs mt-1" aria-label="Output Variable To Calibrate"
-              title="Output Variable To Calibrate" v-model="selectedOutputVariableToCalibrate" :options="['Streamflow']" />
+              :disabled="!isFormulationDataSaved() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
+              title="Output Variable To Calibrate" v-model="selectedOutputVariableToCalibrate" :options="['Streamflow']"/>
           </div>
         </div>
 
@@ -388,10 +389,10 @@ const selectedTuningParameterData = ref();
 const tuningContextMenu = ref();
 
 // new refs to handle time calculations instead of entering all times manually
-const warmupDuration = ref<number>(12);
-const calibrationDuration = ref<number>(60);
+const warmupDuration = ref<number>();
+const calibrationDuration = ref<number>();
 const validationWindow = ref<string>('after');
-const validationDuration = ref<number>(36);
+const validationDuration = ref<number>();
 
 const calSimStartTimeMin = ref<any>();
 const calSimStartTimeMax = ref<any>();
@@ -487,8 +488,12 @@ onMounted(async () => {
         valEndTime.value = DateTime.fromISO(validation_end_time, { zone: 'utc' });
       }
     };
-
-    if (loadTuningTabData.value?._data?.time_controls) {
+    if (!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)) {
+      warmupDuration.value = userCalibrationRunData?.value?.time_controls?.warmup_duration
+      calibrationDuration.value = userCalibrationRunData?.value?.time_controls?.calibration_duration
+      validationWindow.value = userCalibrationRunData?.value?.time_controls?.validation_window ? 'after' : 'before'
+      validationDuration.value = userCalibrationRunData?.value?.time_controls?.validation_duration
+    } else if (loadTuningTabData.value?._data?.time_controls) {
       // default time control inputs based on the server response
       warmupDuration.value = loadTuningTabData.value?._data?.time_controls?.warmup_duration
       calibrationDuration.value = loadTuningTabData.value?._data?.time_controls?.calibration_duration
