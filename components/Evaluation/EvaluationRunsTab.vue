@@ -621,7 +621,7 @@ const onRowContextMenu = (event: any) => {
     if (crRowData.validation_runs >= 1) {
       cmCalibrationRun.value.push({ label: 'Compare Permutations', icon: 'pi pi-arrows-h', command: () => viewSelectedGageCalibrationRuns(crRowData.calibration_run_id, crRowData.gage_id) });
       if (!['Submitted','Running'].includes(crRowData.status) && !crRowData.modules?.some(item => item.toLowerCase() === 'lstm')) {
-        cmCalibrationRun.value.push({ label: 'New Validation Run', icon: 'pi pi-chevron-circle-right', command: () => viewSelectAlternateIteration(crRowData.calibration_run_id) });
+        cmCalibrationRun.value.push({ label: 'New Validation Run', icon: 'pi pi-chevron-circle-right', command: () => goToSelectAlternateIteration(crRowData.calibration_run_id) });
       }
     }
     cmCalibrationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })

@@ -83,7 +83,7 @@ export const useFormulationStore = defineStore("FormulationStore", () => {
     useSlothParameters.value = userCalibrationRunData.value?.use_sloth ?? false;
     slothParameterInputs.value =
       JSON.parse(
-        JSON.stringify(userCalibrationRunData.value?.sloth_parameters)
+        JSON.stringify(userCalibrationRunData.value?.sloth_parameters ?? [])
       ) ?? [];
     formulationIsCalibratable.value = false;
     if (selectedModuleValues.value.length > 0) {

@@ -171,6 +171,7 @@ export interface UserCalibrationRunData {
   time_range: UserCalibrationRunTimeRangeData;
   calibration_times: UserCalibrationRunCalibrationTimesData;
   validation_times: UserCalibrationRunValidationTimesData;
+  time_controls: UserCalibrationRunTimeControlsData;
   output_variable_to_calibrate: string;
   num_catchments: number | null;
   parameters_selected: boolean;
@@ -221,6 +222,14 @@ export interface UserCalibrationRunValidationTimesData {
   validation_end_time: string;
   simulation_start_time: string;
   simulation_end_time: string;
+}
+
+export interface UserCalibrationRunTimeControlsData {
+  simulation_start_time: string;
+  warmup_duration: number;
+  calibration_duration: number;
+  validation_window: string;
+  validation_duration: number;
 }
 
 export interface UserCalibrationRunParametersData {

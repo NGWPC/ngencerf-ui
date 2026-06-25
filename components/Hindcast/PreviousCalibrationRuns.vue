@@ -53,7 +53,7 @@
             v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="true" 
             v-model:contextMenuSelection="contextMenuSelection" contextMenu @rowContextmenu="onRowContextMenu"
             @rowSelect="onCalibrationRunForHindcastRowSelect" @rowUnselect="onCalibrationRunForHindcastRowUnSelect"
-            dataKey="calibration_run_id" class="boxed">
+            @row-dblclick="onRowDblClick($event)" dataKey="calibration_run_id" class="boxed">
             <Column :pt="ptColumn" field="calibration_run_id" sortable>
               <template #header>
                 <div class="column-header">
@@ -317,7 +317,7 @@ const onRowContextMenu = (event: any) => {
   calibrationRunForHindcast.value = selectedCalibrationRuns.value.length === 1 ? selectedCalibrationRuns.value[0] : undefined; 
   if (calibrationRunForHindcast && calibrationRunForHindcast.value?.calibration_run_id === crRowData.calibration_run_id) {
     setSelectedCalibrationRunId(crRowData.calibration_run_id);
-    cmCalibrationRun.value.push({ label: 'Run New Hindcast', icon: 'pi pi-chevron-circle-right', command: () => navigateToSetupHindcast() });
+    cmCalibrationRun.value.push({ label: 'Run New Hindcast', icon: 'pi pi-chevron-circle-right', command: () => goToSetupHindcast() });
     cmCalibrationRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })
     if (calibrationRunForHindcast.value?.is_downloadable) {
       cmCalibrationRun.value.push({ label: 'Download Results', icon: 'pi pi-download', command: () => downloadSelectedCalibrationData() });
