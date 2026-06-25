@@ -358,7 +358,6 @@ const {
   selectedOutputVariableToCalibrate,
   calibrationTuningParameters,
   userSelectedCalibrationTuningParameters,
-  automatic_validation,
   calibratableParametersHaveChanged,
   tuningDataHasChanged,
   validateTuningTimesRequestBody,
@@ -929,13 +928,6 @@ const clearUserSelectedCalibrationTuningParameters = () => {
   calibratableParametersHaveChanged.value = true;
 };
 
-/**
- * Handle automatic validation checkbox change
- */
-const AutoValChecked = () => {
-  const ele = <HTMLInputElement>document.getElementById("CheckTheBox");
-  automatic_validation.value = ele.checked as boolean;
-};
 
 /**
  * Validate and build save_tuning_tab request body. Return false if validation fails
@@ -951,8 +943,6 @@ const validateAndBuildRequestBody = (): boolean => {
     validation_window: validationWindow.value === 'after' ? true : false,
     validation_duration: validationDuration.value
   };
-
-  saveTuningTabRequestBody.value.automatic_validation = automatic_validation.value;
 
   if (areTuningParametersSet()) {
     saveTuningTabRequestBody.value.parameters = userSelectedCalibrationTuningParameters.value;
@@ -1062,11 +1052,6 @@ const areCalibrationTimesValidated = (): boolean => {
  * @returns boolean
  */
 const areValidationTimesValidated = (): boolean => {
-  // check if automatic_validation is not enabled
-  if (!automatic_validation.value) {
-    return true;
-  }
-
   // check if all validation_times are not valid
   if (!isValidDateTime(valSimStartTime.value) && !isValidDateTime(valSimEndTime.value) && !isValidDateTime(valStartTime.value) && !isValidDateTime(valEndTime.value)) {
     return false;
@@ -1272,7 +1257,6 @@ const saveTuningData = () => {
 
   const updateJobData = () => {
     if (userCalibrationRunData.value) {
-      userCalibrationRunData.value.automatic_validation = saveTuningTabRequestBody.value.automatic_validation;
       // simulation_start_time is in Luxon DateTime format. Calling toISO() to convert to string
       if (saveTuningTabRequestBody.value.time_controls && Object.keys(saveTuningTabRequestBody.value.time_controls).length) {
         userCalibrationRunData.value.time_controls = saveTuningTabRequestBody.value.time_controls;

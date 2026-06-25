@@ -167,7 +167,6 @@ export interface UserCalibrationRunData {
   formulation_warning?: FormulationWarning;
   use_sloth: boolean;
   sloth_parameters: SlothParameterData[];
-  automatic_validation: boolean;
   time_range: UserCalibrationRunTimeRangeData;
   calibration_times: UserCalibrationRunCalibrationTimesData;
   validation_times: UserCalibrationRunValidationTimesData;
