@@ -31,8 +31,6 @@ export const useTuningStore = defineStore(
     const calibrationTuningParameters = ref<any[]>([]);
     const userSelectedCalibrationTuningParameters = ref<any[]>([]);
 
-    const automatic_validation = ref<boolean>(true);
-
     const valSimStartTime = ref<any>();
     const valSimEndTime = ref<any>();
     const valStartTime = ref<any>();
@@ -212,7 +210,6 @@ export const useTuningStore = defineStore(
       calibrationTuningModules.value = null;
       calibrationTuningParameters.value = [];
       userSelectedCalibrationTuningParameters.value = [];
-      automatic_validation.value = true;
       valSimStartTime.value = "";
       valSimEndTime.value = "";
       valStartTime.value = "";
@@ -239,7 +236,6 @@ export const useTuningStore = defineStore(
       selectedOutputVariableToCalibrate,
       calibrationTuningParameters,
       userSelectedCalibrationTuningParameters,
-      automatic_validation,
       calibratableParametersHaveChanged,
       tuningDataHasChanged,
       validateTuningTimesRequestBody,
