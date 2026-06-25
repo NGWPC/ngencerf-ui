@@ -6,21 +6,17 @@
     <div :style="`opacity: ${disableAll ? '50%' : '100%'}`">
       <div class="mt-3 mb-2">
         <div v-if="dateRangeBegin && dateRangeEnd" class="text-left mt-1 text-xl c-blue-primary1 font-bold" id="RangeDates"
-          :aria-label="'Range is from ' + format(dateRangeBegin) + ' to ' + format(dateRangeEnd)"
-          :title="'Range is from ' + format(dateRangeBegin) + ' to ' + format(dateRangeEnd)">
-          RANGE: {{ format(dateRangeBegin) }} GMT to {{ format(dateRangeEnd) }} GMT
+          :aria-label="'Range is from ' + formatDate(dateRangeBegin) + ' to ' + formatDate(dateRangeEnd)"
+          :title="'Range is from ' + formatDate(dateRangeBegin) + ' to ' + formatDate(dateRangeEnd)">
+          RANGE: {{ formatDate(dateRangeBegin) }} to {{ formatDate(dateRangeEnd) }}
         </div>
       </div>
       <div class="grid grid-cols-2">
         <div class="col-span-2">
           <div id="BoxLeft" class="text-left">
             <div id="BoxTopLeft" class="pt-2">
-              <span class="tabTitles font-bold" aria-label="Calibration Time Controls, All times entered must be in GMT"
-                title="Calibration Time Controls, All times entered must be in GMT">
-                Calibration Time Controls
-                <span class="font-normal">
-                  <small>(All times entered must be in GMT)</small>
-                </span>
+              <span class="tabTitles font-bold" aria-label="Simulation Configuration" title="Simulation Configuration">
+                Simulation Configuration
               </span>
             </div>
             <div class="pt-2">
@@ -327,7 +323,7 @@ const dialog = useDialog();
 const fileUploadDialogOpened = ref<boolean>(false);
 const nextPrevDialogOpened = ref<boolean>(false);
 
-const format = formatISOStringOrDateToYYYYMMDDHHMM;
+const formatDate = formatISOStringOrDateToYYYYMMDD;
 
 const { addToastRecord } = generalStore();
 const { isLoading } = storeToRefs(generalStore());
