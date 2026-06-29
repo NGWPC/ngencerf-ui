@@ -92,7 +92,23 @@
                       </td>
                     </tr>
 
-                    <!-- Row 5: Validation Duration -->
+                    <!-- Row 5: Calibration Duration -->
+                    <tr>
+                      <th scope="row" class="text-left pr-4 pb-1">
+                        <label for="validationWindowGap" class="whitespace-nowrap required-label">Validation Window Gap</label>
+                      </th>
+                      <td class="text-left pr-2 pb-1 w-1">
+                        <InputNumber id="validationWindowGap" v-model="validationWindowGap" class="w-20 p-1" 
+                          aria-label="Validation Window Gap" title="Validation Window Gap" v-bind="minMaxValidationWindowGapProps"
+                          :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">
+                        </InputNumber>
+                      </td>
+                      <td class="text-left pb-1 align-middle whitespace-nowrap">
+                        months
+                      </td>
+                    </tr>
+
+                    <!-- Row 6: Validation Duration -->
                     <tr>
                       <th scope="row" class="text-left pr-4">
                         <label for="ValidationDuration" class="whitespace-nowrap required-label">Validation Duration</label>
@@ -386,6 +402,7 @@ const tuningContextMenu = ref();
 // new refs to handle time calculations instead of entering all times manually
 const warmupDuration = ref<number>();
 const calibrationDuration = ref<number>();
+const validationWindowGap = ref<number>();
 const validationWindow = ref<string>('after');
 const validationDuration = ref<number>();
 
@@ -395,6 +412,8 @@ const warmupDurationMin = ref<number>();
 const warmupDurationMax = ref<number>();
 const calibrationDurationMin = ref<number>();
 const calibrationDurationMax = ref<number>();
+const validationWindowGapMin = ref<number>();
+const validationWindowGapMax = ref<number>();
 const validationDurationMin = ref<number>();
 const validationDurationMax = ref<number>();
 
@@ -484,16 +503,18 @@ onMounted(async () => {
       }
     };
     if (!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)) {
-      warmupDuration.value = userCalibrationRunData?.value?.time_controls?.warmup_duration
-      calibrationDuration.value = userCalibrationRunData?.value?.time_controls?.calibration_duration
-      validationWindow.value = userCalibrationRunData?.value?.time_controls?.validation_window ? 'after' : 'before'
-      validationDuration.value = userCalibrationRunData?.value?.time_controls?.validation_duration
+      warmupDuration.value = userCalibrationRunData?.value?.time_controls?.warmup_duration;
+      calibrationDuration.value = userCalibrationRunData?.value?.time_controls?.calibration_duration;
+      validationWindowGap.value = userCalibrationRunData?.value?.time_controls?.validation_window_gap;
+      validationWindow.value = userCalibrationRunData?.value?.time_controls?.validation_window_after_calibration ? 'after' : 'before';
+      validationDuration.value = userCalibrationRunData?.value?.time_controls?.validation_duration;
     } else if (loadTuningTabData.value?._data?.time_controls) {
       // default time control inputs based on the server response
-      warmupDuration.value = loadTuningTabData.value?._data?.time_controls?.warmup_duration
-      calibrationDuration.value = loadTuningTabData.value?._data?.time_controls?.calibration_duration
-      validationWindow.value = loadTuningTabData.value?._data?.time_controls?.validation_window ? 'after' : 'before'
-      validationDuration.value = loadTuningTabData.value?._data?.time_controls?.validation_duration
+      warmupDuration.value = loadTuningTabData.value?._data?.time_controls?.warmup_duration;
+      calibrationDuration.value = loadTuningTabData.value?._data?.time_controls?.calibration_duration;
+      validationWindowGap.value = loadTuningTabData.value?._data?.time_controls?.validation_window_gap;
+      validationWindow.value = loadTuningTabData.value?._data?.time_controls?.validation_window_after_calibration ? 'after' : 'before';
+      validationDuration.value = loadTuningTabData.value?._data?.time_controls?.validation_duration;
     }
     
     if (!isValidDateTime(calSimStartTime.value)) {
@@ -570,11 +591,12 @@ const handleCalSimStartUpdate = (value: any) => {
   calSimStartTime.value = DateTime.fromJSDate(normalizeToUtcMidnight(value), { zone: 'utc' });
 };
 
-watch([calSimStartTime, warmupDuration, calibrationDuration, validationWindow, validationDuration], () => {
+watch([calSimStartTime, warmupDuration, calibrationDuration, validationWindowGap, validationWindow, validationDuration], () => {
   if (!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)) return;
   if (!DateTime.isDateTime(calSimStartTime.value)) return;
   if (!warmupDuration.value) warmupDuration.value = minMaxWarmupDurationProps.value.min;
   if (!calibrationDuration.value) calibrationDuration.value = minMaxCalibrationDurationProps.value.min;
+  if (!validationWindowGap.value) validationWindowGap.value = minMaxValidationWindowGapProps.value.min;
   if (!['after','before'].includes(validationWindow.value)) validationWindow.value = 'after';
   if (!validationDuration.value) validationDuration.value = minMaxValidationDurationProps.value.min;
   tuningDataHasChanged.value = true;
@@ -589,7 +611,8 @@ const calculateTimeValues = async() => {
       simulation_start_time: calSimStartTime.value,
       warmup_duration: warmupDuration.value,
       calibration_duration: calibrationDuration.value,
-      validation_window: validationWindow.value === 'after' ? true : false,
+      validation_window_gap: validationWindowGap.value,
+      validation_window_after_calibration: validationWindow.value === 'after' ? true : false,
       validation_duration: validationDuration.value
     }
     const validateTuningTimesResponse = await validateTuningTimes();
@@ -634,6 +657,8 @@ const calculateTimeValues = async() => {
         warmupDurationMax.value = validateTuningTimesResponse._data.time_control_limits.warmup_duration_max;
         calibrationDurationMin.value = validateTuningTimesResponse._data.time_control_limits.calibration_duration_min;
         calibrationDurationMax.value = validateTuningTimesResponse._data.time_control_limits.calibration_duration_max;
+        validationWindowGapMin.value = validateTuningTimesResponse._data.time_control_limits.validation_window_gap_min;
+        validationWindowGapMax.value = validateTuningTimesResponse._data.time_control_limits.validation_window_gap_max;
         validationDurationMin.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_min;
         validationDurationMax.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_max;
       }
@@ -684,6 +709,13 @@ const minMaxCalibrationDurationProps = computed(() => {
     max: calibrationDurationMax.value ? calibrationDurationMax.value : undefined
   };
 });
+
+const minMaxValidationWindowGapProps = computed(() => {
+  return {
+    min: validationWindowGapMin.value ? validationWindowGapMin.value : 0,
+    max: validationWindowGapMax.value ? validationWindowGapMax.value : undefined
+  };
+})
 
 const minMaxValidationDurationProps = computed(() => {
   return {
@@ -940,7 +972,8 @@ const validateAndBuildRequestBody = (): boolean => {
     simulation_start_time: calSimStartTime.value,
     warmup_duration: warmupDuration.value,
     calibration_duration: calibrationDuration.value,
-    validation_window: validationWindow.value === 'after' ? true : false,
+    validation_window_gap: validationWindowGap.value,
+    validation_window_after_calibration: validationWindow.value === 'after' ? true : false,
     validation_duration: validationDuration.value
   };
 
@@ -1303,7 +1336,11 @@ const validateTab = (tabNumber?: number) => {
     error = true;
     text.push("Calibration Duration has changed");
   }
-  if ((loadTuningTabData?.value?._data?.time_controls?.validation_window ? 'after' : 'before') !== validationWindow.value) {
+  if (loadTuningTabData?.value?._data?.time_controls?.validation_window_gap !== validationWindowGap.value) {
+    error = true;
+    text.push("Validation Window Gap has changed");
+  }
+  if ((loadTuningTabData?.value?._data?.time_controls?.validation_window_after_calibration ? 'after' : 'before') !== validationWindow.value) {
     error = true;
     text.push("Validation Window has changed");
   }
@@ -1344,10 +1381,11 @@ const restoreTab = async () => {
   if (loadTuningTabData.value?._data?.time_controls) {
     // default time control inputs based on the server response
     calSimStartTime.value = DateTime.fromISO(loadTuningTabData.value?._data?.time_controls?.simulation_start_time, { zone: 'utc' });
-    warmupDuration.value = loadTuningTabData.value?._data?.time_controls?.warmup_duration
-    calibrationDuration.value = loadTuningTabData.value?._data?.time_controls?.calibration_duration
-    validationWindow.value = loadTuningTabData.value?._data?.time_controls?.validation_window ? 'after' : 'before'
-    validationDuration.value = loadTuningTabData.value?._data?.time_controls?.validation_duration
+    warmupDuration.value = loadTuningTabData.value?._data?.time_controls?.warmup_duration;
+    calibrationDuration.value = loadTuningTabData.value?._data?.time_controls?.calibration_duration;
+    validationWindowGap.value = loadTuningTabData.value?._data?.time_controls?.validation_window_gap;
+    validationWindow.value = loadTuningTabData.value?._data?.time_controls?.validation_window_after_calibration ? 'after' : 'before';
+    validationDuration.value = loadTuningTabData.value?._data?.time_controls?.validation_duration;
   }
 
   calibratableParametersHaveChanged.value = false;
@@ -1435,6 +1473,7 @@ onUnmounted(async () => {
   valEndTime.value = '';
   warmupDuration.value = 0;
   calibrationDuration.value = 1;
+  validationWindowGap.value = 1;
   validationWindow.value = 'after';
   validationDuration.value = 1;
   loadTuningTabData.value = null;
