@@ -42,8 +42,8 @@
                               v-bind="minMaxSimStartProps"
                               :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)" />
                           </div>
-                          <div v-if="timeControlError" class="date-picker-error">
-                            🛑 Durations exceed available date ranges.
+                          <div v-if="timeControlError" class="date-picker-error whitespace-nowrap">
+                            🛑 Simulation Start and durations exceed available date range.
                           </div>
                         </div>
                       </td>
@@ -679,16 +679,10 @@ const calculateTimeValues = async() => {
       }
 
       timeControlError.value = false;
-    } else if (validateTuningTimesResponse._data?.message) {
-      // Show error messages
-      let errorMessage = validateTuningTimesResponse._data?.message;
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Time error', detail: errorMessage, life: ToastTimeout.timeoutError };
-      toast.add(tMsg); addToastRecord(tMsg);
+    } else {
       timeControlError.value = true;
     }
   } else {
-    const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Time error', detail: 'Sim Start is invalid', life: ToastTimeout.timeoutError };
-    toast.add(tMsg); addToastRecord(tMsg);
     timeControlError.value = true;
   }
 }
@@ -1220,6 +1214,18 @@ const saveTuningData = () => {
   // handle saving Tuning Tab data
   toast.removeAllGroups();
   tuningStore_data_loading.value = true;
+
+  if (timeControlError.value) {
+    const tMsg: ToastMessageOptions = {
+      severity: 'error',
+      summary: "Error Saving Tuning Data",
+      detail: "Simulation Start and durations exceed available date range",
+      life: ToastTimeout.timeoutError,
+    };
+    toast.add(tMsg); addToastRecord(tMsg);
+    tuningStore_data_loading.value = false;
+    return;
+  }
 
   const handleSaveTuningTab = async () => {
     const saveTuningTabResponse = await saveTuningTabData();
