@@ -26,12 +26,14 @@
                     <!-- Row 1: Simulation Start -->
                     <tr>
                       <th scope="row" class="text-left pr-4 pb-1">
-                        <label for="SimulationStart" class="whitespace-nowrap required-label">Simulation Start</label>
+                        <label for="SimulationStart" class="whitespace-nowrap required-label"
+                          :class="{ 'date-picker-error': timeControlError }">Simulation Start</label>
                       </th>
                       <td colspan="2" class="text-left pb-1" style="position: relative;">
                         <!-- Container limits width so it aligns with inputs below -->
                         <div class="max-w-xs">
-                          <VueDatePicker id="SimulationStart" class="datePickers dp__theme_dark" 
+                          <VueDatePicker id="SimulationStart" class="datePickers dp__theme_dark"
+                            :class="{ 'date-picker-error': timeControlError }"
                             v-model="calSimStartTime" text-input utc='preserve' format="yyyy-MM-dd"
                             :enable-time-picker="false" @update:model-value="handleCalSimStartUpdate" 
                             aria-label="Calibration Time Simulation Start"
@@ -338,6 +340,7 @@ import FileUploadDialog from "../Common/FileUploadDialog.vue";
 const dialog = useDialog();
 const fileUploadDialogOpened = ref<boolean>(false);
 const nextPrevDialogOpened = ref<boolean>(false);
+const timeControlError = ref<boolean>(false);
 
 const formatDate = formatISOStringOrDateToYYYYMMDD;
 
@@ -525,6 +528,15 @@ onMounted(async () => {
           ? begin.startOf('day')
           : begin.plus({ days: 1 }).startOf('day');
     }
+    
+    // min/max times no longer come from the server response - this should match the total date range instead
+    const minTime = DateTime.fromISO(dateRangeBegin.value,{ zone: 'utc' });
+    calSimStartTimeMin.value =
+      minTime.equals(minTime.startOf('day'))
+        ? minTime.startOf('day')
+        : minTime.plus({ days: 1 }).startOf('day');
+    const maxTime = DateTime.fromISO(dateRangeEnd.value,{ zone: 'utc' });
+    calSimStartTimeMax.value = maxTime.startOf('day');
 
     nextTick(() => {
       isInitialSetupDone.value = true; // set to true after initial setup
@@ -651,13 +663,6 @@ const calculateTimeValues = async() => {
 
       // set min/max input values
       if (validateTuningTimesResponse?._data?.time_control_limits && Object.keys(validateTuningTimesResponse._data.time_control_limits).length > 0) {
-        const minTime = DateTime.fromISO(validateTuningTimesResponse._data.time_control_limits.simulation_start_time_min,{ zone: 'utc' });
-        calSimStartTimeMin.value =
-          minTime.equals(minTime.startOf('day'))
-            ? minTime.startOf('day')
-            : minTime.plus({ days: 1 }).startOf('day');
-        const maxTime = DateTime.fromISO(validateTuningTimesResponse._data.time_control_limits.simulation_start_time_max,{ zone: 'utc' });
-        calSimStartTimeMax.value = maxTime.startOf('day');
         warmupDurationMin.value = validateTuningTimesResponse._data.time_control_limits.warmup_duration_min;
         warmupDurationMax.value = validateTuningTimesResponse._data.time_control_limits.warmup_duration_max;
         calibrationDurationMin.value = validateTuningTimesResponse._data.time_control_limits.calibration_duration_min;
@@ -667,15 +672,19 @@ const calculateTimeValues = async() => {
         validationDurationMin.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_min;
         validationDurationMax.value = validateTuningTimesResponse._data.time_control_limits.validation_duration_max;
       }
+
+      timeControlError.value = false;
     } else if (validateTuningTimesResponse._data?.message) {
       // Show error messages
       let errorMessage = validateTuningTimesResponse._data?.message;
       const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Time error', detail: errorMessage, life: ToastTimeout.timeoutError };
       toast.add(tMsg); addToastRecord(tMsg);
+      timeControlError.value = true;
     }
   } else {
     const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Time error', detail: 'Sim Start is invalid', life: ToastTimeout.timeoutError };
     toast.add(tMsg); addToastRecord(tMsg);
+    timeControlError.value = true;
   }
 }
 
@@ -1511,6 +1520,15 @@ onUnmounted(async () => {
   width: 230px;
   display: inline-block;
   text-align: center;
+}
+
+.date-picker-error {
+  color: #aa0000;
+}
+
+.date-picker-error :deep(.dp__input) {
+  color: #aa0000;
+  border: 1px solid #aa0000;
 }
 
 .mmiInputs {
