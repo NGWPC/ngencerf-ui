@@ -29,17 +29,22 @@
                         <label for="SimulationStart" class="whitespace-nowrap required-label"
                           :class="{ 'date-picker-error': timeControlError }">Simulation Start</label>
                       </th>
-                      <td colspan="2" class="text-left pb-1" style="position: relative;">
-                        <!-- Container limits width so it aligns with inputs below -->
-                        <div class="max-w-xs">
-                          <VueDatePicker id="SimulationStart" class="datePickers dp__theme_dark"
-                            :class="{ 'date-picker-error': timeControlError }"
-                            v-model="calSimStartTime" text-input utc='preserve' format="yyyy-MM-dd"
-                            :enable-time-picker="false" @update:model-value="handleCalSimStartUpdate" 
-                            aria-label="Calibration Time Simulation Start"
-                            title="Calibration Time Simulation Start" :teleport="true"
-                            v-bind="minMaxSimStartProps"
-                            :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)" />
+                      <td colspan="2" class="text-left pb-1">
+                        <div class="flex items-center gap-3">
+                          <!-- Container limits width so it aligns with inputs below -->
+                          <div class="max-w-xs">
+                            <VueDatePicker id="SimulationStart" class="datePickers dp__theme_dark"
+                              :class="{ 'date-picker-error': timeControlError }"
+                              v-model="calSimStartTime" text-input utc='preserve' format="yyyy-MM-dd"
+                              :enable-time-picker="false" @update:model-value="handleCalSimStartUpdate" 
+                              aria-label="Calibration Time Simulation Start"
+                              title="Calibration Time Simulation Start" :teleport="true"
+                              v-bind="minMaxSimStartProps"
+                              :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)" />
+                          </div>
+                          <div v-if="timeControlError" class="date-picker-error">
+                            🛑 Durations exceed available date ranges.
+                          </div>
                         </div>
                       </td>
                     </tr>
