@@ -448,7 +448,7 @@ onMounted(async () => {
       selectedTuningParameterData.value = null;
     }
 
-    await loadTuningTabStaticData();
+    await loadTuningTabStaticData(true);
     tuningStore_data_loading.value = false;
 
     await nextTick();
@@ -526,7 +526,9 @@ onMounted(async () => {
           : begin.plus({ days: 1 }).startOf('day');
     }
 
-    isInitialSetupDone.value = true; // set to true after initial setup
+    nextTick(() => {
+      isInitialSetupDone.value = true; // set to true after initial setup
+    });
   } else {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'No Calibration Job ID', detail: 'No calibration job ID found. Please go back to the Calibration Runs tab and select a job.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
@@ -591,9 +593,12 @@ const handleCalSimStartUpdate = (value: any) => {
   calSimStartTime.value = DateTime.fromJSDate(normalizeToUtcMidnight(value), { zone: 'utc' });
 };
 
-watch([calSimStartTime, warmupDuration, calibrationDuration, validationWindowGap, validationWindow, validationDuration], () => {
-  if (!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)) return;
-  if (!DateTime.isDateTime(calSimStartTime.value)) return;
+watch([calSimStartTime, warmupDuration, calibrationDuration, validationWindowGap, validationWindow, validationDuration], (newValues, oldValues) => {
+  if (
+    !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status) ||
+    !DateTime.isDateTime(calSimStartTime.value) ||
+    !isInitialSetupDone.value
+  ) return;
   if (!warmupDuration.value) warmupDuration.value = minMaxWarmupDurationProps.value.min;
   if (!calibrationDuration.value) calibrationDuration.value = minMaxCalibrationDurationProps.value.min;
   if (!validationWindowGap.value) validationWindowGap.value = minMaxValidationWindowGapProps.value.min;
@@ -848,7 +853,6 @@ async function saveUserTuningParamsFiles(formData: FormData) {
     });
 
     calibratableParametersHaveChanged.value = true;
-    tuningDataHasChanged.value = true;
 
     // scroll to the bottom of the page and table
     scrollToBottom();
@@ -1236,7 +1240,7 @@ const saveTuningData = () => {
       updateJobData();
       calibratableParametersHaveChanged.value = false;
       tuningDataHasChanged.value = false;
-      await loadTuningTabStaticData();
+      await loadTuningTabStaticData(true);
       tuningStore_data_loading.value = false;
     } else {
       tuningStore_data_loading.value = false;
