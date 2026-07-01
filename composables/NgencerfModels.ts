@@ -227,7 +227,8 @@ export interface UserCalibrationRunTimeControlsData {
   simulation_start_time: string;
   warmup_duration: number;
   calibration_duration: number;
-  validation_window: string;
+  validation_window_gap: number;
+  validation_window_after_calibration: string;
   validation_duration: number;
 }
 
