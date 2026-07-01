@@ -247,7 +247,7 @@ export const useLogStore = defineStore('LogStore', () => {
         } else {
           selectedLogStartRow.value = 1;
         }
-        selectedLogFilePath.value = response?._data.log_path;
+        selectedLogFilePath.value = response?._data?.log_name;
         selectedLogByteOffset.value = response?._data?.byte_offset;
         if (document.getElementById('selectedLogDisplay')) {
           nextTick(async () => {
