@@ -420,7 +420,7 @@ useLogoutListen('logoutEvent', (evStr: string) => {
         setIsTokenExpired();
         let err = (lastServerError?.value) ? getErrorTextFromStatus(lastServerError?.value?.status) + ' ' : '';
         useLogout("logoutEvent", "logout");
-        destination('login');
+        navigateTo('login');
         setTimeout(() => {
             Swal.fire({
                 width: 500,
@@ -437,7 +437,7 @@ const logoutUser = async () => {
     if (!popupActive.value) {
         if (confirm("Are you sure you want to logout?")) {
             useLogout("logoutEvent", "logout");
-            await destination('login');
+            await navigateTo('login');
         }
     }
 }
