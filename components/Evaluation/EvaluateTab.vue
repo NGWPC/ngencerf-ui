@@ -24,9 +24,9 @@
 
 
           <div class="absolute" style="top:0px;right:0px;">
-            <div v-if="selectedPlotName && selectedPlotName == selectedGridDisplay?.name && !disableSpatialPlotDate"
+            <div v-if="selectedPlotName && selectedPlotName == selectedGridDisplay?.name"
               class="p-0 relative overflow-visible">
-              <div class="grid grid-cols-3 gap-4">
+              <div v-if="!disableSpatialPlotDate" class="grid grid-cols-3 gap-4">
                 <div class="text-nowrap text-right font-bold" style="padding-top:2px;">
                   Select Date<span class="required-asterisk">*</span>
                 </div>
@@ -46,6 +46,9 @@
                     {{ getGridTimeRange() }}
                   </p>
                 </div>
+              </div>
+              <div v-else>
+                SMAP data unavailable for job time range
               </div>
             </div>
           </div>
@@ -1453,11 +1456,8 @@ const drawInteractiveSlider = () => {
         if (maxRecord) {
           gridMaxValue = maxRecord[gridColumnName];
           gridMaxDate = new Date(maxRecord['timestamp']);
-          console.log('maxRecord:',maxRecord);
-          console.log('gridMaxValue:',gridMaxValue);
-          console.log('gridMaxDate:',gridMaxDate);
         }
-        if (gridColumnName.includes('Simulated')) {
+        if (gridColumnName.toLowerCase().includes('simulated')) {
           disableSpatialPlotDate.value = true;
         }
         // override the default date for grid
