@@ -24,7 +24,7 @@
 
 
           <div class="absolute" style="top:0px;right:0px;">
-            <div v-if="selectedPlotName && selectedPlotName == selectedGridDisplay?.name"
+            <div v-if="selectedPlotName && selectedPlotName == selectedGridDisplay?.name && !disableSpatialPlotDate"
               class="p-0 relative overflow-visible">
               <div class="grid grid-cols-3 gap-4">
                 <div class="text-nowrap text-right font-bold" style="padding-top:2px;">
@@ -339,6 +339,7 @@ const userDataStore = useUserDataStore();
 const toast = useToast();
 
 const showMessagesGroup = ref<boolean>(false);
+const disableSpatialPlotDate = ref<boolean>(false);
 
 const { calibrationJobId, evaluateValidationRunId } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
@@ -1421,16 +1422,43 @@ const drawInteractiveSlider = () => {
         let gridColumnName = '';
         let gridMaxValue = 0;
         let gridMaxDate = null;
-        Object.keys(plotGraphData.value[0]).forEach(key => {
-          if (key.toLowerCase().indexOf('snodas') >= 0 || key.toLowerCase().indexOf('smap') >= 0) {
-            gridColumnName = key;
-          }
-        });
-        for (let d = 0; d < plotGraphData.value.length; d++) {
-          if (plotGraphData.value[d][gridColumnName] > gridMaxValue) {
-            gridMaxValue = plotGraphData.value[d][gridColumnName];
-            gridMaxDate = new Date(plotGraphData.value[d]['timestamp'])
-          }
+        let maxRecord = null;
+        if (selectedGridDisplay?.value?.abbr === 'SWE') {
+          const sweData = plotGraphData.value.filter(
+            d => d.SNODAS_SWE !== "" && d.SNODAS_SWE != null
+          );
+
+          const source = sweData.length > 0 ? sweData : plotGraphData.value;
+          gridColumnName = sweData.length > 0
+            ? "SNODAS_SWE"
+            : "Simulated_SWE";
+
+          maxRecord = source.reduce((max, current) =>
+            Number(current[gridColumnName]) > Number(max[gridColumnName]) ? current : max
+          );
+        } else if (selectedGridDisplay?.value?.abbr === 'SMAP') {
+          const smapData = plotGraphData.value.filter(
+            d => d.SMAP_Soil_Moisture !== "" && d.SMAP_Soil_Moisture != null
+          );
+
+          const source = smapData.length > 0 ? smapData : plotGraphData.value;
+          gridColumnName = smapData.length > 0
+            ? "SMAP_Soil_Moisture"
+            : "Simulated_Soil_Moisture";
+
+          maxRecord = source.reduce((max, current) =>
+            Number(current[gridColumnName]) > Number(max[gridColumnName]) ? current : max
+          );
+        }
+        if (maxRecord) {
+          gridMaxValue = maxRecord[gridColumnName];
+          gridMaxDate = new Date(maxRecord['timestamp']);
+          console.log('maxRecord:',maxRecord);
+          console.log('gridMaxValue:',gridMaxValue);
+          console.log('gridMaxDate:',gridMaxDate);
+        }
+        if (gridColumnName.includes('Simulated')) {
+          disableSpatialPlotDate.value = true;
         }
         // override the default date for grid
         selectedGridDateTime.value = gridMaxDate?.toISOString().split('T')[0];
