@@ -190,7 +190,9 @@
     <div id="ErrorLogOverlay" class="hidden" ref="errorOverlay">
         <LazyErrorLog />
     </div>
-
+    <div id="DownloadCliBoxOverlay" class="hidden" ref="downloadCliOverlay">
+        <LazyDownloadCliBox />
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -213,6 +215,7 @@ const navDialogOpened = ref<boolean>(false);
 
 const LazyAboutBox = defineAsyncComponent(() => import("@/components/Common/AboutBox.vue"))
 const LazyErrorLog = defineAsyncComponent(() => import("@/components/Common/ErrorLog.vue"))
+const LazyDownloadCliBox = defineAsyncComponent(() => import("@/components/Common/DownloadCliBox.vue"))
 const LazyUserAccount = defineAsyncComponent(() => import("@/components/Common/UserAccount.vue"))
 
 // Lazy Load for Help Files
@@ -271,6 +274,7 @@ const emit = defineEmits(["logoutEvent"]);
 const accountOverlay = ref();
 const aboutOverlay = ref();
 const errorOverlay = ref();
+const downloadCliOverlay = ref();
 
 const { getMenuIndex, setMenuIndex, getCalibrationTabIndex, getEvaluationTabIndex, getForecastTabIndex, getHindcastTabIndex, validateCurrentTab } = generalStore();
 
@@ -292,6 +296,7 @@ const userItems = ref([
     { label: 'About', icon: 'pi pi-fw-times', command: () => aboutBox() },
     { label: 'Notifications', icon: 'pi pi-fw-times', command: () => errorLog() },
     { label: 'Users Guide', icon: 'pi pi-fw-times', command: () => window.open(pdfUrl, '_blank') },
+    { label: 'Download CLI', icon: 'pi pi-fw-times', command: () => downloadCliBox() },
     { label: 'Logout', icon: 'pi pi-fw-times', command: () => logoutUser() }
 ])
 
@@ -317,6 +322,7 @@ onMounted(() => {
         sizeHelpWindow();
         sizeLogWindow();
         sizeAboutWindow();
+        sizeDownloadCliWindow();
     });
     document.getElementById("userMenu")?.addEventListener("mouseout", function () { hideUserMenu() });
 
@@ -374,6 +380,16 @@ const sizeAboutWindow = () => {
     };
 };
 
+const sizeDownloadCliWindow = () => {
+    let headerHeight = document.getElementById('Header')?.clientHeight;
+    let footerTop = document.getElementById('Footer')?.getBoundingClientRect().top;
+    if (footerTop && headerHeight) {
+        let h = (footerTop - headerHeight) - 20;
+        let ele = document.getElementById("DownloadCliBox");
+        if (ele) { ele.style.height = h + 'px'; }
+    };
+};
+
 /**
  * 
  */
@@ -396,6 +412,12 @@ const errorLog = async () => {
     setTimeout(function () { sizeLogWindow() }, 0);
 }
 
+
+const downloadCliBox = async () => {
+    downloadCliOverlay.value.style.display = "block";
+    setTimeout(function () { sizeDownloadCliWindow() }, 0);
+}
+
 useAccountEventListen('accountEvent', () => {
     const ele = document.getElementById('UserAccountOverlay') as HTMLElement;
     ele.style.display = "none";
@@ -410,6 +432,12 @@ useAccountEventListen('aboutBoxEvent', () => {
 
 useAccountEventListen('errorLogEvent', () => {
     const ele = document.getElementById('ErrorLogOverlay') as HTMLElement;
+    ele.style.display = "none";
+    popupActive.value = false;
+})
+
+useAccountEventListen('downloadCliBoxEvent', () => {
+    const ele = document.getElementById('DownloadCliBoxOverlay') as HTMLElement;
     ele.style.display = "none";
     popupActive.value = false;
 })
