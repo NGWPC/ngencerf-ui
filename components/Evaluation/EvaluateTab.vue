@@ -26,7 +26,7 @@
           <div class="absolute" style="top:0px;right:0px;">
             <div v-if="selectedPlotName && selectedPlotName == selectedGridDisplay?.name"
               class="p-0 relative overflow-visible">
-              <div v-if="!disableSpatialPlotDate" class="grid grid-cols-3 gap-4">
+              <div v-if="minGridDateTime && maxGridDateTime" class="grid grid-cols-3 gap-4">
                 <div class="text-nowrap text-right font-bold" style="padding-top:2px;">
                   Select Date<span class="required-asterisk">*</span>
                 </div>
@@ -46,9 +46,6 @@
                     {{ getGridTimeRange() }}
                   </p>
                 </div>
-              </div>
-              <div v-else>
-                SMAP data unavailable for job time range
               </div>
             </div>
           </div>
@@ -166,7 +163,7 @@
         </a>
         <div v-if="plotGraphLines.length > 0">
           <div v-for="item in plotGraphLines" :key="item.id">
-            <input v-if="plotGraphLines.length > 1" type="checkbox" :id="`plotGraphCheckbox-${item.id}`"
+            <input v-show="plotGraphLines.length > 1" type="checkbox" :id="`plotGraphCheckbox-${item.id}`"
               v-model="item.checked" @change="drawInteractivePlot(); drawInteractiveSlider();" 
               :disabled="item.checked && numPlotGraphCheckboxesChecked() <= 2" class="align-top">
             <label :for="`plotGraphCheckbox-${item.id}`" :style="`color: ${item.color}`">{{ item.name }}</label>
@@ -174,6 +171,9 @@
         </div>
         <div v-if="numPlotGraphCheckboxesChecked() === 0">
           Check at least one box to generate an interactive plot.
+        </div>
+        <div v-if="simDataOnly" class="text-red-600">
+          {{ selectedGridDisplay.abbr == 'SWE' ? 'SNODAS' : 'SMAP' }} data unavailable for job time range
         </div>
         <div id="CustomizePlotWindow" v-if="showCustomizePlot">
           <div class="text-right sticky top-0">
@@ -342,7 +342,7 @@ const userDataStore = useUserDataStore();
 const toast = useToast();
 
 const showMessagesGroup = ref<boolean>(false);
-const disableSpatialPlotDate = ref<boolean>(false);
+const simDataOnly = ref<boolean>(false);
 
 const { calibrationJobId, evaluateValidationRunId } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
@@ -390,8 +390,8 @@ const {
   queryGetPlot,
 } = runStatusStore;
 const {
-  setgridStartDateTime,
-  setgridEndDateTime,
+  setGridStartDateTime,
+  setGridEndDateTime,
   getGridTimeRange,
   queryGetIterations,
   queryGetPerformanceMetrics,
@@ -736,12 +736,6 @@ watch(selectedPlotName, async () => {
       // reset all of our plot refs except for selectedPlotName
       resetUserPlotRefs(['selectedPlotName','selectedGridDisplay']);
 
-      // set gridStartDateTime and gridEndDateTime if not already set
-      if (!gridStartDateTime.value || !gridEndDateTime.value) {
-        setgridStartDateTime();
-        setgridEndDateTime();
-      }
-
       // pre-load Grid Timeseries Data so that we know our date range
       if (!gridTimeSeriesData.value || gridTimeSeriesData.value.length === 0) {
         const response: any = await queryGetGridTimeSeriesData(
@@ -749,8 +743,35 @@ watch(selectedPlotName, async () => {
         );
         // get time series data from server - need to make this more dynamic
         if (response?._data?.timeseries_data) {
-          gridTimeSeriesData.value = response?._data?.timeseries_data;
+          const gridTimeSeriesDataRaw = response?._data?.timeseries_data;
+
+          // Find keys that have at least one non-empty value
+          const keysToKeep = new Set(["timestamp"]);
+
+          for (const row of gridTimeSeriesDataRaw) {
+            for (const [key, value] of Object.entries(row)) {
+              if (key !== "timestamp" && value !== "") {
+                keysToKeep.add(key);
+              }
+            }
+          }
+
+          // Remove unused keys
+          gridTimeSeriesData.value = gridTimeSeriesDataRaw.map(row =>
+            Object.fromEntries(
+              Object.entries(row).filter(([key]) => keysToKeep.has(key))
+            )
+          );
+
+          simDataOnly.value = keysToKeep.size <= 2;
+
+          // set gridStartDateTime and gridEndDateTime if not already set
+          if (!gridStartDateTime.value || !gridEndDateTime.value) {
+            setGridStartDateTime();
+            setGridEndDateTime();
+          }
           selectedPlotHasTimeseries.value = true;
+
           // Start with timeseries already displayed
           togglePlotGraph();
         } else {
@@ -1376,7 +1397,7 @@ const numPlotGraphCheckboxesChecked = () => {
     }
     return numChecked;
   }
-  return 0;
+  return plotGraphLines.value.length;
 };
 
 // Create slider as a mini-plot of just the first plot line
@@ -1456,9 +1477,6 @@ const drawInteractiveSlider = () => {
         if (maxRecord) {
           gridMaxValue = maxRecord[gridColumnName];
           gridMaxDate = new Date(maxRecord['timestamp']);
-        }
-        if (gridColumnName.toLowerCase().includes('simulated')) {
-          disableSpatialPlotDate.value = true;
         }
         // override the default date for grid
         selectedGridDateTime.value = gridMaxDate?.toISOString().split('T')[0];
