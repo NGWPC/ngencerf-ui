@@ -1,67 +1,328 @@
 <template>
   <!-- Download CLI Box -->
-  <div id="DownloadCliBox" ref="downloadCliBox" class="absolute h-auto rounded-lg">
-    <div id="DownloadCliBoxContents" style="direction: ltr">
+  <div id="DownloadCliBox" ref="downloadCliBox" class="absolute h-auto rounded-lg flex h-screen flex-col">
+    <div id="DownloadCliBoxContents" style="direction: ltr" class="flex-1 overflow-y-auto">
       <div class="text-right sticky top-0">
         <img alt="Close" title="Close" aria-label="Close" src="@/assets/styles/img/xclose.png" width="40"
           class="absolute cursor-pointer right-0 mt-2 mr-2" @click="closeDownloadCliBox" />
       </div>
 
-      <div id="BoxContent">
-        <div id="PgmName" class="inline-block font-bold ml-4 mt-3 text-lg">
-          Download CLI
-        </div>
-        <hr class="mt-2" />
+      <div id="BoxContent" class="mx-auto max-w-7xl">
+        <!-- Header -->
+        <div>
+          <div id="PgmName" class="inline-block font-bold ml-4 mt-3 text-lg">
+            Download ngenCerf CLI
+          </div>
 
-        <div class="grid grid-cols-3 gap-4">
-          <div>
-            <a href="{{ ngencerfBaseUrl }}/static/latest/windows/ngencerf.exe">Windows</a>
-          </div>
-          <div>
-            <a href="{{ ngencerfBaseUrl }}/static/latest/macos/ngencerf">MacOS</a>
-          </div>
-          <div>
-            <a href="{{ ngencerfBaseUrl }}/static/latest/linux/ngencerf">Linux</a>
-          </div>
-          <div class="col-span-3 font-bold">
-            Installation Instructions
-          </div>
-          <div>
-            <div class="font-bold">Windows</div>
-            <ol>
-              <li>Download ngencerf.exe.</li>
-              <li>Move it to a directory on your PATH.</li>
-              <li>Run ngencerf.exe from that directory, or ngencerf if installed on PATH.</li>
-            </ol>
-          </div>
-          <div>
-            <div class="font-bold">macOS</div>
-            <ol>
-              <li>Download ngencerf.</li>
-              <li>Make it executable:<br/>
-              <pre>chmod +x ngencerf</pre></li>
-              <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
-            </ol>
-          </div>
-          <div>
-            <div class="font-bold">Linux</div>
-            <ol>
-              <li>Download ngencerf.</li>
-              <li>Make it executable:<br/>
-              <pre>chmod +x ngencerf</pre></li>
-              <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
-            </ol>
-          </div>
-          <div class="col-span-3">
-            <div class="font-bold">Configure Server URL</div>
+          <hr class="mt-2" />
 
-            <div>Before using the CLI, tell it which ngenCerf server to connect to:</div>
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <p class="m-4 text-gray-600">
+              The ngenCerf Command Line Interface (CLI) lets you run jobs and
+              interact with the server from your local machine.
+            </p>
+            <div class="rounded-lg border bg-white m-4 p-2 shadow-sm lg:w-80">
+              <div class="flex items-start gap-3">
+                <font-awesome-icon
+                  :icon="faCircleInfo"
+                  class="text-2xl text-blue-600"
+                />
 
-            <div><pre>ngencerf url add {{ ngencerfBaseUrl }}</pre></div>
+                <div>
+                  <div class="font-semibold">
+                    Latest Release
+                  </div>
 
-            <div>The CLI saves this URL and uses it for future commands.</div>
+                  <div class="text-sm text-gray-500">
+                    {{ combinedVersionInfo?.ngenCerf_date }}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Download Section -->
+        <section class="rounded-lg border bg-white mx-4 p-4 shadow-sm">
+
+          <h2 class="text-2xl font-semibold">
+            1. Download the CLI
+          </h2>
+
+          <p class="mt-1">
+            Choose your operating system.
+          </p>
+
+          <div class="mt-6 grid gap-6 md:grid-cols-3">
+
+            <!-- Windows -->
+            <div class="flex flex-col items-center rounded-lg border p-4 text-center">
+
+              <div class="mb-4 text-6xl text-blue-600">
+                <a :href="ngencerfBaseUrl + '/static/latest/windows/ngencerf.exe'">
+                  <font-awesome-icon :icon="faWindows" />
+                </a>
+              </div>
+
+              <h3 class="text-xl font-semibold !text-black">
+                Windows
+              </h3>
+
+              <p class="mb-6 text-gray-500">
+                File: ngencerf.exe
+              </p>
+              
+              <a :href="ngencerfBaseUrl + '/static/latest/windows/ngencerf.exe'">
+                <button class="inline-flex items-center justify-center gap-2 rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700">
+                  <font-awesome-icon
+                    :icon="faDownload"
+                    class="text-sm"
+                  />
+                  <span>Download for Windows</span>
+                </button>
+              </a>
+
+            </div>
+
+            <!-- macOS -->
+            <div class="flex flex-col items-center rounded-lg border p-4 text-center">
+
+              <div class="mb-4 text-6xl">
+                <a :href="ngencerfBaseUrl + '/static/latest/macos/ngencerf'">
+                  <font-awesome-icon :icon="faApple" />
+                </a>
+              </div>
+
+              <h3 class="text-xl font-semibold !text-black">
+                macOS
+              </h3>
+
+              <p class="mb-6 text-gray-500">
+                File: ngencerf
+              </p>
+
+              <a :href="ngencerfBaseUrl + '/static/latest/macos/ngencerf'">
+                <button class="inline-flex items-center justify-center gap-2 rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700">
+                  <font-awesome-icon
+                    :icon="faDownload"
+                    class="text-sm"
+                  />
+                  <span>Download for macOS</span>
+                </button>
+              </a>
+
+            </div>
+
+            <!-- Linux -->
+            <div class="flex flex-col items-center rounded-lg border p-4 text-center">
+
+              <div class="mb-4 text-6xl">
+                <a :href="ngencerfBaseUrl + '/static/latest/linux/ngencerf'">
+                  <font-awesome-icon :icon="faLinux" />
+                </a>
+              </div>
+
+              <h3 class="text-xl font-semibold !text-black">
+                Linux
+              </h3>
+
+              <p class="mb-6 text-gray-500">
+                File: ngencerf
+              </p>
+
+              <a :href="ngencerfBaseUrl + '/static/latest/linux/ngencerf'">
+                <button class="inline-flex items-center justify-center gap-2 rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700">
+                  <font-awesome-icon
+                    :icon="faDownload"
+                    class="text-sm"
+                  />
+                  <span>Download for Linux</span>
+                </button>
+              </a>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- Installation -->
+        <section class="rounded-lg border bg-white mx-4 mt-4 p-4 shadow-sm">
+
+          <h2 class="text-2xl font-semibold">
+            2. Installation & Usage
+          </h2>
+
+          <div class="mt-6 grid gap-8 lg:grid-cols-3">
+
+            <div>
+              <h3 class="mb-4 flex items-center gap-2 text-xl font-semibold !text-black">
+                <font-awesome-icon :icon="faWindows" />
+                Windows
+              </h3>
+
+              <ol class="space-y-2 list-decimal pl-6">
+                <li>Download ngencerf.exe.</li>
+                <li>Move it to a directory on your PATH.</li>
+                <li>Run ngencerf.exe from that directory, or ngencerf if installed on PATH.</li>
+              </ol>
+            </div>
+
+            <div class="border-l border-gray-200 pl-8">
+              <h3 class="mb-4 flex items-center gap-2 text-xl font-semibold !text-black">
+                <font-awesome-icon :icon="faApple" />
+                macOS
+              </h3>
+
+              <ol class="space-y-2 list-decimal pl-6">
+                <li>Download ngencerf.</li>
+                <li>Make it executable:
+                  <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
+                    <span>
+                      {{ commandList[0] }}
+                    </span>
+
+                    <button
+                      type="button"
+                      class="ml-4 text-gray-500 hover:text-blue-600"
+                      title="Copy to clipboard"
+                      @click="copyCommand(commandList[0]);"
+                    >
+                      <font-awesome-icon :icon="faCopy" />
+                    </button>
+                  </div>
+                </li>
+                <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
+              </ol>
+            </div>
+
+            <div class="border-l border-gray-200 pl-8">
+              <h3 class="mb-4 flex items-center gap-2 text-xl font-semibold !text-black">
+                <font-awesome-icon :icon="faLinux" />
+                Linux
+              </h3>
+
+              <ol class="space-y-2 list-decimal pl-6">
+                <li>Download ngencerf.</li>
+                <li>Make it executable:
+                  <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
+                    <span>
+                      {{ commandList[1] }}
+                    </span>
+
+                    <button
+                      type="button"
+                      class="ml-4 text-gray-500 hover:text-blue-600"
+                      title="Copy to clipboard"
+                      @click="copyCommand(commandList[1]);"
+                    >
+                      <font-awesome-icon :icon="faCopy" />
+                    </button>
+                  </div>
+                </li>
+                <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
+              </ol>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- Configure URL -->
+        <section class="rounded-lg border bg-white mx-4 my-4 p-4 shadow-sm">
+
+          <h2 class="text-2xl font-semibold">
+            3. Configure the Server URL
+          </h2>
+
+          <div class="mt-6 grid gap-8 lg:grid-cols-3">
+
+            <div>
+              <ul class="space-y-2 list-disc pl-6">
+                <li>
+                  Before using the CLI, tell it which server to connect to.
+                  <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
+                    <span>
+                      {{ commandList[2] }}
+                    </span>
+
+                    <button
+                      type="button"
+                      class="ml-4 text-gray-500 hover:text-blue-600"
+                      title="Copy to clipboard"
+                      @click="copyCommand(commandList[2]);"
+                    >
+                      <font-awesome-icon :icon="faCopy" />
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="border-l border-gray-200 pl-8">
+              <ul class="space-y-2 list-disc pl-6">
+                <li>
+                  The CLI saves this URL and uses it for future commands.
+                </li>
+                <li>
+                  You can save multiple server URLs. The most recently added server URL becomes the active server.
+                </li>
+              </ul>
+            </div>
+
+            <div class="border-l border-gray-200 pl-8">
+              <ul class="space-y-2 list-disc pl-6">
+                <li>
+                  To display your saved servers:
+                  <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
+                    <span>
+                      {{ commandList[3] }}
+                    </span>
+
+                    <button
+                      type="button"
+                      class="ml-4 text-gray-500 hover:text-blue-600"
+                      title="Copy to clipboard"
+                      @click="copyCommand(commandList[3]);"
+                    >
+                      <font-awesome-icon :icon="faCopy" />
+                    </button>
+                  </div>
+                </li>
+
+                <li>
+                  To switch to another saved server:
+                  <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
+                    <span>
+                      {{ commandList[4] }}
+                    </span>
+
+                    <button
+                      type="button"
+                      class="ml-4 text-gray-500 hover:text-blue-600"
+                      title="Copy to clipboard"
+                      @click="copyCommand(commandList[4]);"
+                    >
+                      <font-awesome-icon :icon="faCopy" />
+                    </button>
+                  </div>
+                </li>
+              </ul>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="border-t pt-6 text-sm text-gray-500">
+          <div class="text-center">
+            By downloading the ngenCerf CLI, you agree to the ngenCerf 
+            <a href="/terms" class="text-blue-600 hover:underline">Terms of Use</a> and 
+            <a href="/privacy" class="text-blue-600 hover:underline">Privacy Policy</a>.
+          </div>
+        </footer>
 
       </div>
     </div>
@@ -69,18 +330,58 @@
 </template>
 
 <script setup lang="ts">
+import { useToast } from "primevue/usetoast";
 import { useBackendConfig } from "@/composables/UseBackendConfig";
 import { generalStore } from "@/stores/common/GeneralStore";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {
+  faLinux,
+  faApple,
+  faWindows,
+} from '@fortawesome/free-brands-svg-icons'
+import { 
+  faCircleInfo,
+  faDownload,
+  faCopy
+} from '@fortawesome/free-solid-svg-icons'
 
+import type { ToastMessageOptions } from "primevue/toast";
+import { ToastTimeout } from "@/composables/NgencerfEnums";
+import type { CombinedVersionInfo } from "@/composables/NgencerfModels";
+
+const toast = useToast();
+
+const { addToastRecord, getServerInfo } = generalStore();
 const { popupActive } = storeToRefs(generalStore());
 
 const { ngencerfBaseUrl } = useBackendConfig();
 
-const scrollHeight = ref<string>(); // Default height
+const combinedVersionInfo = ref<CombinedVersionInfo>();
 
 const downloadCliBox = ref<HTMLElement | null>(null);
 
+const commandList = [
+  'chmod +x ngencerf',
+  'chmod +x ngencerf',
+  'ngencerf url add ' + ngencerfBaseUrl,
+  'ngencerf url list',
+  'ngencerf url select <number>'
+]
+
+const copyCommand = async(command: string) => {
+  toast.removeAllGroups();
+  try {
+    await navigator.clipboard.writeText(command);
+    const tMsg: ToastMessageOptions = { severity: 'info', detail: 'Copied code to clipboard', life: ToastTimeout.timeoutInfo };
+    toast.add(tMsg); addToastRecord(tMsg);
+  } catch (err) {
+    const tMsg: ToastMessageOptions = { severity: 'error', detail: 'Error copying code to clipboard: ' + err, life: ToastTimeout.timeoutError };
+    toast.add(tMsg); addToastRecord(tMsg);
+  }
+}
+
 onMounted(async () => {
+  combinedVersionInfo.value = getServerInfo();
   setTimeout(() => {
     const resizeEvent = new Event('resize');
     window.dispatchEvent(resizeEvent);
