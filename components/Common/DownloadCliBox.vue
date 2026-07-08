@@ -15,22 +15,51 @@
 
         <div class="grid grid-cols-3 gap-4">
           <div>
-            Linux
+            <a href="{{ ngencerfBaseUrl }}/static/latest/windows/ngencerf.exe">Windows</a>
           </div>
           <div>
-            MacOS
+            <a href="{{ ngencerfBaseUrl }}/static/latest/macos/ngencerf">MacOS</a>
           </div>
           <div>
-            Windows
+            <a href="{{ ngencerfBaseUrl }}/static/latest/linux/ngencerf">Linux</a>
+          </div>
+          <div class="col-span-3 font-bold">
+            Installation Instructions
           </div>
           <div>
-            {{ ngencerfBaseUrl }}/static/latest/linux/ngencerf
+            <div class="font-bold">Windows</div>
+            <ol>
+              <li>Download ngencerf.exe.</li>
+              <li>Move it to a directory on your PATH.</li>
+              <li>Run ngencerf.exe from that directory, or ngencerf if installed on PATH.</li>
+            </ol>
           </div>
           <div>
-            {{ ngencerfBaseUrl }}/static/latest/macos/ngencerf
+            <div class="font-bold">macOS</div>
+            <ol>
+              <li>Download ngencerf.</li>
+              <li>Make it executable:<br/>
+              <pre>chmod +x ngencerf</pre></li>
+              <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
+            </ol>
           </div>
           <div>
-            {{ ngencerfBaseUrl }}/static/latest/windows/ngencerf.exe
+            <div class="font-bold">Linux</div>
+            <ol>
+              <li>Download ngencerf.</li>
+              <li>Make it executable:<br/>
+              <pre>chmod +x ngencerf</pre></li>
+              <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
+            </ol>
+          </div>
+          <div class="col-span-3">
+            <div class="font-bold">Configure Server URL</div>
+
+            <div>Before using the CLI, tell it which ngenCerf server to connect to:</div>
+
+            <div><pre>ngencerf url add {{ ngencerfBaseUrl }}</pre></div>
+
+            <div>The CLI saves this URL and uses it for future commands.</div>
           </div>
         </div>
 
