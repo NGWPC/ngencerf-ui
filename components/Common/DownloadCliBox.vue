@@ -315,15 +315,6 @@
 
         </section>
 
-        <!-- Footer -->
-        <footer class="border-t pt-6 text-sm text-gray-500">
-          <div class="text-center">
-            By downloading the ngenCerf CLI, you agree to the ngenCerf 
-            <a href="/terms" class="text-blue-600 hover:underline">Terms of Use</a> and 
-            <a href="/privacy" class="text-blue-600 hover:underline">Privacy Policy</a>.
-          </div>
-        </footer>
-
       </div>
     </div>
   </div>
