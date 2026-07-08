@@ -86,7 +86,7 @@
                   :minFractionDigits="2" class="w-24" aria-label="Peak Flow Threshold" title="Peak Flow Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange">
-                </InputNumber> quantile
+                </InputNumber> percentile (0.0-100.0)
               </div>
             </div>
           </div>
@@ -130,7 +130,7 @@
                   :minFractionDigits="2" class="w-24" aria-label=" Peak Flow Threshold" title=" Peak Flow Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange"></InputNumber>
-                quantile
+                percentile (0.0-100.0)
               </div>
             </div>
           </div>
