@@ -699,6 +699,7 @@ export type AccountEvent = {
   accountEvent: string;
   aboutBoxEvent: string;
   errorLogEvent: string;
+  downloadCliBoxEvent: string;
 };
 
 export type CombinedVersionInfo = {
