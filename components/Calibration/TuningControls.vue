@@ -1,23 +1,23 @@
 <template>
-  <div id="TuningControls" class="">
+  <div id="TuningControls" class="ml-3">
     <div v-if="disableAll" class="text-red-600">
       Tuning Controls cannot be set until Formulation is set on the previous tab.
     </div>
     <div :style="`opacity: ${disableAll ? '50%' : '100%'}`">
-      <div class="mt-3 mb-2">
-        <div v-if="dateRangeBegin && dateRangeEnd" class="text-left mt-1 text-xl c-blue-primary1 font-bold" id="RangeDates"
-          :aria-label="'Range is from ' + formatDate(dateRangeBegin) + ' to ' + formatDate(dateRangeEnd)"
-          :title="'Range is from ' + formatDate(dateRangeBegin) + ' to ' + formatDate(dateRangeEnd)">
-          RANGE: {{ formatDate(dateRangeBegin) }} to {{ formatDate(dateRangeEnd) }}
-        </div>
-      </div>
       <div class="grid grid-cols-2">
         <div class="col-span-2">
           <div id="BoxLeft" class="text-left">
             <div id="BoxTopLeft" class="pt-2">
-              <span class="tabTitles font-bold" aria-label="Simulation Configuration" title="Simulation Configuration">
+              <span class="tabTitles text-xl font-bold" aria-label="Simulation Configuration" title="Simulation Configuration">
                 Simulation Configuration
               </span>
+            </div>
+            <div class="mt-3 mb-2 col-span-2">
+                <div v-if="dateRangeBegin && dateRangeEnd" class="text-left mt-1 c-blue-primary1 font-bold" id="RangeDates"
+                :aria-label="'Range is from ' + formatDate(dateRangeBegin) + ' to ' + formatDate(dateRangeEnd)"
+                :title="'Range is from ' + formatDate(dateRangeBegin) + ' to ' + formatDate(dateRangeEnd)">
+                Available Date Range: {{ formatDate(dateRangeBegin) }} to {{ formatDate(dateRangeEnd) }}
+                </div>
             </div>
             <div class="pt-2">
               <div class="timeBlocks datepicker-wrapper w-[695px]" @click="handleCalibrationTimeControlsClick">
@@ -43,7 +43,7 @@
                               :disabled="!isTimeRangeSet() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)" />
                           </div>
                           <div v-if="timeControlError" class="date-picker-error whitespace-nowrap">
-                            🛑 Simulation Start and durations exceed available date range.
+                            🛑 Simulation Start with durations falls outside available date range.
                           </div>
                         </div>
                       </td>
@@ -61,7 +61,7 @@
                         </InputNumber>
                       </td>
                       <td class="text-left pb-1 align-middle whitespace-nowrap">
-                        months
+                        months (min 0)
                       </td>
                     </tr>
 
@@ -77,7 +77,7 @@
                         </InputNumber>
                       </td>
                       <td class="text-left pb-1 align-middle whitespace-nowrap">
-                        months
+                        months (min 1)
                       </td>
                     </tr>
 
@@ -111,7 +111,7 @@
                         </InputNumber>
                       </td>
                       <td class="text-left pb-1 align-middle whitespace-nowrap">
-                        months
+                        months (min 0)
                       </td>
                     </tr>
 
@@ -127,7 +127,7 @@
                         </InputNumber>
                       </td>
                       <td class="text-left align-middle whitespace-nowrap">
-                        months
+                        months (min 1)
                       </td>
                     </tr>
                   </tbody>
@@ -142,7 +142,7 @@
         <div class="text-left">
           <div class="hr my-3"></div>
           <div>
-            <div class="font-bold required-label">Output Variable To Calibrate</div>
+            <div class="font-bold text-xl required-label">Output Variable To Calibrate</div>
             <Select id="OutputVariable" class="varInputs mt-1" aria-label="Output Variable To Calibrate"
               :disabled="!isFormulationDataSaved() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
               title="Output Variable To Calibrate" v-model="selectedOutputVariableToCalibrate" :options="['Streamflow']"/>
@@ -1200,7 +1200,7 @@ const saveTuningData = () => {
     const tMsg: ToastMessageOptions = {
       severity: 'error',
       summary: "Error Saving Tuning Data",
-      detail: "Simulation Start and durations exceed available date range",
+      detail: "Simulation Start with durations falls outside available date range",
       life: ToastTimeout.timeoutError,
     };
     toast.add(tMsg); addToastRecord(tMsg);
