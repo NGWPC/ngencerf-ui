@@ -126,7 +126,7 @@
               </span>
               <div v-if="showMetricThresholdEvent && !cbEventBasedDisabled" id="ThresholdEvent" class="mt-2 pl-8">
                 Event Threshold<span class="required-asterisk" aria-hidden="true">* </span>
-                <InputNumber inputId="uiThresholdEvent" v-model="uiThresholdEvent"
+                <InputNumber inputId="uiThresholdEvent" v-model="uiThresholdEvent" :min="0" :max="100" 
                   :minFractionDigits="2" class="w-24" aria-label=" Event Threshold" title=" Event Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange"></InputNumber>

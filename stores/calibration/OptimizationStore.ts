@@ -186,14 +186,14 @@ export const useOptimizationStore = defineStore(
         saveOptMetPayload.value["objective_function"] =
           uiObjectiveFunction.value;
       if (
-        uiThresholdCategorical.value !== undefined &&
-        uiThresholdCategorical.value > 0
+        uiThresholdCategorical.value !== undefined
       )
         saveOptMetPayload.value["threshold_categorical"] =
           uiThresholdCategorical.value;
       if (
         uiThresholdEvent.value !== undefined &&
-        uiThresholdEvent.value > 0
+        uiThresholdEvent.value >= 0 &&
+        uiThresholdEvent.value <= 100
       )
         saveOptMetPayload.value["threshold_event"] =
           uiThresholdEvent.value;
