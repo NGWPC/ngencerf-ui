@@ -73,17 +73,17 @@
                 }}
               </div>
               <div v-if="showObjectiveFunctionThresholdCategorical" class="ml-3 mt-2">
-                Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
+                Categorical Threshold<span class="required-asterisk" aria-hidden="true">* </span>
                 <InputNumber inputId="uiThresholdCategorical" v-model="uiThresholdCategorical"
-                  :minFractionDigits="2" class="w-24" aria-label="Flow Threshold" title="Flow Threshold"
+                  :minFractionDigits="2" class="w-24" aria-label="Categorical Threshold" title="Categorical Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange">
                 </InputNumber> m3/s
               </div>
               <div v-if="showObjectiveFunctionThresholdEvent" class="ml-3 mt-2">
-                Peak Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
+                Event Threshold<span class="required-asterisk" aria-hidden="true">* </span>
                 <InputNumber inputId="ofEventBasedFlowThreshold" v-model="uiThresholdEvent"
-                  :minFractionDigits="2" class="w-24" aria-label="Peak Flow Threshold" title="Peak Flow Threshold"
+                  :minFractionDigits="2" class="w-24" aria-label="Event Threshold" title="Event Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange">
                 </InputNumber> percentile (0.0-100.0)
@@ -106,9 +106,9 @@
                 </div>
               </span>
               <div v-if="showMetricThresholdCategorical && !cbCategoricalDisabled" id="FlowThreshold" class="mt-2 pl-8">
-                Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
+                Categorical Threshold<span class="required-asterisk" aria-hidden="true">* </span>
                 <InputNumber inputId="metricCategoricalFlowThreshold" v-model="uiThresholdCategorical"
-                  :minFractionDigits="2" class="w-24" aria-label="Flow Threshold" title="Flow Threshold"
+                  :minFractionDigits="2" class="w-24" aria-label="Categorical Threshold" title="Categorical Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange"></InputNumber> m3/s
               </div><br />
@@ -125,9 +125,9 @@
                 </div>
               </span>
               <div v-if="showMetricThresholdEvent && !cbEventBasedDisabled" id="ThresholdEvent" class="mt-2 pl-8">
-                Peak Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
+                Event Threshold<span class="required-asterisk" aria-hidden="true">* </span>
                 <InputNumber inputId="uiThresholdEvent" v-model="uiThresholdEvent"
-                  :minFractionDigits="2" class="w-24" aria-label=" Peak Flow Threshold" title=" Peak Flow Threshold"
+                  :minFractionDigits="2" class="w-24" aria-label=" Event Threshold" title=" Event Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange"></InputNumber>
                 percentile (0.0-100.0)
@@ -516,14 +516,14 @@ const validateTab = (tabNumber?: number) => {
       (!cbIsCategorical.value && userCalibrationRunData.value?.threshold_categorical ) ||
       (userCalibrationRunData?.value?.threshold_categorical || 0) !== (uiThresholdCategorical.value || 0)) {
       error = true;
-      text.push("Calculate Categorical Metrics (Flow Threshold) has been changed");
+      text.push("Calculate Categorical Metrics (Categorical Threshold) has been changed");
     }
 
     if ((cbIsEventBased.value && !userCalibrationRunData.value?.threshold_event ) ||
       (!cbIsEventBased.value && userCalibrationRunData.value?.threshold_event ) ||
       (userCalibrationRunData?.value?.threshold_event || 0) !== (uiThresholdEvent.value || 0)) {
       error = true;
-      text.push("Calculate Event Based Metrics (Peak Flow Threshold) has been changed");
+      text.push("Calculate Event Based Metrics (Event Threshold) has been changed");
     }
 
     if (algParamDataHasChanged.value) {
