@@ -33,8 +33,8 @@ export const useOptimizationStore = defineStore(
     const optimizationStore_data_loading = ref<boolean>(true);
 
     const optimizationTabData = ref<OptimizationTabData>();
-    const uiStreamFlowThreshold = ref<number>();
-    const uiPeakFlowThreshold = ref<number>();
+    const uiThresholdCategorical = ref<number>();
+    const uiThresholdEvent = ref<number>();
     const uiOptimizationInputs = ref<UserCalibrationRunOptimizationInputData[]>(
       []
     );
@@ -44,8 +44,8 @@ export const useOptimizationStore = defineStore(
     const uiStopCriteria = ref<number>();
     const optimizationAlgorithmOptionsList = ref<SelectOption[]>([]);
     const objectiveFunctionOptionsList = ref<SelectOption[]>([]);
-    const showObjectiveFunctionPeakFlow = ref<boolean>(false);
-    const showObjectiveFunctionStreamFlow = ref<boolean>(false);
+    const showObjectiveFunctionThresholdEvent = ref<boolean>(false);
+    const showObjectiveFunctionThresholdCategorical = ref<boolean>(false);
     const optMetDataHasChanged = ref<boolean>(false);
     const algParamDataHasChanged = ref<boolean>(false);
 
@@ -74,10 +74,10 @@ export const useOptimizationStore = defineStore(
     };
 
     const setUserSelection = (): void => {
-      uiStreamFlowThreshold.value =
-        userCalibrationRunData.value?.streamflow_threshold ?? undefined;
-      uiPeakFlowThreshold.value =
-        userCalibrationRunData.value?.peak_flow_threshold ?? undefined;
+      uiThresholdCategorical.value =
+        userCalibrationRunData.value?.threshold_categorical ?? undefined;
+      uiThresholdEvent.value =
+        userCalibrationRunData.value?.threshold_event ?? undefined;
       if (userCalibrationRunData.value?.objective_function) {
         uiObjectiveFunction.value = userCalibrationRunData.value.objective_function;
       } else {
@@ -186,17 +186,17 @@ export const useOptimizationStore = defineStore(
         saveOptMetPayload.value["objective_function"] =
           uiObjectiveFunction.value;
       if (
-        uiStreamFlowThreshold.value !== undefined &&
-        uiStreamFlowThreshold.value > 0
+        uiThresholdCategorical.value !== undefined &&
+        uiThresholdCategorical.value > 0
       )
-        saveOptMetPayload.value["streamflow_threshold"] =
-          uiStreamFlowThreshold.value;
+        saveOptMetPayload.value["threshold_categorical"] =
+          uiThresholdCategorical.value;
       if (
-        uiPeakFlowThreshold.value !== undefined &&
-        uiPeakFlowThreshold.value > 0
+        uiThresholdEvent.value !== undefined &&
+        uiThresholdEvent.value > 0
       )
-        saveOptMetPayload.value["peak_flow_threshold"] =
-          uiPeakFlowThreshold.value;
+        saveOptMetPayload.value["threshold_event"] =
+          uiThresholdEvent.value;
       if (uiStopCriteria.value !== undefined && uiStopCriteria.value > 0)
         saveOptMetPayload.value["stop_criteria"] = uiStopCriteria.value;
       if (uiPlotFrequency.value !== undefined && uiPlotFrequency.value > 0)
@@ -270,8 +270,8 @@ export const useOptimizationStore = defineStore(
      * @returns {void}
      */
     const resetOptimizationStore = (): void => {
-      uiStreamFlowThreshold.value = undefined;
-      uiPeakFlowThreshold.value = undefined;
+      uiThresholdCategorical.value = undefined;
+      uiThresholdEvent.value = undefined;
       uiObjectiveFunction.value = "";
       uiOptimization.value = "";
       uiPlotFrequency.value = 1;
@@ -285,15 +285,15 @@ export const useOptimizationStore = defineStore(
       uiObjectiveFunction,
       uiOptimization,
       uiOptimizationInputs,
-      uiPeakFlowThreshold,
+      uiThresholdEvent,
       uiPlotFrequency,
       uiStopCriteria,
-      uiStreamFlowThreshold,
+      uiThresholdCategorical,
       userCalibrationRunData,
       getOptimizationAlgorithmOptionsList,
       getObjectiveFunctionOptionsList,
-      showObjectiveFunctionPeakFlow,
-      showObjectiveFunctionStreamFlow,
+      showObjectiveFunctionThresholdEvent,
+      showObjectiveFunctionThresholdCategorical,
       optMetDataHasChanged,
       algParamDataHasChanged,
       getOptimizationInputUserData,

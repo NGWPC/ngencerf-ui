@@ -72,17 +72,17 @@
                     )
                 }}
               </div>
-              <div v-if="showObjectiveFunctionStreamFlow" class="ml-3 mt-2">
+              <div v-if="showObjectiveFunctionThresholdCategorical" class="ml-3 mt-2">
                 Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
-                <InputNumber inputId="ofCategoricalFlowThreshold" v-model="uiStreamFlowThreshold"
+                <InputNumber inputId="uiThresholdCategorical" v-model="uiThresholdCategorical"
                   :minFractionDigits="2" class="w-24" aria-label="Flow Threshold" title="Flow Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange">
                 </InputNumber> m3/s
               </div>
-              <div v-if="showObjectiveFunctionPeakFlow" class="ml-3 mt-2">
+              <div v-if="showObjectiveFunctionThresholdEvent" class="ml-3 mt-2">
                 Peak Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
-                <InputNumber inputId="ofEventBasedFlowThreshold" v-model="uiPeakFlowThreshold"
+                <InputNumber inputId="ofEventBasedFlowThreshold" v-model="uiThresholdEvent"
                   :minFractionDigits="2" class="w-24" aria-label="Peak Flow Threshold" title="Peak Flow Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange">
@@ -99,15 +99,15 @@
                   :binary="true" v-model="cbIsCategorical" aria-label="Calculate Categorical Metrics Checkbox"
                   title="Calculate Categorical Metrics Checkbox"
                   :disabled="cbCategoricalDisabled || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
-                  @change="toggleMetricStreamFlowInput" />
+                  @change="toggleMetricThresholdCategoricalInput" />
                 <label for="CalcCatMetCB" class="inline">Calculate Categorical Metrics</label>
                 <div class="pl-8">
                   <span class="text-sm ml-2">(POD, CSI, FAR)</span>
                 </div>
               </span>
-              <div v-if="showMetricStreamFlow && !cbCategoricalDisabled" id="FlowThreshold" class="mt-2 pl-8">
+              <div v-if="showMetricThresholdCategorical && !cbCategoricalDisabled" id="FlowThreshold" class="mt-2 pl-8">
                 Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
-                <InputNumber inputId="metricCategoricalFlowThreshold" v-model="uiStreamFlowThreshold"
+                <InputNumber inputId="metricCategoricalFlowThreshold" v-model="uiThresholdCategorical"
                   :minFractionDigits="2" class="w-24" aria-label="Flow Threshold" title="Flow Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange"></InputNumber> m3/s
@@ -118,15 +118,15 @@
                   style="display:inline-block" :binary="true" v-model="cbIsEventBased"
                   aria-label="Calculate Event Based Metrics Checkbox" title="Calculate Event Based Metrics Checkbox"
                   :disabled="cbEventBasedDisabled || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
-                  @change="toggleMetricPeakFlowInput" />
+                  @change="toggleMetricThresholdEventInput" />
                 <label for="CalEventMetCB" class="inline">Calculate Event Based Metrics</label>
                 <div class="pl-8">
                   <span class="text-sm ml-2">(PKBIAS, PKTE, EVBIAS)</span>
                 </div>
               </span>
-              <div v-if="showMetricPeakFlow && !cbEventBasedDisabled" id="PeakFlowThreshold" class="mt-2 pl-8">
+              <div v-if="showMetricThresholdEvent && !cbEventBasedDisabled" id="ThresholdEvent" class="mt-2 pl-8">
                 Peak Flow Threshold<span class="required-asterisk" aria-hidden="true">* </span>
-                <InputNumber inputId="metricEventBasedFlowThreshold" v-model="uiPeakFlowThreshold"
+                <InputNumber inputId="uiThresholdEvent" v-model="uiThresholdEvent"
                   :minFractionDigits="2" class="w-24" aria-label=" Peak Flow Threshold" title=" Peak Flow Threshold"
                   :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"
                   @input="handleOptimizationDataChange"></InputNumber>
@@ -241,15 +241,15 @@ const {
   uiObjectiveFunction,
   uiOptimization,
   uiOptimizationInputs,
-  uiPeakFlowThreshold,
+  uiThresholdEvent,
   uiPlotFrequency,
   uiStopCriteria,
-  uiStreamFlowThreshold,
+  uiThresholdCategorical,
   optimizationStore_data_loading,
   getOptimizationAlgorithmOptionsList,
   getObjectiveFunctionOptionsList,
-  showObjectiveFunctionPeakFlow,
-  showObjectiveFunctionStreamFlow,
+  showObjectiveFunctionThresholdEvent,
+  showObjectiveFunctionThresholdCategorical,
   getOptimizationInputUserData,
   optMetDataHasChanged,
   algParamDataHasChanged,
@@ -281,8 +281,8 @@ const cbCategoricalDisabled = ref<boolean>(false);
 const cbEventBasedDisabled = ref<boolean>(false);
 const cbIsCategorical = ref<boolean>(false);
 const cbIsEventBased = ref<boolean>(false);
-const showMetricPeakFlow = ref<boolean>(false);
-const showMetricStreamFlow = ref<boolean>(false);
+const showMetricThresholdEvent = ref<boolean>(false);
+const showMetricThresholdCategorical = ref<boolean>(false);
 const ele = document.getElementById("MainLeftDataArea") as HTMLElement;
 
 const disableAll = computed(() => {
@@ -304,16 +304,16 @@ onMounted(async() => {
 
   updateMetricFlowFieldVisibility();
 
-  if (userCalibrationRunData.value?.streamflow_threshold) {
+  if (userCalibrationRunData.value?.threshold_categorical) {
     cbIsCategorical.value = true;
-    showMetricStreamFlow.value = true;
-    uiStreamFlowThreshold.value = userCalibrationRunData.value?.streamflow_threshold;
+    showMetricThresholdCategorical.value = true;
+    uiThresholdCategorical.value = userCalibrationRunData.value?.threshold_categorical;
   }
 
-  if (userCalibrationRunData.value?.peak_flow_threshold) {
+  if (userCalibrationRunData.value?.threshold_event) {
     cbIsEventBased.value = true;
-    showMetricPeakFlow.value = true;
-    uiPeakFlowThreshold.value = userCalibrationRunData.value?.peak_flow_threshold;
+    showMetricThresholdEvent.value = true;
+    uiThresholdEvent.value = userCalibrationRunData.value?.threshold_event;
   }
 
   nextTick(() => {
@@ -334,40 +334,40 @@ const updateMetricFlowFieldVisibility = () => {
   if (selectedMetric.value) {
     if (selectedMetric?.value?.categorical === true) {
       // if objective function stream flow value was previously set and we're hiding that field, clear the value
-      if (uiStreamFlowThreshold.value && !showObjectiveFunctionStreamFlow.value) {
-        uiStreamFlowThreshold.value = undefined;
+      if (uiThresholdCategorical.value && !showObjectiveFunctionThresholdCategorical.value) {
+        uiThresholdCategorical.value = undefined;
         optMetDataHasChanged.value = true;
       }
-      showObjectiveFunctionStreamFlow.value = true;
-      showMetricStreamFlow.value = false;
+      showObjectiveFunctionThresholdCategorical.value = true;
+      showMetricThresholdCategorical.value = false;
       cbIsCategorical.value = false;
       cbCategoricalDisabled.value = true;
     } else {
       // if metric stream flow value was previously set and we're hiding that field, clear the value
-      if (uiStreamFlowThreshold.value && showObjectiveFunctionStreamFlow.value) {
-        uiStreamFlowThreshold.value = undefined;
+      if (uiThresholdCategorical.value && showObjectiveFunctionThresholdCategorical.value) {
+        uiThresholdCategorical.value = undefined;
         optMetDataHasChanged.value = true;
       }
-      showObjectiveFunctionStreamFlow.value = false;
+      showObjectiveFunctionThresholdCategorical.value = false;
       cbCategoricalDisabled.value = false;
     }
     if (selectedMetric?.value?.event_based === true) {
       // if objective function peak flow value was previously set and we're hiding that field, clear the value
-      if (uiPeakFlowThreshold.value && !showObjectiveFunctionPeakFlow.value) {
-        uiPeakFlowThreshold.value = undefined;
+      if (uiThresholdEvent.value && !showObjectiveFunctionThresholdEvent.value) {
+        uiThresholdEvent.value = undefined;
         optMetDataHasChanged.value = true;
       }
-      showObjectiveFunctionPeakFlow.value = true;
-      showMetricPeakFlow.value = false;
+      showObjectiveFunctionThresholdEvent.value = true;
+      showMetricThresholdEvent.value = false;
       cbIsEventBased.value = false;
       cbEventBasedDisabled.value = true;
     } else {
       // if metric peak flow value was previously set and we're hiding that field, clear the value
-      if (uiPeakFlowThreshold.value && showObjectiveFunctionPeakFlow.value) {
-        uiPeakFlowThreshold.value = undefined;
+      if (uiThresholdEvent.value && showObjectiveFunctionThresholdEvent.value) {
+        uiThresholdEvent.value = undefined;
         optMetDataHasChanged.value = true;
       }
-      showObjectiveFunctionPeakFlow.value = false;
+      showObjectiveFunctionThresholdEvent.value = false;
       cbEventBasedDisabled.value = false;
     }
   }
@@ -376,12 +376,12 @@ const updateMetricFlowFieldVisibility = () => {
 /**
  * metric stream flow field visibility toggle 
  */
-const toggleMetricStreamFlowInput = () => {
+const toggleMetricThresholdCategoricalInput = () => {
   if (!cbCategoricalDisabled.value && cbIsCategorical.value) {
-    showMetricStreamFlow.value = true;
+    showMetricThresholdCategorical.value = true;
   } else if (!cbIsCategorical.value) {
-    showMetricStreamFlow.value = false;
-    uiStreamFlowThreshold.value = undefined;
+    showMetricThresholdCategorical.value = false;
+    uiThresholdCategorical.value = undefined;
   }
   optMetDataHasChanged.value = true;
 };
@@ -389,12 +389,12 @@ const toggleMetricStreamFlowInput = () => {
 /**
  * metric peak flow field visibility toggle 
  */
-const toggleMetricPeakFlowInput = () => {
+const toggleMetricThresholdEventInput = () => {
   if (!cbEventBasedDisabled.value && cbIsEventBased.value) {
-    showMetricPeakFlow.value = true;
+    showMetricThresholdEvent.value = true;
   } else if (!cbIsEventBased.value) {
-    showMetricPeakFlow.value = false;
-    uiPeakFlowThreshold.value = undefined;
+    showMetricThresholdEvent.value = false;
+    uiThresholdEvent.value = undefined;
   }
   optMetDataHasChanged.value = true;
 };
@@ -426,20 +426,20 @@ const optimizationSelectChange = () => {
  */
 watch(() => optimizationStore_data_loading.value, (loading_status) => {
   if (selectedMetric?.value?.categorical === true) {
-    showObjectiveFunctionStreamFlow.value = true;
+    showObjectiveFunctionThresholdCategorical.value = true;
     cbCategoricalDisabled.value = true;
     cbIsCategorical.value = true;
-  } else if (!selectedMetric?.value?.categorical && uiStreamFlowThreshold.value) {
-    showMetricStreamFlow.value = true;
+  } else if (!selectedMetric?.value?.categorical && uiThresholdCategorical.value) {
+    showMetricThresholdCategorical.value = true;
     cbIsCategorical.value = true;
   }
 
   if (selectedMetric?.value?.event_based === true) {
-    showObjectiveFunctionPeakFlow.value = true;
+    showObjectiveFunctionThresholdEvent.value = true;
     cbEventBasedDisabled.value = true;
     cbIsEventBased.value = true;
-  } else if (!selectedMetric?.value?.event_based && uiPeakFlowThreshold.value) {
-    showMetricPeakFlow.value = true;
+  } else if (!selectedMetric?.value?.event_based && uiThresholdEvent.value) {
+    showMetricThresholdEvent.value = true;
     cbIsEventBased.value = true;
   }
 })
@@ -477,8 +477,8 @@ const updateJobData = () => {
     userCalibrationRunData.value.optimization_inputs = saveOptMetPayload.value.optimization_inputs as [];
     userCalibrationRunData.value.optimization = saveOptMetPayload.value.optimization ?? '';
     userCalibrationRunData.value.objective_function = saveOptMetPayload.value.objective_function as string;
-    userCalibrationRunData.value.streamflow_threshold = saveOptMetPayload.value.streamflow_threshold as number
-    userCalibrationRunData.value.peak_flow_threshold = saveOptMetPayload.value.peak_flow_threshold as number
+    userCalibrationRunData.value.threshold_categorical = saveOptMetPayload.value.threshold_categorical as number
+    userCalibrationRunData.value.threshold_event = saveOptMetPayload.value.threshold_event as number
     userCalibrationRunData.value.stop_criteria = saveOptMetPayload.value.stop_criteria as number
     userCalibrationRunData.value.save_plot_iteration_frequency = saveOptMetPayload.value.save_plot_iteration_frequency as number
     userCalibrationRunData.value.save_output_iteration = saveOptMetPayload.value.save_output_iteration as boolean
@@ -512,16 +512,16 @@ const validateTab = (tabNumber?: number) => {
       text.push("Plot Generation Frequency has been changed");
     }
 
-    if ((cbIsCategorical.value && !userCalibrationRunData.value?.streamflow_threshold ) ||
-      (!cbIsCategorical.value && userCalibrationRunData.value?.streamflow_threshold ) ||
-      (userCalibrationRunData?.value?.streamflow_threshold || 0) !== (uiStreamFlowThreshold.value || 0)) {
+    if ((cbIsCategorical.value && !userCalibrationRunData.value?.threshold_categorical ) ||
+      (!cbIsCategorical.value && userCalibrationRunData.value?.threshold_categorical ) ||
+      (userCalibrationRunData?.value?.threshold_categorical || 0) !== (uiThresholdCategorical.value || 0)) {
       error = true;
       text.push("Calculate Categorical Metrics (Flow Threshold) has been changed");
     }
 
-    if ((cbIsEventBased.value && !userCalibrationRunData.value?.peak_flow_threshold ) ||
-      (!cbIsEventBased.value && userCalibrationRunData.value?.peak_flow_threshold ) ||
-      (userCalibrationRunData?.value?.peak_flow_threshold || 0) !== (uiPeakFlowThreshold.value || 0)) {
+    if ((cbIsEventBased.value && !userCalibrationRunData.value?.threshold_event ) ||
+      (!cbIsEventBased.value && userCalibrationRunData.value?.threshold_event ) ||
+      (userCalibrationRunData?.value?.threshold_event || 0) !== (uiThresholdEvent.value || 0)) {
       error = true;
       text.push("Calculate Event Based Metrics (Peak Flow Threshold) has been changed");
     }
@@ -542,22 +542,22 @@ const restoreTab = async () => {
     uiObjectiveFunction.value = userCalibrationRunData?.value?.objective_function;
     uiStopCriteria.value = userCalibrationRunData?.value?.stop_criteria || 0;
     uiPlotFrequency.value = userCalibrationRunData?.value?.save_plot_iteration_frequency || 0;
-    if (userCalibrationRunData.value?.streamflow_threshold) {
+    if (userCalibrationRunData.value?.threshold_categorical) {
       cbIsCategorical.value = true;
-      showMetricStreamFlow.value = true;
-      uiStreamFlowThreshold.value = userCalibrationRunData.value?.streamflow_threshold;
+      showMetricThresholdCategorical.value = true;
+      uiThresholdCategorical.value = userCalibrationRunData.value?.threshold_categorical;
     } else {
       cbIsCategorical.value = false;
-      showMetricStreamFlow.value = false;
+      showMetricThresholdCategorical.value = false;
     }
 
-    if (userCalibrationRunData.value?.peak_flow_threshold) {
+    if (userCalibrationRunData.value?.threshold_event) {
       cbIsEventBased.value = true;
-      showMetricPeakFlow.value = true;
-      uiPeakFlowThreshold.value = userCalibrationRunData.value?.peak_flow_threshold;
+      showMetricThresholdEvent.value = true;
+      uiThresholdEvent.value = userCalibrationRunData.value?.threshold_event;
     } else {
       cbIsEventBased.value = false;
-      showMetricPeakFlow.value = false;
+      showMetricThresholdEvent.value = false;
     }
   }
   optMetDataHasChanged.value = false;
