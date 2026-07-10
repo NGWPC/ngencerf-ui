@@ -176,8 +176,8 @@ export interface UserCalibrationRunData {
   parameters_selected: boolean;
   parameters: UserCalibrationRunParametersData[];
   objective_function: string;
-  streamflow_threshold: number;
-  peak_flow_threshold: number;
+  threshold_categorical: number;
+  threshold_event: number;
   optimization: string;
   optimization_inputs: UserCalibrationRunOptimizationInputData[];
   save_plot_iteration_frequency: number;
@@ -478,8 +478,8 @@ export interface SaveOptimizationPayload {
   optimization_inputs?: UserCalibrationRunOptimizationInputData[];
   optimization?: string;
   objective_function?: string;
-  streamflow_threshold?: number;
-  peak_flow_threshold?: number;
+  threshold_categorical?: number;
+  threshold_event?: number;
   stop_criteria?: number;
   save_plot_iteration_frequency?: number;
   save_output_iteration?: boolean;

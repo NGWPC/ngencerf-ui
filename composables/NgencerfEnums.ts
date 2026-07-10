@@ -161,8 +161,8 @@ export const ValidationFormFields = {
   param_units: "Sloth Parameter Units",
   stop_criteria: "Stop Criteria",
   save_plot_iteration_frequency: "Plot Generation Frequency",
-  streamflow_threshold: "Flow Threshold",
-  peak_flow_threshold: "Peak Flow Threshold",
+  threshold_categorical: "Categorical Threshold",
+  threshold_event: "Event Threshold",
   objective_function: "Objective Function",
   optimization: "Optimization Algorithm",
 };
