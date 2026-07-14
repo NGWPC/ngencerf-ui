@@ -13,7 +13,6 @@ export const generalStore = defineStore(
   "generalStore",
   () => {
 
-    const activeDirectoryEnabled = ref<boolean>(false);
     const allowSelfRegistration = ref<boolean>(true);
     const allowPasswordChange = ref<boolean>(true);
 
@@ -178,7 +177,6 @@ export const generalStore = defineStore(
     }
 
     return {
-      activeDirectoryEnabled,
       allowSelfRegistration,
       allowPasswordChange,
       gitInfo,
