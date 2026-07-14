@@ -216,7 +216,7 @@ const { serverInfo, gitInfo, menuIndex, calibrationTabIndex, evaluationTabIndex,
 
 const { popupActive } = storeToRefs(generalStore());
 
-const { activeDirectoryEnabled, allowSelfRegistration, allowPasswordChange, calibrationJobId } = storeToRefs(generalStore());
+const  allowSelfRegistration, allowPasswordChange, calibrationJobId } = storeToRefs(generalStore());
 
 const { logUserIn, setUserName, hardResetUserDataStore, isUserLoggedIn, getAccessToken } = useUserDataStore();
 const { resetGeneralStore, clearToastRecords, addToastRecord, getServerInfo, setServerInfo } = generalStore();
@@ -292,7 +292,6 @@ const getConfigInformation = () => {
       "Content-Type": 'application/json'
     }
   }).then(response => {
-    activeDirectoryEnabled.value = response._data.active_directory_enabled;
     allowSelfRegistration.value = response._data.allow_self_registration;
     allowPasswordChange.value = response._data.allow_password_change;
   }).catch(error => {
