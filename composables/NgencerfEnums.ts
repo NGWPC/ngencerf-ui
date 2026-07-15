@@ -21,9 +21,6 @@ export const ForecastTabs = {
   tab_setupForecast: 2,
   tab_forecastRunStatus: 3,
   tab_forecastResults: 4,
-  tab_verificationJobs: 5,
-  tab_verificationRunStatus: 6,
-  tab_verificationResults: 7,
 };
 
 export const HindcastTabs = {

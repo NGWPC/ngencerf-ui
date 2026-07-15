@@ -112,23 +112,6 @@
             Forecast Results
             <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
           </div>
-          <div data-tab="6" class="tabs prevent-select" @click="tabClicked"
-            aria-label="Verification Runs Tab" title="Verification Runs Tab">
-            Verification Runs
-            <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
-          </div>
-          <div v-show="[7].includes(currentTab) || (selectedVerificationJob && currentTab >= 6)" 
-            data-tab="7" class="tabs prevent-select" @click="tabClicked" 
-            aria-label="Verification Run/Status Tab" title="Verification Run/Status Tab">
-            Verification Run/Status
-            <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
-          </div>
-          <div v-show="[8].includes(currentTab) || (selectedVerificationJob && selectedVerificationJob.status === 'Done' && currentTab >= 6)" 
-            data-tab="8" class="tabs prevent-select" @click="tabClicked"
-            aria-label="Verification Results Tab" title="Verification Results Tab">
-            Verification Results
-            <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
-          </div>
         </div>
       </span>
 
@@ -193,8 +176,8 @@ import { useUserDataStore } from "@/stores/common/UserDataStore"
 import { useEvaluationCalibrationRunStore } from "@/stores/evaluation/EvaluationCalibrationRunStore";
 import { useEvaluationRunStatusStore } from '@/stores/evaluation/EvaluationRunStatusStore';
 import { useForecastStore } from "@/stores/forecast/ForecastStore";
-import { useVerificationStore } from "~/stores/forecast/VerificationStore";
 import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
+import { useVerificationStore } from "@/stores/hindcast/VerificationStore";
 
 import { useDialog } from "primevue/usedialog";
 import MoveNextPrevDialog from "../Common/MoveNextPrevDialog.vue";

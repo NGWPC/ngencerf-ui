@@ -4,7 +4,7 @@ import { generalStore } from '@/stores/common/GeneralStore';
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 import { useForecastStore } from '@/stores/forecast/ForecastStore';
 import { useHindcastStore } from '@/stores/hindcast/HindcastStore';
-import { useVerificationStore } from '~/stores/forecast/VerificationStore';
+import { useVerificationStore } from '@/stores/hindcast/VerificationStore';
 
 function capitalCase(str: string) {
   return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');

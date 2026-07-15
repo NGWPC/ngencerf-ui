@@ -116,7 +116,7 @@ import type { DataTableContextMenuOption, VerificationJob } from "@/composables/
 import type { ToastMessageOptions } from "primevue/toast";
 
 import { useHindcastStore } from "~/stores/hindcast/HindcastStore";
-import { useVerificationStore } from "~/stores/forecast/VerificationStore";
+import { useVerificationStore } from "~/stores/hindcast/VerificationStore.js";
 import { generalStore } from "~/stores/common/GeneralStore";
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 
@@ -136,7 +136,6 @@ const { resetFilters } = useHindcastStore();
 const verificationStore = useVerificationStore();
 const {
   verificationJobs,
-  verificationJobType,
   verificationRunListPageSize,
   verificationRunListCurrentPage,
   verificationRunListTotalPages,
@@ -230,7 +229,6 @@ onMounted(() => {
     verificationRunListCurrentPage.value = 1;
 
     // load verificationJobs
-    verificationJobType.value = 'hindcast';
     await getVerificationJobs();
     updateGageList();
   });

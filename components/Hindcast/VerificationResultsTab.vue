@@ -93,7 +93,7 @@ const toast = useToast();
 import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
 const hindcastStore = useHindcastStore();
 
-import { useVerificationStore } from "~/stores/forecast/VerificationStore";
+import { useVerificationStore } from "~/stores/hindcast/VerificationStore.js";
 const verificationStore = useVerificationStore();
 
 const { calibrationJobId } = storeToRefs(generalStore());

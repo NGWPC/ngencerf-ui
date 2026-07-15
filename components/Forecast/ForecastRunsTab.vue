@@ -184,7 +184,6 @@ import type { DataTableContextMenuOption, ForecastJob } from "@/composables/Ngen
 import type { ToastMessageOptions } from "primevue/toast";
 
 import { useForecastStore } from "@/stores/forecast/ForecastStore";
-import { useVerificationStore } from "~/stores/forecast/VerificationStore";
 import { generalStore } from "~/stores/common/GeneralStore";
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 
@@ -227,8 +226,6 @@ const {
   resetFilters,
   fetchForecastGageList
 } = useForecastStore();
-
-const { resetSelectedVerificationJobData } = useVerificationStore();
 
 const showMessagesGroup = ref<boolean>(false);
 const toast = useToast();
@@ -277,9 +274,6 @@ const onRowContextMenu = (event: any) => {
     }
     if (crRowData.calibration_run_id) {
       cmForecastRun.value.push({ label: 'Run New Forecast', icon: 'pi pi-chevron-circle-right', command: () => goToSetupForecast() });
-      if (crRowData.forecast_status === 'Done') {
-        cmForecastRun.value.push({ label: 'Run New Verification', icon: 'pi pi-bars', command: () => createNewVerification() });
-      }
       cmForecastRun.value.push({ label: 'View Calibration Details', icon: 'pi pi-list', command: () => viewCalibrationDetails(crRowData.calibration_run_id) })
     }
     if (crRowData.forecast_status !== 'Running') {
@@ -302,9 +296,6 @@ onMounted(async () => {
 
   //reset Run/Status store in case we have running intervals
   hardResetForecastStore();
-
-  //reset any previously selected verification data
-  resetSelectedVerificationJobData();
 
   hilightTab(ForecastTabs.tab_forecastRuns);
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
@@ -436,21 +427,6 @@ const acceptDelete = (selectedRunId: number) => {
         toast.add(tMsg); addToastRecord(tMsg);
       });
     }
-  });
-}
-
-const createNewVerification = async () => {
-  // Just go to Run/Status with the selected forecast - no need to create anything new yet
-  goToVerificationJobStatus();
-}
-
-const goToVerificationJobStatus = () => {
-  isLoading.value = true;
-  nextTick(async () => {
-    if (props.callGoToTab) {
-      props.callGoToTab(7);
-    }
-    isLoading.value = false;
   });
 }
 

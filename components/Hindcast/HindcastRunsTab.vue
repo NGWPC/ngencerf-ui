@@ -184,8 +184,8 @@ import type { DataTableContextMenuOption, HindcastJob } from "@/composables/Ngen
 import type { ToastMessageOptions } from "primevue/toast";
 
 import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
-import { useVerificationStore } from "~/stores/forecast/VerificationStore";
-import { generalStore } from "~/stores/common/GeneralStore";
+import { useVerificationStore } from "@/stores/hindcast/VerificationStore";
+import { generalStore } from "@/stores/common/GeneralStore";
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 
 import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
