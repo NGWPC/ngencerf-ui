@@ -10,7 +10,7 @@ import { makeProtectedApiCall } from "@/composables/UserAuth";
 import { useBackendConfig } from "@/composables/UseBackendConfig";
 import { useApiErrorResponsePreprocess } from "@/composables/ValidationHandlers";
 import { isValidDate } from '@/utils/CommonHelpers';
-import { formatElapsedTime, formatDateForRunOnString } from '@/utils/TimeHelpers';
+import { formatDateForRunOnString } from '@/utils/TimeHelpers';
 
 export const useHindcastStore = defineStore('HindcastStore', () => {
   const { ngencerfBaseUrl } = useBackendConfig();

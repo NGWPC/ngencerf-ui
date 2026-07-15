@@ -33,8 +33,8 @@
 
 <script setup lang="ts">
 import { generalStore } from "@/stores/common/GeneralStore";
-import { useHindcastStore } from "~/stores/hindcast/HindcastStore";
-import { useVerificationStore } from "~/stores/forecast/VerificationStore";
+import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
+import { useVerificationStore } from "@/stores/hindcast/VerificationStore";
 
 const hindcastStore = useHindcastStore();
 const verificationStore = useVerificationStore();

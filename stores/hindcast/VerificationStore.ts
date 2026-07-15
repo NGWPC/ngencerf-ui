@@ -3,7 +3,6 @@ import { defineStore, storeToRefs } from "pinia";
 
 import type { VerificationJob, VerificationJobs } from "@/composables/NgencerfModels";
 import { useUserDataStore } from "@/stores/common/UserDataStore";
-import { useForecastStore } from "@/stores/forecast/ForecastStore";
 import { useHindcastStore } from "@/stores/hindcast/HindcastStore";
 
 import { makeProtectedApiCall } from "@/composables/UserAuth";
@@ -29,26 +28,19 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
     statusTypeFilterList 
   } = storeToRefs(useUserDataStore());
 
-  const forecastStore = useForecastStore();
+  const hindcastStore = useHindcastStore();
   const { 
-    forecastJobId,
-    selectedForecastJob,
+    hindcastJobId,
+    selectedHindcastJob,
     failureMessages,
     elapsedTime,
     submitTimeDate,
     submitTime
-  } = storeToRefs(forecastStore);
-
-  const hindcastStore = useHindcastStore();
-  const { 
-    hindcastJobId,
-    selectedHindcastJob
   } = storeToRefs(hindcastStore);
 
   // refs
   const verificationJobId = ref<number>();
   const verificationJobs = ref<VerificationJob[]>([]);
-  const verificationJobType = ref<string>('forecast');
   const selectedVerificationJob = ref<VerificationJob>();
   const verificationRunListPageSize = ref<number>(50);
   const verificationRunListCurrentPage = ref<number>(1);
@@ -64,8 +56,8 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
   const verificationJobStatus = ref<string>();
   const verificationStatusCheckingInterval = ref<any>();
   const verificationRunningTimeInterval = ref<any>();
-  const verificationPlotNames = ref<any>(); // TODO: create verificationPlotNames interface
-  const verificationPlot = ref<any>(); // TODO: create verificationPlot interface
+  const verificationPlotNames = ref<any>();
+  const verificationPlot = ref<any>();
 
   /**
    * fetch get_verification_jobs
@@ -74,7 +66,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
   const getVerificationJobs = async (): Promise<any> => {
     verificationJobs.value = [];
     let requestBody = {
-      verification_job_type: verificationJobType.value === 'hindcast' ? 'hindcast' : 'forecast',
       limit: verificationRunListPageSize.value,
       offset: (verificationRunListCurrentPage.value - 1) * verificationRunListPageSize.value,
       sort: {
@@ -145,7 +136,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
   async function fetchVerificationGageList() {
     // only apply domain and archived filters
     let requestBody = {
-      verification_job_type: verificationJobType.value === 'hindcast' ? 'hindcast' : 'forecast',
       domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
       include_archived: false
     }
@@ -264,11 +254,7 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
 
   const setSelectedVerificationJobId = async(verification_run_id: number): Promise<void> => {
     verificationJobId.value = verification_run_id;
-    if (selectedVerificationJob?.value?.hindcast_run_id) {
-      hindcastJobId.value = selectedVerificationJob.value.hindcast_run_id;
-    } else if (selectedVerificationJob?.value?.forecast_run_id) {
-      forecastJobId.value = selectedVerificationJob.value.forecast_run_id;
-    }
+    hindcastJobId.value = selectedVerificationJob?.value?.hindcast_run_id;
   }
 
   const setSelectedVerificationRowData = async (verification_row_data: VerificationJob): Promise<void> => {
@@ -277,9 +263,7 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
   }
 
   const resetSelectedVerificationJobData = (): void => {
-    // clear previously selected forecast/hindcast/verification jobs
-    selectedForecastJob.value = undefined;
-    forecastJobId.value = undefined;
+    // clear previously selected hindcast/verification jobs
     selectedHindcastJob.value = undefined;
     hindcastJobId.value = undefined;
     selectedVerificationJob.value = undefined;
@@ -290,19 +274,15 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
    * Create and Run Verification Job
    */
   const createAndRunVerificationJob = (): Promise<any> => {
-    let requestBody = {};
-    if (selectedHindcastJob?.value) {
-      requestBody.hindcast_run_id = selectedHindcastJob?.value?.hindcast_run_id;
-    } else if (selectedForecastJob?.value) {
-      requestBody.forecast_run_id = selectedForecastJob?.value?.forecast_run_id;
-    }
     return makeProtectedApiCall<CalibrationStatus>(`${ngencerfBaseUrl}/calibration/create_and_run_verification_job/`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${getAccessToken()}`,
         "Content-Type": 'application/json'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        hindcast_run_id: selectedHindcastJob?.value?.hindcast_run_id
+      })
     });
   };
   
@@ -404,7 +384,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
     verificationStatusCheckingInterval,
     verificationRunningTimeInterval,
     verificationJobs,
-    verificationJobType,
     verificationRunListPageSize,
     verificationRunListCurrentPage,
     verificationRunListTotalPages,

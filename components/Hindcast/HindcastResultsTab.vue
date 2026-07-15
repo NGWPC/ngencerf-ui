@@ -860,7 +860,7 @@ const toggleCustomizePlot = async () => {
   }
 }
 
-// Handle verification plot changes
+// Handle hindcast plot changes
 watch(selectedLogCategory, async () => {
   if(selectedLogCategory.value == 'hindcast plot') {
     nextTick(async() => {

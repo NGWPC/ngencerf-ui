@@ -111,9 +111,8 @@ import { hilightTab } from '@/composables/TabHilight';
 import { useDialog } from 'primevue/usedialog';
 import { storeToRefs } from "pinia";
 
-import { useForecastStore } from "~/stores/forecast/ForecastStore";
 import { useHindcastStore } from "~/stores/hindcast/HindcastStore";
-import { useVerificationStore } from "~/stores/forecast/VerificationStore";
+import { useVerificationStore } from "~/stores/hindcast/VerificationStore.js";
 import { generalStore } from "@/stores/common/GeneralStore";
 import { useLogStore } from '@/stores/common/LogStore';
 
@@ -128,20 +127,16 @@ const cancelButtonDisabled = ref<boolean>(true);
 const dialog = useDialog();
 const nextPrevDialogOpened = ref<boolean>(false);
 
-const forecastStore = useForecastStore();
 const hindcastStore = useHindcastStore();
 const verificationStore = useVerificationStore();
 
 const {
+  selectedHindcastJob,
+  hindcastJobId,
   submitTimeDate,
   submitTime,
   elapsedTime,
   failureMessages
-} = storeToRefs(forecastStore);
-
-const {
-  selectedHindcastJob,
-  hindcastJobId,
 } = storeToRefs(hindcastStore);
 
 const { 

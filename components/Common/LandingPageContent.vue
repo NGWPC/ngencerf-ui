@@ -79,17 +79,8 @@
                     </div>
                 </div>
 
-                <!-- Completed Forecast Verifications Card -->
-                <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
-                    @click="gotoMenuAndFilter('MainMenuForecast', 6, {'status': 'Done'})">
-                    <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
-                    <div class="text-3xl sm:text-4xl font-extrabold text-blue-600">
-                        {{ doneForecastVerificationJobs }}
-                    </div>
-                    <div class="text-sm sm:text-base text-gray-700 mt-1">
-                        Forecast Verifications Completed
-                    </div>
-                </div>
+                <!-- Placeholder -->
+                <div></div>
 
                 <!-- Running Hindcasts Card -->
                 <div class="bg-teal-100 text-teal-800 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
@@ -116,7 +107,7 @@
                     </div>
                 </div>
 
-                <!-- Completed Hindcasts Verifications Card -->
+                <!-- Completed Hindcast Verifications Card -->
                 <div class="bg-blue-50 p-2 rounded-lg shadow-md flex flex-col items-center hover:cursor-pointer"
                     @click="gotoMenuAndFilter('MainMenuHindcast', 6, {'status': 'Done'})">
                     <i class="pi pi-check text-blue-600 text-3xl mb-1"></i>
@@ -170,7 +161,6 @@ const readyCalibrationJobs = ref<number | null>(null);
 const savedCalibrationJobs = ref<number | null>(null);
 const runningForecastJobs = ref<number | null>(null);
 const doneForecastJobs = ref<number | null>(null);
-const doneForecastVerificationJobs = ref<number | null>(null);
 const runningHindcastJobs = ref<number | null>(null);
 const doneHindcastJobs = ref<number | null>(null);
 const doneHindcastVerificationJobs = ref<number | null>(null);
@@ -194,7 +184,6 @@ onMounted(async () => {
     savedCalibrationJobs.value = jobCounts._data?.saved_calibration_count;
     runningForecastJobs.value = jobCounts._data?.running_forecast_count;
     doneForecastJobs.value = jobCounts._data?.done_forecast_count;
-    doneForecastVerificationJobs.value = jobCounts._data?.done_forecast_verification_count;
     runningHindcastJobs.value = jobCounts._data?.running_hindcast_count;
     doneHindcastJobs.value = jobCounts._data?.done_hindcast_count;
     doneHindcastVerificationJobs.value = jobCounts._data?.done_hindcast_verification_count;

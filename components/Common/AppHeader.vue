@@ -134,15 +134,6 @@
                                 <span v-else-if="getForecastTabIndex() === 5">
                                     <LazyForecastResultsHelp />
                                 </span>
-                                <span v-else-if="getForecastTabIndex() === 6">
-                                    <LazyForecastVerificationRunsHelp />
-                                </span>
-                                <span v-else-if="getForecastTabIndex() === 7">
-                                    <LazyForecastVerificationRunStatusHelp />
-                                </span>
-                                <span v-else-if="getForecastTabIndex() === 8">
-                                    <LazyForecastVerificationResultsHelp />
-                                </span>
                             </div>
                         </div>
 
@@ -239,9 +230,6 @@ const LazyForecastForecastRunsHelp = defineAsyncComponent(() => import("@/compon
 const LazyForecastSetupForecastHelp = defineAsyncComponent(() => import("@/components/Help/Forecast/SetupForecastHelp.vue"));
 const LazyForecastRunStatusHelp = defineAsyncComponent(() => import("@/components/Help/Forecast/RunStatusHelp.vue"));
 const LazyForecastResultsHelp = defineAsyncComponent(() => import("@/components/Help/Forecast/ResultsHelp.vue"));
-const LazyForecastVerificationRunsHelp = defineAsyncComponent(() => import("@/components/Help/Forecast/VerificationRunsHelp.vue"));
-const LazyForecastVerificationRunStatusHelp = defineAsyncComponent(() => import("@/components/Help/Forecast/VerificationRunStatusHelp.vue"));
-const LazyForecastVerificationResultsHelp = defineAsyncComponent(() => import("@/components/Help/Forecast/VerificationResultsHelp.vue"));
 
 // Hindcast Workflow Help Files
 const LazyHindcastCalibrationRunsHelp = defineAsyncComponent(() => import("@/components/Help/Hindcast/CalibrationRunsHelp.vue"));

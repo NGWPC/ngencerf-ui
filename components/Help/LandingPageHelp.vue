@@ -17,7 +17,7 @@
             <li><strong>Calibration</strong></li>
             <li><strong>Evaluation</strong></li>
             <li><strong>Forecast</strong></li>
-            <li><strong>Verification</strong> (also known as reforecasting or hindcasting)</li>
+            <li><strong>Hindcast</strong></li>
         </ul>
 
         <p class="leading-relaxed mb-6">
@@ -75,10 +75,10 @@
             previously completed calibration.
         </p>
 
-        <p><strong>Verification</strong></p>
+        <p><strong>Hindcast</strong></p>
         <p>
-            Enables verification of forecast results, often referred to as
-            reforecasting or hindcasting.
+            Allows you to run hindcasts and verifications using the best parameters generated from a
+            previously completed calibration.
         </p>
         <br />
         <hr/>
