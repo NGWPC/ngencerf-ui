@@ -216,7 +216,7 @@ const { serverInfo, gitInfo, menuIndex, calibrationTabIndex, evaluationTabIndex,
 
 const { popupActive } = storeToRefs(generalStore());
 
-const  allowSelfRegistration, allowPasswordChange, calibrationJobId } = storeToRefs(generalStore());
+const { allowSelfRegistration, allowPasswordChange, calibrationJobId } = storeToRefs(generalStore());
 
 const { logUserIn, setUserName, hardResetUserDataStore, isUserLoggedIn, getAccessToken } = useUserDataStore();
 const { resetGeneralStore, clearToastRecords, addToastRecord, getServerInfo, setServerInfo } = generalStore();
