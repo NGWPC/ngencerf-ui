@@ -70,12 +70,15 @@
 <div id="FilterDialog" class="flex flex-col items-start">
   <label class="text-left w-[90%] required-label" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
     title="Headwater Basin Gage">Headwater Basin Gage</label>
-  <div class="w-1/6 pb-3 self-start">
-    <Select id="HeadwaterBasinGageCompare" class="mt-2 basin-gage-filter text-left w-full" v-model="uiCompareGageId"
-      :options="compareCalibrationRunGageList" filter optionLabel="name" optionValue="name" placeholder="All"
-      aria-label="Headwater Basin Gage Filter Select" title="Headwater Basin Gage Filter Select"
-      @change="viewSelectedGageCalibrationRuns(0, uiCompareGageId);">
-    </Select>
+  <div class="flex flex-row items-center pb-3">
+    <div class="w-40 mt-2">
+      <Select id="HeadwaterBasinGageCompare" class="basin-gage-filter text-left w-full" v-model="uiCompareGageId"
+        :options="compareCalibrationRunGageList" filter optionLabel="name" optionValue="name" placeholder="All"
+        aria-label="Headwater Basin Gage Filter Select" title="Headwater Basin Gage Filter Select"
+        @change="viewSelectedGageCalibrationRuns(0, uiCompareGageId);">
+      </Select>
+    </div>
+    <p class="text-xs text-gray-500 ml-3 pt-2 whitespace-nowrap">Only gages with 2+ calibration runs are available.</p>
   </div>
 </div>
         <div id="evaluationCalibrationListByGage">
