@@ -382,7 +382,7 @@ const saveFormulationData = () => {
         }
       }
 
-      saveFormulationTabData().then(response => {
+      saveFormulationTabData().then(async response => {
         if (response.status === 200) {
           formulationIsCalibratable.value = true;
           if (response._data.eds_errors) {
@@ -417,6 +417,7 @@ const saveFormulationData = () => {
           modulesHaveChanged.value = false;
           modulePropertiesHaveChanged.value = false;
           updateJobData();
+          await fetchUserCalibrationRunData();
         } else {
           isLoading.value = false;
           useApiErrorResponsePreprocess(response).forEach(message => {
