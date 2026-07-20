@@ -67,17 +67,20 @@
 
       <!-- Show a list of calibration jobs from the same gage if user has chosen to Compare -->
       <div v-else-if="userEvaluationRunListDataByGage.length > 1">
-        <div id="FilterDialog">
-          <label class="block text-left w-[90%] required-label" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
-            title="Headwater Basin Gage">Headwater Basin Gage</label>
-            <div class="inline-block w-1/6 pb-3">
-                <Select id="HeadwaterBasinGageCompare" class="mt-2 basin-gage-filter text-left" v-model="uiCompareGageId"
-                    :options="compareCalibrationRunGageList" filter optionLabel="name" optionValue="name" placeholder="All"
-                    aria-label="Headwater Basin Gage Filter Select" title="Headwater Basin Gage Filter Select"
-                    @change="viewSelectedGageCalibrationRuns(0, uiCompareGageId);">
-                </Select>
-            </div>
-        </div>
+<div id="FilterDialog" class="flex flex-col items-start">
+  <label class="text-left w-[90%] required-label" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
+    title="Headwater Basin Gage">Headwater Basin Gage</label>
+  <div class="flex flex-row items-center pb-3">
+    <div class="w-40 mt-2">
+      <Select id="HeadwaterBasinGageCompare" class="basin-gage-filter text-left w-full" v-model="uiCompareGageId"
+        :options="compareCalibrationRunGageList" filter optionLabel="name" optionValue="name" placeholder="All"
+        aria-label="Headwater Basin Gage Filter Select" title="Headwater Basin Gage Filter Select"
+        @change="viewSelectedGageCalibrationRuns(0, uiCompareGageId);">
+      </Select>
+    </div>
+    <p class="text-xs text-gray-500 ml-3 pt-2 whitespace-nowrap">Only gages with 2+ calibration runs are available.</p>
+  </div>
+</div>
         <div id="evaluationCalibrationListByGage">
           <ContextMenu :pt="{ root: { id: ' cp-context-menu' } }" class="bg-white" ref="cpContextMenu"
             :model="cmCompareRun"></ContextMenu>
@@ -377,7 +380,6 @@ const { fetchUserCalibrationRunData } = userDataStore;
 
 const {
   uiCompareGageId, 
-  evaluationCalibrationRunGageList,
   compareCalibrationRunGageList,
   loadCalibrationDataComplete,
   userSelectedEvalCalibrationRunId,
@@ -416,7 +418,8 @@ const {
   setSelectedCalibrationRunId,
   fetchValidationRunListByCalibrationRun,
   resetFilters,
-  fetchGageList
+  fetchGageList,
+  fetchCompareGageList
 } = evaluationCalibrationRunStore;
 
 const { validationStatusCheckingIntervalId, validationRunningTimeIntervalId } = storeToRefs(useEvaluationRunStatusStore());
@@ -748,12 +751,19 @@ const viewSelectedCalibrationValidationRuns = async (calibration_run_id: number)
   })
 }
 
+// NOTE: this function may be invoked twice in a row when triggered from the context menu
+// (likely due to the Select's @change firing on the programmatic uiCompareGageId update below).
+// Known pre-existing behavior, not introduced by the for_comparison change — left as-is, 
+// no budget/time to address before code freeze for NGWPC FY26 shutdown.
 const viewSelectedGageCalibrationRuns = async (calibration_run_id: number, gage_id: string) => {
   isLoading.value = true;
   userSelectedEvalCalibrationRunId.value = calibrationJobId.value = 0;
   userEvaluationRunListDataByGage.value = [];
   uiCompareGageId.value = gage_id;
-  let filteredRunList = await fetchUserValidatedCalibrationJobsListDataForComparison();
+  const [filteredRunList] = await Promise.all([
+    fetchUserValidatedCalibrationJobsListDataForComparison(),
+    fetchCompareGageList()
+  ]);
   clearUserCalibrationRunData();
   
   nextTick(async () => {

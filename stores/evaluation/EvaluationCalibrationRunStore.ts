@@ -67,41 +67,21 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
   const selectedCalibrationModules = ref<string[] | undefined>([]);
 
   /**
-  * @returns {SelectOption[]}
-  */
-  const evaluationCalibrationRunGageList = computed(() => {
-    let gageOptionList = <SelectOption[]>[];
-    gageOptionList.push({
-      'name': "All",
-      'description': "All"
-    });
-    userEvaluationRunListData.value.forEach(runItem => {
-      const checkGageIndex = gageOptionList.findIndex(
-        (gageOption) =>
-          gageOption.name === runItem.gage_id
-      ) !== -1;
-      if (!checkGageIndex) {
-        gageOptionList.push({
-          'name': runItem.gage_id,
-          'description': runItem.gage_id
-        });
-      }
-    });
-    return gageOptionList;
-  });
+   * list of gages eligible for Compare Permutations (backend guarantees >= 2 calibration jobs per gage)
+   */
+  const compareCalibrationRunGageList = ref<SelectOption[]>([]);
 
   /**
-  * @returns {SelectOption[]}
-  */
-  const compareCalibrationRunGageList = computed(() => {
-    let gageOptionList = <SelectOption[]>[];
-    evaluationCalibrationRunGageList.value.forEach(gage => {
-      if (userEvaluationRunListData.value.filter((row) => (row as CalibrationJobListItem).gage_id === gage.name).length >= 2) {
-        gageOptionList.push(gage);
-      }
-    });
-    return gageOptionList;
-  });
+   * fetch the list of gages eligible for comparison and populate compareCalibrationRunGageList
+   * @return {void}
+   */
+  async function fetchCompareGageList() {
+    const gages: string[] = await fetchGageList(true);
+    compareCalibrationRunGageList.value = gages.map((gageId: string) => ({
+      name: gageId,
+      description: gageId
+    }));
+  }
 
   /**
    * fetch user created calibration job list data
@@ -357,13 +337,15 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
 
   /**
    * fetch list of gage IDs
+   * @param {boolean} forComparison - when true, backend only returns gages with >= 2 calibration jobs
    * @return {void}
    */
-  async function fetchGageList() {
+  async function fetchGageList(forComparison: boolean = false) {
     // only apply domain and archived filters
     let requestBody = {
       domain_name: uiDomainName.value && uiDomainName.value !== "All" ? uiDomainName.value : "",
-      include_archived: false
+      include_archived: false,
+      for_comparison: forComparison
     }
     const gageListResult =
       await makeProtectedApiCall<any>(
@@ -533,7 +515,6 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
   return {
     uiCompareGageId,
     evaluationRunList,
-    evaluationCalibrationRunGageList,
     compareCalibrationRunGageList,
     userSelectedEvalCalibrationRunId,
     loadCalibrationDataComplete,
@@ -550,6 +531,7 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
     resetUserSelectedCalibrationValidationRunList,
     fetchUserSelectedCalibrationValidationRunList,
     fetchGageList,
+    fetchCompareGageList,
     displayUserSelectedCalibrationValidationRunList,
     resetUserSelectedCalibrationCompareRunList,
     resetUserSelectedEvalValidationRun,
