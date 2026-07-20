@@ -94,13 +94,17 @@ export const useEvaluationCalibrationRunStore = defineStore('EvaluationCalibrati
   * @returns {SelectOption[]}
   */
   const compareCalibrationRunGageList = computed(() => {
-    let gageOptionList = <SelectOption[]>[];
-    evaluationCalibrationRunGageList.value.forEach(gage => {
-      if (userEvaluationRunListData.value.filter((row) => (row as CalibrationJobListItem).gage_id === gage.name).length >= 2) {
-        gageOptionList.push(gage);
-      }
+    const runCounts = new Map<string, number>();
+    userEvaluationRunListData.value.forEach(row => {
+      const gageId: string = (row as CalibrationJobListItem).gage_id;
+      const currentCount = runCounts.get(gageId);
+      runCounts.set(gageId, currentCount === undefined ? 1 : currentCount + 1);
     });
-    return gageOptionList;
+
+    return evaluationCalibrationRunGageList.value.filter(gage => {
+      const count = runCounts.get(gage.name as string);
+      return count !== undefined && count >= 2;
+    });
   });
 
   /**

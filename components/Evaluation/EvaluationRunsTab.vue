@@ -67,17 +67,17 @@
 
       <!-- Show a list of calibration jobs from the same gage if user has chosen to Compare -->
       <div v-else-if="userEvaluationRunListDataByGage.length > 1">
-        <div id="FilterDialog">
-          <label class="block text-left w-[90%] required-label" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
-            title="Headwater Basin Gage">Headwater Basin Gage</label>
-            <div class="inline-block w-1/6 pb-3">
-                <Select id="HeadwaterBasinGageCompare" class="mt-2 basin-gage-filter text-left" v-model="uiCompareGageId"
-                    :options="compareCalibrationRunGageList" filter optionLabel="name" optionValue="name" placeholder="All"
-                    aria-label="Headwater Basin Gage Filter Select" title="Headwater Basin Gage Filter Select"
-                    @change="viewSelectedGageCalibrationRuns(0, uiCompareGageId);">
-                </Select>
-            </div>
-        </div>
+<div id="FilterDialog" class="flex flex-col items-start">
+  <label class="text-left w-[90%] required-label" for="HeadwaterBasinGage" aria-label="Headwater Basin Gage"
+    title="Headwater Basin Gage">Headwater Basin Gage</label>
+  <div class="w-1/6 pb-3 self-start">
+    <Select id="HeadwaterBasinGageCompare" class="mt-2 basin-gage-filter text-left w-full" v-model="uiCompareGageId"
+      :options="compareCalibrationRunGageList" filter optionLabel="name" optionValue="name" placeholder="All"
+      aria-label="Headwater Basin Gage Filter Select" title="Headwater Basin Gage Filter Select"
+      @change="viewSelectedGageCalibrationRuns(0, uiCompareGageId);">
+    </Select>
+  </div>
+</div>
         <div id="evaluationCalibrationListByGage">
           <ContextMenu :pt="{ root: { id: ' cp-context-menu' } }" class="bg-white" ref="cpContextMenu"
             :model="cmCompareRun"></ContextMenu>
