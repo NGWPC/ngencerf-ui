@@ -377,7 +377,6 @@ const { fetchUserCalibrationRunData } = userDataStore;
 
 const {
   uiCompareGageId, 
-  evaluationCalibrationRunGageList,
   compareCalibrationRunGageList,
   loadCalibrationDataComplete,
   userSelectedEvalCalibrationRunId,
@@ -416,7 +415,8 @@ const {
   setSelectedCalibrationRunId,
   fetchValidationRunListByCalibrationRun,
   resetFilters,
-  fetchGageList
+  fetchGageList,
+  fetchCompareGageList
 } = evaluationCalibrationRunStore;
 
 const { validationStatusCheckingIntervalId, validationRunningTimeIntervalId } = storeToRefs(useEvaluationRunStatusStore());
@@ -748,12 +748,19 @@ const viewSelectedCalibrationValidationRuns = async (calibration_run_id: number)
   })
 }
 
+// NOTE: this function may be invoked twice in a row when triggered from the context menu
+// (likely due to the Select's @change firing on the programmatic uiCompareGageId update below).
+// Known pre-existing behavior, not introduced by the for_comparison change — left as-is, 
+// no budget/time to address before code freeze for NGWPC FY26 shutdown.
 const viewSelectedGageCalibrationRuns = async (calibration_run_id: number, gage_id: string) => {
   isLoading.value = true;
   userSelectedEvalCalibrationRunId.value = calibrationJobId.value = 0;
   userEvaluationRunListDataByGage.value = [];
   uiCompareGageId.value = gage_id;
-  let filteredRunList = await fetchUserValidatedCalibrationJobsListDataForComparison();
+  const [filteredRunList] = await Promise.all([
+    fetchUserValidatedCalibrationJobsListDataForComparison(),
+    fetchCompareGageList()
+  ]);
   clearUserCalibrationRunData();
   
   nextTick(async () => {
