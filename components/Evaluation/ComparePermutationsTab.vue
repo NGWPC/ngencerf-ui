@@ -88,6 +88,13 @@ const runStatusStore = useRunStatusStore();
 const userDataStore = useUserDataStore();
 const toast = useToast();
 
+const props = defineProps({
+  callGoToTab: {
+    type: Function,
+    required: false,
+  }
+});
+
 const showMessagesGroup = ref<boolean>(false);
 
 const { calibrationJobId, evaluateValidationRunId } = storeToRefs(generalStore());
