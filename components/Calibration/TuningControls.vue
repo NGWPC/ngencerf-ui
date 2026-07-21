@@ -1400,7 +1400,7 @@ const restoreTab = async () => {
 const goNextTab = () => {
   const errors = validateTab();
   if (props.callNavDialog && errors.error) {
-    props.callNavDialog(errors.text, true, 54);
+    props.callNavDialog(errors.text, true, 5);
   } else if (props.callGoToTab) {
     props.callGoToTab(5);
   }
