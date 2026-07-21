@@ -188,10 +188,7 @@ export const useGageStore = defineStore(
       if (selectedGeopackageValue.value)
         gagePayload.value["geopackage_source"] = selectedGeopackageValue.value;
 
-      if (
-        Object.keys(gagePayload.value).length > 0 &&
-        gagePayload.value.hasOwnProperty("gage_id")
-      ) {
+      if (gagePayload.value.job_name) {
         gagePayload.value["calibration_run_id"] = calibrationJobId.value;
 
         const saveGageTabDataResponse =
@@ -213,7 +210,7 @@ export const useGageStore = defineStore(
       } else {
         return Promise.resolve({
           _data: {
-            message: "Please select a Gage ID before saving.",
+            message: "Please provide a Job Name before saving.",
             calibration_run_id: calibrationJobId.value,
             status: "error",
           },
