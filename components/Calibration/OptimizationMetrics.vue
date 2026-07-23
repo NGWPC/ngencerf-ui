@@ -332,7 +332,7 @@ const updateMetricFlowFieldVisibility = () => {
       }
       showObjectiveFunctionThresholdCategorical.value = true;
       showMetricThresholdCategorical.value = false;
-      cbIsCategorical.value = false;
+      cbIsCategorical.value = true;
       cbCategoricalDisabled.value = true;
     } else {
       // if metric stream flow value was previously set and we're hiding that field, clear the value
@@ -351,7 +351,7 @@ const updateMetricFlowFieldVisibility = () => {
       }
       showObjectiveFunctionThresholdEvent.value = true;
       showMetricThresholdEvent.value = false;
-      cbIsEventBased.value = false;
+      cbIsEventBased.value = true;
       cbEventBasedDisabled.value = true;
     } else {
       // if metric peak flow value was previously set and we're hiding that field, clear the value
