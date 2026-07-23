@@ -181,7 +181,6 @@
     <div id="ErrorLogOverlay" class="hidden" ref="errorOverlay">
         <LazyErrorLog />
     </div>
-
 </template>
 
 <script lang="ts" setup>
@@ -280,6 +279,7 @@ const userItems = ref([
     { label: 'About', icon: 'pi pi-fw-times', command: () => aboutBox() },
     { label: 'Notifications', icon: 'pi pi-fw-times', command: () => errorLog() },
     { label: 'Users Guide', icon: 'pi pi-fw-times', command: () => window.open(pdfUrl, '_blank') },
+    { label: 'Download CLI', icon: 'pi pi-fw-times', command: () => navigateTo("DownloadCli") },
     { label: 'Logout', icon: 'pi pi-fw-times', command: () => logoutUser() }
 ])
 
@@ -383,6 +383,7 @@ const errorLog = async () => {
     errorOverlay.value.style.display = "block";
     setTimeout(function () { sizeLogWindow() }, 0);
 }
+
 
 useAccountEventListen('accountEvent', () => {
     const ele = document.getElementById('UserAccountOverlay') as HTMLElement;
