@@ -135,14 +135,11 @@
               <font-awesome-icon :icon="faWindows" />
               Windows
             </h3>
-            
+
             <ol class="space-y-2 list-decimal pl-6">
               <li>Download <b>ngenCerf.exe</b>.</li>
-              <li>Save it in a directory where you want to keep command-line tools, such as 
-                <b>C:\Users\&lt;your-username&gt;\bin</b>.</li>
-              <li>You can run it directly from that directory using <b>.\ngencerf.exe</b>.</li>
-              <li>Optionally, add that directory to your Windows <b>PATH</b> so you can run it from anywhere 
-                using <b>ngencerf</b>.</li>
+              <li>Move it to a directory on your PATH.</li>
+              <li>Run <b>ngenCerf.exe</b> from that directory, or <b>ngenCerf</b> if installed on PATH.</li>
             </ol>
           </div>
 
@@ -154,7 +151,7 @@
 
             <ol class="space-y-2 list-decimal pl-6">
               <li>Download <b>ngenCerf</b>.</li>
-              <li>Open Terminal in the download directory and make it executable using:
+              <li>Make it executable:
                 <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
                   <span>
                     {{ commandList[0] }}
@@ -170,9 +167,7 @@
                   </button>
                 </div>
               </li>
-              <li>You can run it directly from the download directory using <b>./ngencerf</b>.</li>
-              <li>Optionally, move it to a directory on your <b>PATH</b>, such as <b>/usr/local/bin</b>, 
-                so you can run it from anywhere using <b>ngencerf</b>.</li>
+              <li>Run <b>./ngenCerf</b> from the download directory, or <b>ngenCerf</b> if installed on PATH.</li>
             </ol>
           </div>
 
@@ -184,7 +179,7 @@
 
             <ol class="space-y-2 list-decimal pl-6">
               <li>Download <b>ngenCerf</b>.</li>
-              <li>Open a terminal in the download directory and make it executable using:
+              <li>Make it executable:
                 <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
                   <span>
                     {{ commandList[1] }}
@@ -200,9 +195,7 @@
                   </button>
                 </div>
               </li>
-              <li>You can run it directly from the download directory using <b>./ngencerf</b>.</li>
-              <li>Optionally, move it to a directory on your <b>PATH</b>, such as <b>/usr/local/bin</b>, 
-                so you can run it from anywhere using <b>ngencerf</b>.</li>
+              <li>Run <b>./ngenCerf</b> from the download directory, or <b>ngenCerf</b> if installed on PATH.</li>
             </ol>
           </div>
 
@@ -305,7 +298,7 @@
 import { useToast } from "primevue/usetoast";
 import { useBackendConfig } from "@/composables/UseBackendConfig";
 import { generalStore } from "@/stores/common/GeneralStore";
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   faLinux,
   faApple,
