@@ -325,26 +325,42 @@ const updateMetricFlowFieldVisibility = () => {
 
   if (selectedMetric.value) {
     if (selectedMetric?.value?.categorical === true) {
+      // if objective function stream flow value was previously set and we're hiding that field, clear the value
+      if (uiThresholdCategorical.value && !showObjectiveFunctionThresholdCategorical.value) {
+        uiThresholdCategorical.value = undefined;
+        optMetDataHasChanged.value = true;
+      }
       showObjectiveFunctionThresholdCategorical.value = true;
       showMetricThresholdCategorical.value = false;
       cbIsCategorical.value = true;
       cbCategoricalDisabled.value = true;
     } else {
+      // if metric stream flow value was previously set and we're hiding that field, clear the value
+      if (uiThresholdCategorical.value && showObjectiveFunctionThresholdCategorical.value) {
+        uiThresholdCategorical.value = undefined;
+        optMetDataHasChanged.value = true;
+      }
       showObjectiveFunctionThresholdCategorical.value = false;
       cbCategoricalDisabled.value = false;
-      // if the checkbox remains checked (e.g. carried over from a forced state), keep showing its threshold field
-      showMetricThresholdCategorical.value = cbIsCategorical.value;
     }
     if (selectedMetric?.value?.event_based === true) {
+      // if objective function peak flow value was previously set and we're hiding that field, clear the value
+      if (uiThresholdEvent.value && !showObjectiveFunctionThresholdEvent.value) {
+        uiThresholdEvent.value = undefined;
+        optMetDataHasChanged.value = true;
+      }
       showObjectiveFunctionThresholdEvent.value = true;
       showMetricThresholdEvent.value = false;
       cbIsEventBased.value = true;
       cbEventBasedDisabled.value = true;
     } else {
+      // if metric peak flow value was previously set and we're hiding that field, clear the value
+      if (uiThresholdEvent.value && showObjectiveFunctionThresholdEvent.value) {
+        uiThresholdEvent.value = undefined;
+        optMetDataHasChanged.value = true;
+      }
       showObjectiveFunctionThresholdEvent.value = false;
       cbEventBasedDisabled.value = false;
-      // if the checkbox remains checked (e.g. carried over from a forced state), keep showing its threshold field
-      showMetricThresholdEvent.value = cbIsEventBased.value;
     }
   }
 };
