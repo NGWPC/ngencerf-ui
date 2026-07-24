@@ -276,7 +276,8 @@
         <div id="TuningBottomButtons" class="grid grid-cols-8">
           <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
             <div class="col-span-1 mr-6 h-8" @click="saveTuningData()">
-              <Button class="font-normal ngenButtonDiv-green" title="Save" aria-label="Save Button">
+              <Button class="font-normal ngenButtonDiv-green" title="Save" aria-label="Save Button"
+                :disabled="isLoading || tuningStore_data_loading">
                 Save
               </Button>
             </div>
@@ -289,7 +290,7 @@
           <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
             <div class="col-span-1 mr-3">
               <Button v-if="tuningDataHasChanged || calibratableParametersHaveChanged" class="ngenButtonDiv-yellow" title="Revert All Changes"
-                @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
+                @click="restoreTab()" aria-label="Revert All Changes" :disabled="isLoading || tuningStore_data_loading">Revert</Button>
             </div>
           </span>
           <span v-else>
@@ -298,11 +299,11 @@
           <div class="col-span-4">&nbsp;</div>
           <div class="col-span-1">
             <Button class="ngenButtonDiv ml-6 font-normal h-8 float-right" title="Previous Tab Button"
-              aria-label="Previous Tab Button" @click="goPrevTab()">Prev</Button>
+              aria-label="Previous Tab Button" @click="goPrevTab()" :disabled="isLoading || tuningStore_data_loading">Prev</Button>
           </div>
           <div class="col-span-1 mr-4">
             <Button class="ngenButtonDiv ml-6 font-normal h-8" title="Next Tab Button" aria-label="Next Tab Button"
-              @click="goNextTab()">Next</Button>
+              @click="goNextTab()" :disabled="isLoading || tuningStore_data_loading">Next</Button>
           </div>
         </div>
       </div>

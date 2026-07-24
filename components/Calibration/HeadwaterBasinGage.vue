@@ -116,7 +116,7 @@
             <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
               <div class="col-span-1 mr-6 h-8" @click="saveTabData()">
                 <Button id="HBGSaveButton" class="font-normal ngenButtonDiv-green " title="Save"
-                  aria-label="Save Button">
+                  aria-label="Save Button" :disabled="isLoading">
                   Save
                 </Button>
               </div>
@@ -129,7 +129,7 @@
             <span v-if="jobNameHasChanged || (gageHasChanged && userCalibrationRunData?.gage !== null) || gageDataSourceHasChanged">
               <div class="col-span-1 mr-3">
                 <Button class="ngenButtonDiv-yellow" title="Revert All Changes"
-                  @click="restoreTab()" aria-label="Revert All Changes">Revert</Button>
+                  @click="restoreTab()" aria-label="Revert All Changes" :disabled="isLoading">Revert</Button>
               </div>
             </span>
             <span v-else>
@@ -141,7 +141,7 @@
             <div class="col-span-1">&nbsp;</div>
             <div class="col-span-1 mr-4">
               <Button class="ngenButtonDiv ml-6 font-normal h-8" title="Next" aria-label="Next"
-                @click="goNextTab()">Next</Button>
+                @click="goNextTab()" :disabled="isLoading">Next</Button>
             </div>
           </div>
         </div>
