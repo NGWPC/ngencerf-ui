@@ -30,11 +30,11 @@
                 :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)"></Select>
             </div>
 
-            <div class="col-span-1" v-if="displayForcingOptionsList.length > 0">
+            <div class="col-span-1" v-if="displayForcingOptionsList?.length > 0">
               <label for="Forcing" class="required-label">Forcing Source</label><br />
               <Select id="Forcing" v-model="selectedForcingValue" :options="displayForcingOptionsList" 
                 optionLabel="display_name" optionValue="name" class="user-select" @change="uploadForcingDlgOpen($event)"
-                :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status) || displayForcingOptionsList.length === 1"
+                :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status) || displayForcingOptionsList?.length === 1"
                 aria-label="Forcing Source Select" title="Forcing Source Select"></Select>
             </div>
           </div>
@@ -232,9 +232,9 @@ const displayForcingOptionsList = computed(() => {
   if (selectedDomainValue.value !== 'CONUS') {
     return getForcingOptionsList.value?.filter(option => {
       return option.name !== 'AORC'
-    });
+    }) ?? [];
   }
-  return getForcingOptionsList.value;
+  return getForcingOptionsList.value ?? [];
 });
 
 const resetData = ref<GageResetData>({
