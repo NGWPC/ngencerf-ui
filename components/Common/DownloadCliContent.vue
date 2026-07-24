@@ -5,15 +5,35 @@
     <div id="BoxContent" class="mx-auto max-w-7xl">
       <!-- Header -->
       <div>
-        <div>
-          <h1 class="p-4 text-3xl font-bold inline-block">
-            <span>Download ngenCerf CLI</span>
-          </h1>
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 class="p-4 text-3xl font-bold inline-block">
+              <span>Download ngenCerf CLI</span>
+            </h1>
 
-          <p class="m-4 text-gray-600">
-            The <b>ngenCerf</b> Command Line Interface (CLI) lets you run jobs and
-            interact with the server from your local machine.
-          </p>
+            <p class="m-4 text-gray-600">
+              The ngenCerf Command Line Interface (CLI) lets you run jobs and
+              interact with the server from your local machine.
+            </p>
+          </div>
+          <div class="rounded-lg border bg-white m-4 p-2 shadow-sm lg:w-80">
+            <div class="flex items-start gap-3">
+              <font-awesome-icon
+                :icon="faCircleInfo"
+                class="text-2xl text-blue-600"
+              />
+
+              <div>
+                <div class="font-semibold">
+                  Latest Release
+                </div>
+
+                <div class="text-sm text-gray-500">
+                  {{ combinedVersionInfo?.ngenCerf_date }}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -44,7 +64,7 @@
             </h3>
 
             <p class="mb-6 text-gray-500">
-              File: <b>ngenCerf.exe</b>
+              File: ngencerf.exe
             </p>
             
             <a :href="ngencerfBaseUrl + '/static/latest/windows/ngencerf.exe'">
@@ -73,7 +93,7 @@
             </h3>
 
             <p class="mb-6 text-gray-500">
-              File: <b>ngenCerf</b>
+              File: ngencerf
             </p>
 
             <a :href="ngencerfBaseUrl + '/static/latest/macos/ngencerf'">
@@ -102,7 +122,7 @@
             </h3>
 
             <p class="mb-6 text-gray-500">
-              File: <b>ngenCerf</b>
+              File: ngencerf
             </p>
 
             <a :href="ngencerfBaseUrl + '/static/latest/linux/ngencerf'">
@@ -137,9 +157,9 @@
             </h3>
 
             <ol class="space-y-2 list-decimal pl-6">
-              <li>Download <b>ngenCerf.exe</b>.</li>
+              <li>Download ngencerf.exe.</li>
               <li>Move it to a directory on your PATH.</li>
-              <li>Run <b>ngenCerf.exe</b> from that directory, or <b>ngenCerf</b> if installed on PATH.</li>
+              <li>Run ngencerf.exe from that directory, or ngencerf if installed on PATH.</li>
             </ol>
           </div>
 
@@ -150,7 +170,7 @@
             </h3>
 
             <ol class="space-y-2 list-decimal pl-6">
-              <li>Download <b>ngenCerf</b>.</li>
+              <li>Download ngencerf.</li>
               <li>Make it executable:
                 <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
                   <span>
@@ -167,7 +187,7 @@
                   </button>
                 </div>
               </li>
-              <li>Run <b>./ngenCerf</b> from the download directory, or <b>ngenCerf</b> if installed on PATH.</li>
+              <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
             </ol>
           </div>
 
@@ -178,7 +198,7 @@
             </h3>
 
             <ol class="space-y-2 list-decimal pl-6">
-              <li>Download <b>ngenCerf</b>.</li>
+              <li>Download ngencerf.</li>
               <li>Make it executable:
                 <div class="flex items-center justify-between rounded border bg-gray-50 mt-2 p-3 font-mono text-sm">
                   <span>
@@ -195,7 +215,7 @@
                   </button>
                 </div>
               </li>
-              <li>Run <b>./ngenCerf</b> from the download directory, or <b>ngenCerf</b> if installed on PATH.</li>
+              <li>Run ./ngencerf from the download directory, or ngencerf if installed on PATH.</li>
             </ol>
           </div>
 
