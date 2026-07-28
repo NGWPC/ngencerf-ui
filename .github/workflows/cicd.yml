@@ -8,6 +8,7 @@ on:
       - main
       - nwm-release
       - development
+      - development-pw
       - release-candidate
   push:
     branches:
@@ -16,8 +17,14 @@ on:
       - main
       - nwm-release
       - development
+      - development-pw
       - release-candidate
   workflow_dispatch:
+    inputs:
+      BASE_IMAGE:
+        description: 'BASE_IMAGE (full ref; overrides the lane default)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -27,8 +34,10 @@ permissions:
 env:
   REGISTRY: ghcr.io
   NODE_VERSION: '24.16.0'
-  BASE_REPO: rockylinux
-  BASE_TAG: '9.3'
+  # per-lane base images: development-pw builds on rockylinux, every other ref
+  # on the node bookworm image (keep the node tag in sync with NODE_VERSION)
+  BASE_IMAGE_DEV: node:24.16.0-bookworm-slim
+  BASE_IMAGE_PW: rockylinux:9.3
 
 jobs:
   # set variables to use in other jobs
@@ -102,8 +111,18 @@ jobs:
             sudo apt-get install -y --no-install-recommends skopeo
           fi
 
-          # base image metadata for Dockerfile labels
-          BASE_NAME="${{ env.BASE_REPO }}:${{ env.BASE_TAG }}"
+          # base image follows the lane: development-pw (or a PR into it) builds on
+          # the rocky base, every other ref on the node bookworm base. An explicit
+          # BASE_IMAGE dispatch input always wins over this default.
+          BASE_NAME="${{ inputs.BASE_IMAGE }}"
+          if [ -z "$BASE_NAME" ]; then
+            LANE_REF="${GITHUB_BASE_REF:-$GITHUB_REF_NAME}"
+            if [ "$LANE_REF" = "development-pw" ]; then
+              BASE_NAME="${BASE_IMAGE_PW}"
+            else
+              BASE_NAME="${BASE_IMAGE_DEV}"
+            fi
+          fi
           BASE_INSPECT=$(skopeo inspect --override-os linux --override-arch amd64 "docker://${BASE_NAME}" 2>/dev/null || echo '{}')
           BASE_DIGEST=$(echo "$BASE_INSPECT" | jq -r '.Digest // "unknown"')
           BASE_REVISION=$(echo "$BASE_INSPECT" | jq -r '.Labels["org.opencontainers.image.revision"] // "unknown"')
@@ -173,8 +192,7 @@ jobs:
           push: true
           tags: ${{ needs.setup.outputs.image_base }}:${{ needs.setup.outputs.test_image_tag }}
           build-args: |
-            BASE_REPO=${{ env.BASE_REPO }}
-            BASE_TAG=${{ env.BASE_TAG }}
+            BASE_IMAGE=${{ needs.setup.outputs.base_name }}
             BASE_DIGEST=${{ needs.setup.outputs.base_digest }}
             BASE_REVISION=${{ needs.setup.outputs.base_revision }}
             IMAGE_SOURCE=https://github.com/${{ github.repository }}
@@ -271,11 +289,21 @@ jobs:
             --all \
             "docker://${IMAGE_BASE}:${TEST_TAG}" "docker://${IMAGE_BASE}:${ALIAS_TAG}"
 
-          # tag with 'latest' on development branch
+          # Branch-keyed promotion: development promotes 'latest' (bookworm/AWS
+          # lane); development-pw promotes 'latest-pw' (rocky/PW lane). Do not
+          # manually dispatch a cross-lane build from either branch: promotion
+          # keys off the branch name, so the tested image would promote under
+          # the wrong alias.
           if [ "$GITHUB_REF_NAME" = "development" ]; then
             skopeo copy \
               --src-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
               --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
               --all \
               "docker://${IMAGE_BASE}:${TEST_TAG}" "docker://${IMAGE_BASE}:latest"
+          elif [ "$GITHUB_REF_NAME" = "development-pw" ]; then
+            skopeo copy \
+              --src-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
+              --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
+              --all \
+              "docker://${IMAGE_BASE}:${TEST_TAG}" "docker://${IMAGE_BASE}:latest-pw"
           fi
