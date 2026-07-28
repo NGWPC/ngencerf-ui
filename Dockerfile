@@ -7,19 +7,17 @@
 ARG IMAGE_NAMESPACE=ngwpc
 ############################################################################
 
-ARG BASE_REPO=rockylinux
-ARG BASE_TAG=9.3
+ARG BASE_IMAGE=rockylinux:9.3
 
-FROM ${BASE_REPO}:${BASE_TAG}
+FROM ${BASE_IMAGE}
 
 # Re-expose args after FROM for the remaining build stage
 # Keeps whatever value was already set
 ARG IMAGE_NAMESPACE
 
 # OCI Metadata Arguments
-ARG BASE_REPO
-ARG BASE_TAG
-ARG BASE_NAME="${BASE_REPO}:${BASE_TAG}"
+ARG BASE_IMAGE
+ARG BASE_NAME="${BASE_IMAGE}"
 ARG BASE_DIGEST="unknown"
 ARG BASE_REVISION="unknown"
 ARG IMAGE_SOURCE="unknown"
