@@ -76,18 +76,14 @@ export const useRunStatusStore = defineStore('RunStatusStore', () => {
       return userCalibrationRunData.value.status;
     } else if (userCalibrationRunData?.value?.status !== 'Done') {
       return `Calibration ${userCalibrationRunData?.value?.status}`;
-    } else if (userCalibrationRunData?.value?.status === 'Done' && validationControlStatus?.value === 'Running') {
-      return `Calibration Done, Validation Control Running`;
-    } else if (userCalibrationRunData?.value?.status === 'Done' && validationBestStatus?.value === 'Running') {
-      return `Calibration Done, Validation Best Running`;
     } else if (
       userCalibrationRunData?.value.status === 'Done' &&
       validationControlStatus?.value === 'Done' &&
       validationBestStatus?.value === 'Done'
     ) {
       return 'Done';
-    } else if (userCalibrationRunData.value.status === 'Done' && validControlAndValidBestStatus?.value) {
-      return `Calibration Done, Validation ${validControlAndValidBestStatus.value}`;
+    } else if (userCalibrationRunData.value.status === 'Done' && validationControlStatus?.value && validationControlStatus?.value) {
+      return `Calibration Done, Valid ${getValidControlAndValidBestStatusForDisplay(validationControlStatus.value, validationBestStatus.value)}`;
     }
     return '';
   });
