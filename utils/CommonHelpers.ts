@@ -129,8 +129,8 @@ export const getValidControlAndValidBestStatus = (
   } else if (validControlStatus !== 'Done') {
     // if validControlstatus is not Done, return that status
     return validControlStatus;
-    // if validBestStatus is not Done, return that status
   } else if (validBestStatus !== 'Done') {
+    // if validBestStatus is not Done, return that status
     return validBestStatus;
   } else {
     // else return 'Unknown'
