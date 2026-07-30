@@ -123,30 +123,17 @@ export const getValidControlAndValidBestStatus = (
   validControlStatus: string,
   validBestStatus?: string
 ): string => {
-  // statuses that are not 'Done'
-  const nonDoneStatuses = [
-    "Submitted",
-    "Saved",
-    "Ready",
-    "Running",
-    "Cancelled",
-    "Failed",
-    "Server error",
-  ];
-
-  // return non-Done status if either validControlStatus or validBestStatus
-  // are set to one of them
-  for (const status of nonDoneStatuses) {
-    if (validControlStatus === status || validBestStatus === status) {
-      return status;
-    }
-  }
-
-  // if both are 'Done', return 'Done'
-  // else return 'Unknown'
   if (validControlStatus === "Done" && validBestStatus === "Done") {
+    // if both are 'Done', return 'Done'
     return "Done";
+  } else if (validControlStatus !== 'Done') {
+    // if validControlstatus is not Done, return that status
+    return validControlStatus;
+    // if validBestStatus is not Done, return that status
+  } else if (validBestStatus !== 'Done') {
+    return validBestStatus;
   } else {
+    // else return 'Unknown'
     return "Unknown";
   }
 };
