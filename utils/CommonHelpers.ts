@@ -128,6 +128,31 @@ export const getValidControlAndValidBestStatus = (
     return "Done";
   } else if (validControlStatus !== 'Done') {
     // if validControlstatus is not Done, return that status
+    return validControlStatus;
+  } else if (validBestStatus !== 'Done') {
+    // if validBestStatus is not Done, return that status
+    return validBestStatus;
+  } else {
+    // else return 'Unknown'
+    return "Unknown";
+  }
+};
+
+/**
+ * Get a displayable status of valid_control and valid_best
+ * @param validControl
+ * @param validBest
+ * @returns {string}
+ */
+export const getValidControlAndValidBestStatusForDisplay = (
+  validControlStatus: string,
+  validBestStatus?: string
+): string => {
+  if (validControlStatus === "Done" && validBestStatus === "Done") {
+    // if both are 'Done', return 'Done'
+    return "Done";
+  } else if (validControlStatus !== 'Done') {
+    // if validControlstatus is not Done, return that status
     return 'Control ' + validControlStatus;
   } else if (validBestStatus !== 'Done') {
     // if validBestStatus is not Done, return that status
