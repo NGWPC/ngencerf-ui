@@ -86,8 +86,8 @@ export const useRunStatusStore = defineStore('RunStatusStore', () => {
       validationBestStatus?.value === 'Done'
     ) {
       return 'Done';
-    } else if (userCalibrationRunData.value.status === 'Done' && validControlAndValidBestStatus?.value) {
-      return `Calibration Done, Validation ${validControlAndValidBestStatus.value}`;
+    } else if (userCalibrationRunData.value.status === 'Done' && validationControlStatus?.value && validationControlStatus?.value) {
+      return `Calibration Done, Valid ${getValidControlAndValidBestStatus(validationControlStatus.value, validationBestStatus.value)}`;
     }
     return '';
   });

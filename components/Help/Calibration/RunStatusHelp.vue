@@ -28,7 +28,7 @@
                     <div class="ml-2"><strong>Calibration Ready -&gt; Submitted -&gt; Calibration Running -&gt; Calibration Done,
                         Validation Control
                         Running -&gt;
-                        Calibration Done, Validation Best Running -&gt; Done </strong>
+                        Calibration Calibration Done, Valid Best Running -&gt; Done </strong>
                     </div>
                 </li>
                 <li>
@@ -224,7 +224,7 @@
             </tr>
             <tr class="odd:bg-white even:bg-gray-50  border-t-2 border-gray-900">
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 align-top border-r-2 border-gray-200">
-                Calibration Done, Validation Control Running
+                Calibration Calibration Done, Valid Control Running
               </td>
               <td class="px-4 py-3 text-sm text-gray-700 align-top">
                 The calibration has completed the iterative running ngen. The calibration manager is currently 
@@ -233,7 +233,7 @@
             </tr>
             <tr class="odd:bg-white even:bg-gray-50  border-t-2 border-gray-900">
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 align-top border-r-2 border-gray-200">
-                Calibration Done, Validation Best Running
+                Calibration Calibration Done, Valid Best Running
               </td>
               <td class="px-4 py-3 text-sm text-gray-700 align-top">
                 Both the calibration run, and validation control run have completed successfully. 
@@ -262,7 +262,7 @@
             </tr>
             <tr class="odd:bg-white even:bg-gray-50  border-t-2 border-gray-900">
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 align-top border-r-2 border-gray-200">
-                Calibration Done, Validation Control Failed
+                Calibration Calibration Done, Valid Control Failed
               </td>
               <td class="px-4 py-3 text-sm text-gray-700 align-top">
                 A failure occurred causing the Validation Control Job to crash. Logs and Plots are viewable in the 
@@ -273,7 +273,7 @@
             </tr>
             <tr class="odd:bg-white even:bg-gray-50  border-t-2 border-gray-900">
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 align-top border-r-2 border-gray-200">
-                Calibration Done, Validation Best Failed
+                Calibration Calibration Done, Valid Best Failed
               </td>
               <td class="px-4 py-3 text-sm text-gray-700 align-top">
                 A failure occurred causing the Validation Best Job to crash. Logs and Plots are viewable in the 

@@ -87,13 +87,13 @@ export const getOverallCalibrationValidationStatus = (
     validationControlStatus &&
     validationControlStatus === "Running"
   ) {
-    return `Calibration Done, Validation Control Running`;
+    return `Calibration Calibration Done, Valid Control Running`;
   } else if (
     calibrationStatus === "Done" &&
     validationBestStatus &&
     validationBestStatus === "Running"
   ) {
-    return `Calibration Done, Validation Best Running`;
+    return `Calibration Calibration Done, Valid Best Running`;
   } else if (
     calibrationStatus === "Done" &&
     validationControlStatus &&
@@ -108,7 +108,7 @@ export const getOverallCalibrationValidationStatus = (
       validationControlStatus,
       validationBestStatus
     );
-    return `Calibration Done, Validation ${validationControlBestStatus}`;
+    return `Calibration Done, Valid ${validationControlBestStatus}`;
   }
   return "";
 };
@@ -128,10 +128,10 @@ export const getValidControlAndValidBestStatus = (
     return "Done";
   } else if (validControlStatus !== 'Done') {
     // if validControlstatus is not Done, return that status
-    return validControlStatus;
+    return 'Control ' + validControlStatus;
   } else if (validBestStatus !== 'Done') {
     // if validBestStatus is not Done, return that status
-    return validBestStatus;
+    return 'Best ' + validBestStatus;
   } else {
     // else return 'Unknown'
     return "Unknown";
