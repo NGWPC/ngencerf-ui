@@ -17,6 +17,9 @@
             The table updates automatically as you select filters.
             </p>
 
+            <p><strong>Domain</strong></p>
+            <p class="mb-2">Select a single domains to show jobs with gages in that domain.</p>
+
             <p><strong>Headwater Basin Gage</strong></p>
             <p class="mb-2">Select a single gage to show jobs for that basin.</p>
 
