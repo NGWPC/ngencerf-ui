@@ -23,16 +23,19 @@
             <p><strong>Headwater Basin Gage</strong></p>
             <p class="mb-2">Select a single gage to show jobs for that basin.</p>
 
+            <p><strong>Status</strong></p>
+            <p class="mb-2">Multi-select filter. Jobs matching any selected status will be shown.</p>
+
             <p><strong>Created After</strong></p>
             <p class="mb-2">Show jobs created on or after the selected date.</p>
 
             <p><strong>Created Before</strong></p>
             <p class="mb-2">Show jobs created on or before the selected date.</p>
 
-            <p><strong>Job ID Start</strong></p>
+            <p><strong>Verification Job ID Start</strong></p>
             <p class="mb-2">Show jobs with ID greater than or equal to this number.</p>
 
-            <p><strong>Job ID End</strong></p>
+            <p><strong>Verification Job ID End</strong></p>
             <p class="mb-2">Show jobs with ID less than or equal to this number.</p>
 
             <p class="mt-4 mb-4 italic">
@@ -64,11 +67,12 @@
             <tbody>
                 <tr>
                     <td class="td1">View Status</td>
-                    <td class="td2">View the status of a running job the job statistics from a completed job.</td>
+                    <td class="td2">View the status of a running job, and the job statistics from a completed job.<br/>
+                        Double clicking on a row is equivalent to this action.</td>
                 </tr>
                 <tr>
                     <td class="td1">View Results</td>
-                    <td class="td2">View results from this hindcast run.</td>
+                    <td class="td2">View results from this verification run.</td>
                 </tr>
                 <tr>
                     <td class="td1">Delete</td>

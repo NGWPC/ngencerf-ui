@@ -31,10 +31,10 @@
             <p><strong>Created Before</strong></p>
             <p class="mb-2">Show jobs created on or before the selected date.</p>
 
-            <p><strong>Job ID Start</strong></p>
+            <p><strong>Calibration Job ID Start</strong></p>
             <p class="mb-2">Show jobs with ID greater than or equal to this number.</p>
 
-            <p><strong>Job ID End</strong></p>
+            <p><strong>Calibration Job ID End</strong></p>
             <p class="mb-2">Show jobs with ID less than or equal to this number.</p>
 
             <p class="mt-4 mb-4 italic">
@@ -65,7 +65,8 @@
             <tbody>
                 <tr>
                     <td class="td1">Run New Forecast</td>
-                    <td class="td2">Run a new foreast using this calibration as the basis for the job.</td>
+                    <td class="td2">Run a new foreast using this calibration as the basis for the job.<br/>
+                        Double clicking on a row is equivalent to this action.</td>
                 </tr>
                 <tr>
                     <td class="td1">View Calibration Details</td>

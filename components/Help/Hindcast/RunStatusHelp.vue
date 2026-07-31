@@ -24,9 +24,8 @@
                     <td class="td1">Display</td>
                     <td class="td2">Select the result to display in the main viewing area (e.g. time series or logs).
                         <ul class="list-disc list-outside ml-6 space-y-0">
-                            <li>Selecting <strong>Logs</strong> reveals a second pull-down to select a specific log.</li>
-                            <li>Selecting <strong>Time Series</strong> shows a slider at the bottom to zoom in or out. 
-                                The plot and slider default to fully zoomed out.</li>
+                            <li>Selecting <strong>Cold Start Logs</strong> or <strong>Hindcast Logs</strong> 
+                                reveals a second pull-down to select a specific log.</li>
                         </ul>
                     </td>
                 </tr>
@@ -52,7 +51,7 @@
                 </tr>
                 <tr>
                     <td class="td1">Configuration</td>
-                    <td class="td2">Time elapsed since the job was submitted. Time is in days, HH:MM:SS</td>
+                    <td class="td2">The name of the configuration chosen for the hindcast.</td>
                 </tr>
                 <tr>
                     <td class="td1">Cycle Date</td>
@@ -87,6 +86,7 @@
                     <td class="td1">Status</td>
                     <td class="td2">
                         Ready - Click Run to start.<br />
+                        Cold Start Running (if not using a saved state)<br />
                         Hindcast Running<br />
                         Done
                     </td>

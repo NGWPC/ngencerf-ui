@@ -29,6 +29,22 @@
                     <td class="td2">This Verification Job ID.</td>
                 </tr>
                 <tr>
+                    <td class="td1">Configuration</td>
+                    <td class="td2">The name of the configuration chosen for the hindcast.</td>
+                </tr>
+                <tr>
+                    <td class="td1">Cycle Date</td>
+                    <td class="td2">UTC Date and hour of the hindcast cycle which determines the real-time forcing data used.</td>
+                </tr>
+                <tr>
+                    <td class="td1">Status</td>
+                    <td class="td2">
+                        Ready - Click Run to start.<br />
+                        Verification Running<br />
+                        Done
+                    </td>
+                </tr>
+                <tr>
                     <td class="td1">Submit Time</td>
                     <td class="td2">Date/Time the job was submitted to run.
                     </td>
@@ -36,19 +52,6 @@
                 <tr>
                     <td class="td1">Elapsed Time</td>
                     <td class="td2">Time elapsed since the job was submitted. Time is in days, HH:MM:SS</td>
-                </tr>
-                <tr>
-                    <td class="td1">Status</td>
-                    <td class="td2">
-                        Ready - Click Run to start.<br />
-                        Forcing Download Running<br />
-                        Verification Running<br />
-                        Done
-                    </td>
-                </tr>
-                <tr>
-                    <td class="td1">Results Pathname</td>
-                    <td class="td2">Location on the file system containing all data pertaining to this job.</td>
                 </tr>
                 <tr>
                     <td class="td1">Run Button</td>
@@ -63,6 +66,10 @@
                 <tr>
                     <td class="td1">View Results Button</td>
                     <td class="td2">View results of the verification. Appears once the job is done.</td>
+                </tr>
+                <tr>
+                    <td class="td1">Select Verification Log</td>
+                    <td class="td2">Shows a pull-down to select a specific log.</td>
                 </tr>
             </tbody>
         </table>

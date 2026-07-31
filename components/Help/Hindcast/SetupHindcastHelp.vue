@@ -29,7 +29,7 @@
                 <ul class="list-disc list-outside space-y-0 ml-6">
                     <li><strong>Saved State</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                     <li><strong>Cycle Date</strong> (automatically set)</li>
-                    <li><strong>Interval Cycle</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
+                    <li><strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                     <li><strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                 </ul>
 
@@ -39,8 +39,13 @@
                     <li><strong>Cold Start Hour</strong></li>
                     <li><strong>Cycle Date</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                     <li><strong>Cycle Hour</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
-                    <li><strong>Interval Cycle</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
+                    <li><strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                     <li><strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
+                </ul>
+
+                <p><strong>For example:</strong></p>
+                <ul class="list-disc list-outside space-y-0 ml-6">
+                    <li>An Advance Interval of 6 hours with 12 Intervals yields outputs every 6 hours across a 72-hour period.</li>
                 </ul>
 
                 <p>
