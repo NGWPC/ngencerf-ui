@@ -106,8 +106,18 @@
 
         <div class="mt-2 ml-6">
             <div class="text-center font-bold text-xl mb-3">Dashboard</div>
-            <p class="leading-relaxed text-center mb-6">
-                A summary of your calibrations that are running, ready to run, or still in setup.
+            <p class="leading-relaxed mb-6">
+                The first row is a summary of your calibrations that are running, ready to run, or still in setup.
+            </p>
+            <p class="leading-relaxed mb-6">
+                The second row is a summary of your forecasts that are either running or completed.
+            </p>
+            <p class="leading-relaxed mb-6">
+                The third row is a summary of your hindcasts that are either running or completed, 
+                and your completed verifications.
+            </p>
+            <p class="leading-relaxed mb-6">
+                Clicking on any of these boxes will take you to a list filtered on the relevant job type/status.
             </p>
 
             <hr class="my-6 border-grey" />

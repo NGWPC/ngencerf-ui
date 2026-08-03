@@ -17,8 +17,14 @@
             The table updates automatically as you select filters.
             </p>
 
+            <p><strong>Domain</strong></p>
+            <p class="mb-2">Select a single domains to show jobs with gages in that domain.</p>
+
             <p><strong>Headwater Basin Gage</strong></p>
             <p class="mb-2">Select a single gage to show jobs for that basin.</p>
+
+            <p><strong>Status</strong></p>
+            <p class="mb-2">Multi-select filter. Jobs matching any selected status will be shown.</p>
 
             <p><strong>Created After</strong></p>
             <p class="mb-2">Show jobs created on or after the selected date.</p>
@@ -26,10 +32,10 @@
             <p><strong>Created Before</strong></p>
             <p class="mb-2">Show jobs created on or before the selected date.</p>
 
-            <p><strong>Job ID Start</strong></p>
+            <p><strong>Hindcast Job ID Start</strong></p>
             <p class="mb-2">Show jobs with ID greater than or equal to this number.</p>
 
-            <p><strong>Job ID End</strong></p>
+            <p><strong>Hindcast Job ID End</strong></p>
             <p class="mb-2">Show jobs with ID less than or equal to this number.</p>
 
             <p class="mt-4 mb-4 italic">
@@ -61,7 +67,8 @@
             <tbody>
                 <tr>
                     <td class="td1">View Status</td>
-                    <td class="td2">View the status of a running job the job statistics from a completed job.</td>
+                    <td class="td2">View the status of a running job, and the job statistics from a completed job.<br/>
+                        Double clicking on a row is equivalent to this action.</td>
                 </tr>
                 <tr>
                     <td class="td1">View Results</td>
@@ -70,6 +77,10 @@
                 <tr>
                     <td class="td1">Run New Hindcast</td>
                     <td class="td2">Run a new hindcast using the same calibration as the basis for the job.</td>
+                </tr>
+                <tr>
+                    <td class="td1">Run New Verification</td>
+                    <td class="td2">Run a new verification using this hindcast as the basis for the job.</td>
                 </tr>
                 <tr>
                     <td class="td1">View Calibration Details</td>
