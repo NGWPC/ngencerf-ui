@@ -39,9 +39,24 @@
                             instead of cold-starting. This skips the spin-up period, so the run is faster.
                         </div>
                     </li>
-                    <li><strong>Cycle Date</strong> (automatically set)</li>
-                    <li><strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
-                    <li><strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
+                    <li>
+                        <strong>Cycle Date</strong> (automatically set)
+                        <div class="text-sm text-gray-700 mt-1">
+                            Equivalent to the end of the saved state run.
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span>
+                        <div class="text-sm text-gray-700 mt-1">
+                            How far apart each cycle is spaced (e.g., every 6 hours).
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span>
+                        <div class="text-sm text-gray-700 mt-1">
+                            How many cycles to generate at that spacing.
+                        </div>
+                    </li>
                 </ul>
 
                 <p><strong>Without a Saved State (Cold Start):</strong></p>
@@ -62,19 +77,25 @@
                             model would have forecast (T=0 for this hindcast).
                         </div>
                     </li>
-                    <li><strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
-                    <li><strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
+                    <li>
+                        <strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span>
+                        <div class="text-sm text-gray-700 mt-1">
+                            How far apart each cycle is spaced (e.g., every 6 hours).
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span>
+                        <div class="text-sm text-gray-700 mt-1">
+                            How many cycles to generate at that spacing.
+                        </div>
+                    </li>
                 </ul>
 
                 <p>
                     <strong>Advance Interval</strong> and <strong>Number of Intervals</strong> let you generate
                     a <em>batch</em> of hindcast cycles in one submission, stepping forward in time
-                    automatically, rather than running just one:
+                    automatically, rather than running just one.
                 </p>
-                <ul class="list-disc list-outside space-y-1 ml-6">
-                    <li><strong>Advance Interval</strong> — how far apart each cycle is spaced (e.g., every 6 hours).</li>
-                    <li><strong>Number of Intervals</strong> — how many cycles to generate at that spacing.</li>
-                </ul>
 
                 <p><strong>For example:</strong></p>
                 <ul class="list-disc list-outside space-y-0 ml-6">
