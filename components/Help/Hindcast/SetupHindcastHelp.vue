@@ -16,6 +16,11 @@
             <!-- Hindcast configuration details -->
             <div class="space-y-4">
                 <p>
+                    A hindcast (a.k.a. <strong>re-forecast</strong> — the "R" in ngenCERF) runs the model as
+                    if it were forecasting at a point in the past, using historical inputs. This lets you
+                    evaluate forecast skill against known outcomes.
+                </p>
+                <p>
                     To set up a hindcast, <strong>select a hindcast configuration</strong> from the table. 
                     After making a selection, you will be prompted to enter the required input fields.
                 </p>
@@ -26,26 +31,59 @@
                 </p>
 
                 <p><strong>Using a Saved State:</strong></p>
-                <ul class="list-disc list-outside space-y-0 ml-6">
-                    <li><strong>Saved State</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
+                <ul class="list-disc list-outside space-y-2 ml-6">
+                    <li>
+                        <strong>Saved State</strong><span class="required-asterisk" aria-hidden="true">*</span>
+                        <div class="text-sm text-gray-700 mt-1">
+                            Reuses a model state that was already computed and saved by a previous run,
+                            instead of cold-starting. This skips the spin-up period, so the run is faster.
+                        </div>
+                    </li>
                     <li><strong>Cycle Date</strong> (automatically set)</li>
                     <li><strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                     <li><strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                 </ul>
 
                 <p><strong>Without a Saved State (Cold Start):</strong></p>
-                <ul class="list-disc list-outside space-y-0 ml-6">
-                    <li><strong>Cold Start Date</strong></li>
-                    <li><strong>Cold Start Hour</strong></li>
-                    <li><strong>Cycle Date</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
-                    <li><strong>Cycle Hour</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
+                <ul class="list-disc list-outside space-y-2 ml-6">
+                    <li>
+                        <strong>Cold Start Date</strong> / <strong>Cold Start Hour</strong>
+                        <div class="text-sm text-gray-700 mt-1">
+                            The date/hour to begin building model state from scratch (soil moisture,
+                            streamflow, channel storage, etc.), running forward through the Cycle Date/Hour
+                            before the hindcast itself begins.
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Cycle Date</strong><span class="required-asterisk" aria-hidden="true">*</span>
+                        / <strong>Cycle Hour</strong><span class="required-asterisk" aria-hidden="true">*</span>
+                        <div class="text-sm text-gray-700 mt-1">
+                            The historical date/time you want to pretend you're standing at, to see what the
+                            model would have forecast (T=0 for this hindcast).
+                        </div>
+                    </li>
                     <li><strong>Advance Interval</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                     <li><strong>Number of Intervals</strong><span class="required-asterisk" aria-hidden="true">*</span></li>
                 </ul>
 
+                <p>
+                    <strong>Advance Interval</strong> and <strong>Number of Intervals</strong> let you generate
+                    a <em>batch</em> of hindcast cycles in one submission, stepping forward in time
+                    automatically, rather than running just one:
+                </p>
+                <ul class="list-disc list-outside space-y-1 ml-6">
+                    <li><strong>Advance Interval</strong> — how far apart each cycle is spaced (e.g., every 6 hours).</li>
+                    <li><strong>Number of Intervals</strong> — how many cycles to generate at that spacing.</li>
+                </ul>
+
                 <p><strong>For example:</strong></p>
                 <ul class="list-disc list-outside space-y-0 ml-6">
-                    <li>An Advance Interval of 6 hours with 12 Intervals yields outputs every 6 hours across a 72-hour period.</li>
+                    <li>
+                        An Advance Interval of 6 hours with 12 Intervals produces 12 separate hindcast runs,
+                        one every 6 hours, spanning a 72-hour period starting at your Cycle Date/Hour. Each of
+                        those runs gets its own forecast window on top (per the configuration's Hindcast
+                        Window).
+                    </li>
                 </ul>
 
                 <p>
