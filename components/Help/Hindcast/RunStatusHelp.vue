@@ -74,12 +74,7 @@
                 </tr>
                 <tr>
                     <td class="td1">Number of Intervals</td>
-                    <td class="td2">How many cycles to generate at that spacing.
-                    </td>
-                </tr>
-                <tr>
-                    <td class="td2"><span class="font-normal">For example</span></td>
-                    <td class="td2">
+                    <td class="td2">How many cycles to generate at that spacing.<br />For example:<br />
                         An Advance Interval of 6 hours with 12 Intervals produces 12 separate hindcast runs,
                         one every 6 hours, spanning a 72-hour period starting at your Cycle Date/Hour. Each of
                         those runs gets its own forecast window on top (per the configuration's Hindcast
