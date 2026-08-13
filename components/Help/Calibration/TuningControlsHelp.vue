@@ -105,14 +105,14 @@
                     <td class="td1">Warmup Duration<span class="required-asterisk" aria-hidden="true">*</span></td>
                     <td class="td2">A run-up period in months before calibration/validation begins, allowing parameter values 
                         to stabilize from arbitrary initial conditions before calibration starts<br />
-                        Minumum: 0
+                        Minimum: 0
                     </td>
                 </tr>
                 <tr>
                     <td class="td1">Cailbration Duration<span class="required-asterisk" aria-hidden="true">*</span></td>
                     <td class="td2">Length of the period (in months) over which the formulation is calibrated against observed data,
                         starting right after the warmup period ends.<br />
-                        Minumum: 1
+                        Minimum: 1
                     </td>
                 </tr>
                 <tr>
@@ -126,14 +126,14 @@
                     <td class="td1">Validation Window Gap<span class="required-asterisk" aria-hidden="true">*</span></td>
                     <td class="td2">A buffer (in months) separating the end of one period from the start of the other,
                         keeping calibration and validation on non-overlapping dates.<br />
-                        Minumum: 0
+                        Minimum: 0
                     </td>
                 </tr>
                 <tr>
                     <td class="td1">Validation Duration<span class="required-asterisk" aria-hidden="true">*</span></td>
                     <td class="td2">Length of the period (in months) over which the calibrated formulation is evaluated 
                         against data it wasn't calibrated on.<br />
-                        Minumum: 1
+                        Minimum: 1
                     </td>
                 </tr>
                 <tr>
