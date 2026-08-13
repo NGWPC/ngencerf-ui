@@ -73,6 +73,9 @@
                         <div v-if="location.name === 'LandingPage'" class="py-10 px-6">
                             <LazyHelpLandingPageHelp />
                         </div>
+                        <div v-else-if="location.name === 'DownloadCli'" class="py-10 px-6">
+                            <LazyHelpDownloadCliPageHelp />
+                        </div>
 
                         <div v-if="location.name === 'Calibration'" class="py-10 px-1">
                             <div v-if="getMenuIndex() === 1">
@@ -207,6 +210,7 @@ const LazyUserAccount = defineAsyncComponent(() => import("@/components/Common/U
 
 // Lazy Load for Help Files
 const LazyHelpLandingPageHelp = defineAsyncComponent(() => import("@/components/Help/LandingPageHelp.vue"))
+const LazyHelpDownloadCliPageHelp = defineAsyncComponent(() => import("@/components/Help/DownloadCliPageHelp.vue"))
 
 // Calibration Workflow Help Files
 const LazyCalibrationHelpPreviousRunsHelp = defineAsyncComponent(() => import("@/components/Help/Calibration/PreviousRunsHelp.vue"))
