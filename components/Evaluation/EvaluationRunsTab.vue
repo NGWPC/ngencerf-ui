@@ -478,6 +478,7 @@ onMounted(async() => {
 
   //clear calibration data if user was on calibration tab and clear previous evaluation run data user may have selected
   resetUserSelectedEvalCalibrationRun();
+  selectedCalibrationCompareRuns.value = [];
 
   //reset Run/Status store in case we have running intervals
   hardResetEvaluationRunStatusStore();
@@ -859,6 +860,7 @@ const viewValidationRunStatus = async (calibration_run_id: number): Promise<void
 
 const returnCalibrationJobList = (event: any) => {
   selectedCalibrationRuns.value = selectedCalibrationValidationRun.value = undefined;
+  selectedCalibrationCompareRuns.value = [];
   resetUserSelectedEvalValidationRun();
   uiCompareGageId.value = 'All';
   resetUserSelectedEvalCompareRun();
