@@ -290,6 +290,7 @@ onMounted(async () => {
   isLoading.value = true;
   forecastJobId.value = undefined;
   calibrationRunForForecast.value = undefined;
+  userCalibrationRunData.value = undefined;
   selectedForecastJob.value = undefined;
   forecastJobStatus.value = undefined;
   forecastRunListCurrentPage.value = 1;

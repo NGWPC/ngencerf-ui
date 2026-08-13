@@ -232,7 +232,7 @@ import { useDialog } from 'primevue/usedialog';
 import { isValidDate } from '@/utils/CommonHelpers';
 import { calculateElapsedTime } from '@/utils/TimeHelpers';
 
-const { isLoading } = storeToRefs(generalStore());
+const { calibrationJobId, isLoading } = storeToRefs(generalStore());
 const { addToastRecord } = generalStore();
 const toast = useToast();
 
@@ -310,8 +310,11 @@ onMounted(async () => {
   elapsedTimeIntervalId.value = undefined;
   
   // get calibration job data if we don't already have it
+  calibrationJobId.value = calibrationRunForForecast?.value?.calibration_run_id;
   if (!userCalibrationRunData.value) {
+    isLoading.value = true;
     await fetchUserCalibrationRunData();
+    isLoading.value = false;
   }
   if (forecastJobId.value) {
     await loadForecastRunStatusTabData();
