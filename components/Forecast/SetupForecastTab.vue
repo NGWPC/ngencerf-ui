@@ -266,8 +266,8 @@ onMounted(async () => {
     hilightTab(ForecastTabs.tab_setupForecast);
 
     nextTick(async () => {
-        // load userCalibrationRunData so we can show details on user request
         calibrationJobId.value = calibrationRunForForecast.value?.calibration_run_id;
+
         // load tab data to populate forecastConfigurations
         const loadForecastTabResponse: any = await loadForecastTab();
         if (loadForecastTabResponse?._data?.forecast_configuration_values) {
@@ -287,7 +287,9 @@ const toggleMessagesGroup = async () => {
     showMessagesGroup.value = false;
   } else {
     if (!userCalibrationRunData?.value) {
+      isLoading.value = true;
       await fetchUserCalibrationRunData();
+      isLoading.value = false;
     }
     showMessagesGroup.value = true;
   }

@@ -391,6 +391,7 @@ onMounted(async () => {
   isLoading.value = true;
   hindcastJobId.value = undefined;
   calibrationRunForHindcast.value = undefined;
+  userCalibrationRunData.value = undefined;
   selectedHindcastJob.value = undefined;
   hindcastJobStatus.value = undefined; 
   calibrationRunsForHindcastListCurrentPage.value = 1;

@@ -29,7 +29,7 @@
             :aria-label="'Calibration Job ID is ' + calibrationRunForHindcast?.calibration_run_id"
             :title="'Calibration Job ID is  ' + calibrationRunForHindcast?.calibration_run_id">
             <h2 style="font-size:1.5em; padding-top:5px;">
-                <a v-if="userCalibrationRunData" href="#" class="c-blue underline"
+                <a href="#" class="c-blue underline"
                   @click="toggleMessagesGroup">
                   Calibration Job ID: 
                   {{ calibrationRunForHindcast?.calibration_run_id }}
@@ -319,9 +319,8 @@ onMounted(async () => {
     hilightTab(HindcastTabs.tab_setupHindcast);
 
     nextTick(async () => {
-        // load userCalibrationRunData so we can show details on user request
         calibrationJobId.value = calibrationRunForHindcast.value?.calibration_run_id;
-        await fetchUserCalibrationRunData();
+        
         // load tab data to populate hindcastConfigurations
         const loadHindcastTabResponse: any = await loadHindcastTab();
         if (loadHindcastTabResponse?._data?.forecast_configuration_values) {
@@ -354,6 +353,11 @@ const toggleMessagesGroup = async () => {
   if (showMessagesGroup.value) {
     showMessagesGroup.value = false;
   } else {
+    if (!userCalibrationRunData?.value) {
+      isLoading.value = true;
+      await fetchUserCalibrationRunData();
+      isLoading.value = false;
+    }
     showMessagesGroup.value = true;
   }
 }

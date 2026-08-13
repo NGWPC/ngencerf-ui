@@ -289,8 +289,11 @@ onMounted(async () => {
     toast.add(tMsg); addToastRecord(tMsg);
   });
   // get calibration job data if we don't already have it
+  calibrationJobId.value = calibrationRunForForecast?.value?.calibration_run_id;
   if (!userCalibrationRunData.value) {
+    isLoading.value = true;
     await fetchUserCalibrationRunData();
+    isLoading.value = false;
   }
 });
 
