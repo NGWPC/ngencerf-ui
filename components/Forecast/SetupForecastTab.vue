@@ -29,8 +29,7 @@
             :aria-label="'Calibration Job ID is ' + calibrationRunForForecast?.calibration_run_id"
             :title="'Calibration Job ID is  ' + calibrationRunForForecast?.calibration_run_id">
             <h2 style="font-size:1.5em; padding-top:5px;">
-                <a v-if="userCalibrationRunData" href="#" class="c-blue underline"
-                  @click="toggleMessagesGroup">
+                <a href="#" class="c-blue underline" @click="toggleMessagesGroup">
                   Calibration Job ID: 
                   {{ calibrationRunForForecast?.calibration_run_id }}
                 </a>
@@ -269,7 +268,6 @@ onMounted(async () => {
     nextTick(async () => {
         // load userCalibrationRunData so we can show details on user request
         calibrationJobId.value = calibrationRunForForecast.value?.calibration_run_id;
-        await fetchUserCalibrationRunData();
         // load tab data to populate forecastConfigurations
         const loadForecastTabResponse: any = await loadForecastTab();
         if (loadForecastTabResponse?._data?.forecast_configuration_values) {
@@ -288,6 +286,9 @@ const toggleMessagesGroup = async () => {
   if (showMessagesGroup.value) {
     showMessagesGroup.value = false;
   } else {
+    if (!userCalibrationRunData?.value) {
+      await fetchUserCalibrationRunData();
+    }
     showMessagesGroup.value = true;
   }
 }
