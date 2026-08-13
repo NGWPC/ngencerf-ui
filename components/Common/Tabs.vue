@@ -100,13 +100,13 @@
             Setup Forecast
             <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
           </div>
-          <div v-show="[4].includes(currentTab) || (calibrationRunForForecast && calibrationRunForForecast?.configuration && currentTab <= 5)" 
+          <div v-show="[4].includes(currentTab) || (calibrationRunForForecast && (calibrationRunForForecast?.configuration || forecastConfigurationName) && currentTab <= 5)" 
             data-tab="4" class="tabs prevent-select" @click="tabClicked" 
             aria-label="Forecast Run/Status tab" title="Forecast Run/Status Tab">
             Forecast Run/Status
             <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
           </div>
-          <div v-show="[5].includes(currentTab) || (calibrationRunForForecast && calibrationRunForForecast?.forecast_status === 'Done' && currentTab <= 5)" 
+          <div v-show="[5].includes(currentTab) || (calibrationRunForForecast && (calibrationRunForForecast?.forecast_status === 'Done' || overallColdStartForecastStatus === 'Done') && currentTab <= 5)" 
             data-tab="5" class="tabs prevent-select" @click="tabClicked"
             aria-label="Forecast Results Tab" title="Forecast Results Tab">
             Forecast Results
@@ -133,13 +133,13 @@
             Setup Hindcast
             <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
           </div>
-          <div v-show="[4].includes(currentTab) || (calibrationRunForHindcast && calibrationRunForHindcast?.configuration && currentTab <= 5)" 
+          <div v-show="[4].includes(currentTab) || (calibrationRunForHindcast && (calibrationRunForHindcast?.configuration || hindcastConfigurationName) && currentTab <= 5)" 
             data-tab="4" class="tabs prevent-select" @click="tabClicked" 
             aria-label="Hindcast Run/Status tab" title="Hindcast Run/Status Tab">
             Hindcast Run/Status
             <div :class="tabNotCompleted ? 'errorDot' : 'noErrorDot'"></div>
           </div>
-          <div v-show="[5].includes(currentTab) || (calibrationRunForHindcast && calibrationRunForHindcast?.hindcast_status === 'Done' && currentTab <= 5)" 
+          <div v-show="[5].includes(currentTab) || (calibrationRunForHindcast && (calibrationRunForHindcast?.hindcast_status === 'Done' || overallColdStartHindcastStatus === 'Done') && currentTab <= 5)" 
             data-tab="5" class="tabs prevent-select" @click="tabClicked"
             aria-label="Hindcast Results Tab" title="Hindcast Results Tab">
             Hindcast Results
@@ -212,11 +212,11 @@ const {
 
 const { runStatusTabVisible } = storeToRefs(useEvaluationRunStatusStore());
 
-const { calibrationRunForForecast, forecastJobId } = storeToRefs(useForecastStore());
+const { calibrationRunForForecast, forecastJobId, forecastConfigurationName, overallColdStartForecastStatus } = storeToRefs(useForecastStore());
 
 const { selectedVerificationJob } = storeToRefs(useVerificationStore());
 
-const { calibrationRunForHindcast, hindcastJobId } = storeToRefs(useHindcastStore());
+const { calibrationRunForHindcast, hindcastJobId, hindcastConfigurationName, overallColdStartHindcastStatus } = storeToRefs(useHindcastStore());
 
 const emit = defineEmits(["tabNumber"]);
 
