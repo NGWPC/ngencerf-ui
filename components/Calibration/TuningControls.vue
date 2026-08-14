@@ -1197,6 +1197,8 @@ const saveTuningData = () => {
   toast.removeAllGroups();
   tuningStore_data_loading.value = true;
 
+  calculateTimeValues();
+
   if (timeControlError.value) {
     const tMsg: ToastMessageOptions = {
       severity: 'error',
