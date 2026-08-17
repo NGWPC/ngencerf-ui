@@ -709,11 +709,13 @@ const validateTab = (tabNumber?: number) => {
     error = true;
     text.push("Forcing Source has been changed");
   }
-  if (selectedObservationalValue.value !== resetData.value.observational_source) {
+  if (getObservationalOptionsList?.value && getObservationalOptionsList?.value?.length > 1 && 
+    selectedObservationalValue.value !== resetData.value.observational_source) {
     error = true;
     text.push("Observational Source has been changed");
   }
-  if (selectedGeopackageValue.value != resetData.value.geopackage_source) {
+  if (getGeopackageOptionsList?.value && getGeopackageOptionsList?.value?.length > 1 &&
+    selectedGeopackageValue.value != resetData.value.geopackage_source) {
     error = true;
     text.push("GeoPackage has been changed");
   }

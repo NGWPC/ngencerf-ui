@@ -190,7 +190,7 @@ export const useGageStore = defineStore(
 
       if (gagePayload.value.job_name) {
         gagePayload.value["calibration_run_id"] = calibrationJobId.value;
-
+        
         const saveGageTabDataResponse =
           await makeProtectedApiCall<SaveGageTabResponse>(
             `${ngencerfBaseUrl}/calibration/save_gage_tab/`,
