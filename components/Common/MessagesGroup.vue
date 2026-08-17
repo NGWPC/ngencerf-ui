@@ -37,11 +37,6 @@
               {{ forcingSourceDisplay }}
             </span>
           </div>
-          <div v-if="calData?.observational_source" :aria-label="'Observational Data ' + calData?.observational_source"
-            :title="'Observational Data ' + calData?.observational_source"><span class="font-medium">Observational
-              Data:</span> 
-            {{ calData?.observational_source }}
-          </div>
         </div>
       </div>
       <div class="line-spacer">&nbsp;</div>
