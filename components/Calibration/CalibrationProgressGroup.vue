@@ -13,13 +13,13 @@
             class="pi pi-check font-bold"></i></td>
         <td data-tab="2" title="Forcing" aria-label="Forcing" @click="tabClicked">Forcing Source</td>
       </tr>
-      <tr>
+      <tr v-if="getObservationalOptionsList?.length > 1">
         <td><i v-if="userCalibrationRunData?.external_data_status?.observational"
             :class="userCalibrationRunData?.external_data_status?.observational ? 'checkMark' : ''"
             class="pi pi-check font-bold"></i></td>
         <td data-tab="2" title="Observational" aria-label="Observational" @click="tabClicked">Observational</td>
       </tr>
-      <tr>
+      <tr v-if="getGeopackageOptionsList?.length > 1">
         <td><i v-if="userCalibrationRunData?.external_data_status?.geopackage"
             :class="userCalibrationRunData?.external_data_status?.geopackage ? 'checkMark' : ''"
             class="pi pi-check font-bold"></i></td>
@@ -33,8 +33,8 @@
       </tr>
       <tr>
         <td><i v-if="checkStartEndTimeValues()" class="pi pi-check font-bold checkMark"></i></td>
-        <td data-tab="4" title="Start and End Times" aria-label="Start and End Times" @click="tabClicked">
-          Start and End Times</td>
+        <td data-tab="4" title="Start and Duration Times" aria-label="Start and Duration Times" @click="tabClicked">
+          Start and Duration Times</td>
       </tr>
       <tr>
         <td><i v-if="(checkStartEndTimeValues() || userCalibrationRunData?.parameters_selected) && !userCalibrationRunData?.modules?.includes('LSTM')" class="pi pi-check font-bold checkMark"></i></td>
@@ -75,6 +75,7 @@
 <script lang="ts" setup>
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 import { generalStore } from "@/stores/common/GeneralStore";
+import { useGageStore } from "@/stores/calibration/GageStore";
 import { useFormulationStore } from "@/stores/calibration/FormulationStore";
 import { useTuningStore } from "@/stores/calibration/TuningStore";
 import { useToast } from 'primevue/usetoast';
@@ -84,6 +85,7 @@ import { ToastTimeout } from "@/composables/NgencerfEnums";
 
 const { getCalibrationTabIndex, getMenuIndex } = generalStore();
 const { userCalibrationRunData } = storeToRefs(useUserDataStore());
+const { getGeopackageOptionsList, getObservationalOptionsList } = storeToRefs(useGageStore());
 const { selectedModuleValues, formulationIsCalibratable, moduleProperties } = storeToRefs(useFormulationStore());
 const { loadFormulationTabData, setUserSelection } = useFormulationStore();
 const { tuningParametersAreValid } = storeToRefs(useTuningStore());
