@@ -33,8 +33,8 @@
       </tr>
       <tr>
         <td><i v-if="checkStartEndTimeValues()" class="pi pi-check font-bold checkMark"></i></td>
-        <td data-tab="4" title="Start and End Times" aria-label="Start and End Times" @click="tabClicked">
-          Start and End Times</td>
+        <td data-tab="4" title="Start and Duration Times" aria-label="Start and Duration Times" @click="tabClicked">
+          Start and Duration Times</td>
       </tr>
       <tr>
         <td><i v-if="(checkStartEndTimeValues() || userCalibrationRunData?.parameters_selected) && !userCalibrationRunData?.modules?.includes('LSTM')" class="pi pi-check font-bold checkMark"></i></td>
