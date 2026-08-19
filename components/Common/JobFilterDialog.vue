@@ -184,10 +184,10 @@
     
     <div v-if="props.runningJobInList" class="text-center" style="color: green;">
       <span v-if="props.selectedJobs.length > 0">
-        Auto-refresh for running jobs is paused while jobs are selected — clear selections or click "Refresh List" to update.
+        Auto-refresh paused while jobs selected — click "Refresh List" to update.
       </span>
       <span v-else>
-        List refreshed every {{ refreshTime }} seconds when there are running jobs.
+        Auto-refreshes every {{ refreshTime }} seconds while jobs are running.
       </span>
     </div>
   </div>
