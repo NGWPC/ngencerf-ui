@@ -124,7 +124,7 @@
         </div>
       </div>
 
-      <div v-show="showBulkActions && totalSize > 1">
+      <div v-show="props.showBulkActions?.length > 0 && totalSize > 1">
         <hr class="border-t-2 border-gray-300 my-4">
         <div class="flex gap-2">
           <div :style="`opacity: ${props.selectedJobs.length === 0 ? '50%' : '100%'}`">
@@ -182,9 +182,9 @@
       </div>
     </div>
     
-    <div v-if="props.runningJobInList">
-      <span v-if="deferRefresh">
-        List will not refresh while you have jobs selected. Clear your selections or click "Refresh List" to see the latest.
+    <div v-if="props.runningJobInList" class="text-center" style="color: green;">
+      <span v-if="props.selectedJobs.length > 0">
+        Auto-refresh for running jobs is paused while jobs are selected — clear selections or click "Refresh List" to update.
       </span>
       <span v-else>
         List refreshed every {{ refreshTime }} seconds when there are running jobs.

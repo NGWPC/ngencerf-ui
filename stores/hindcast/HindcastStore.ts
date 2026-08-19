@@ -134,7 +134,6 @@ export const useHindcastStore = defineStore('HindcastStore', () => {
    * @return {void}
    */
   const getHindcastJobs = async (): Promise<any> => {
-    hindcastRuns.value = [];
     let requestBody = {
       limit: hindcastRunListPageSize.value,
       offset: (hindcastRunListCurrentPage.value - 1) * hindcastRunListPageSize.value,
@@ -462,7 +461,6 @@ export const useHindcastStore = defineStore('HindcastStore', () => {
    * Query get_calibration_jobs_for_hindcast endpoint
    */
   const getCalibrationJobsForHindcast = async (): Promise<any> => {
-    calibrationRunsForHindcast.value = [];
     let requestBody = {
       limit: calibrationRunsForHindcastListPageSize.value,
       offset: (calibrationRunsForHindcastListCurrentPage.value - 1) * calibrationRunsForHindcastListPageSize.value,

@@ -64,7 +64,6 @@ export const useVerificationStore = defineStore('VerificationStore', () => {
    * @return {void}
    */
   const getVerificationJobs = async (): Promise<any> => {
-    verificationJobs.value = [];
     let requestBody = {
       limit: verificationRunListPageSize.value,
       offset: (verificationRunListCurrentPage.value - 1) * verificationRunListPageSize.value,
