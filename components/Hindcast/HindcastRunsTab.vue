@@ -24,7 +24,7 @@
           <JobFilterDialog id="JobFilterDialog" job-type="Hindcast" :disable-all="false" 
             :show-modules="false" :show-archived="false"
             :totalSize="hindcastRunListTotalSize" :totalPages="hindcastRunListTotalPages"
-            v-model:currentPage="hindcastRunListCurrentPage"
+            v-model:currentPage="hindcastRunListCurrentPage" :running-job-in-list="runningJobInList"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
             @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
@@ -296,6 +296,7 @@ const onRowDblClick = (event: any) => {
 
 onMounted(async () => {
   isLoading.value = true;
+  hindcastRuns.value = [];
   hindcastJobId.value = undefined;
   calibrationRunForHindcast.value = undefined;
   userCalibrationRunData.value = undefined;
@@ -334,6 +335,13 @@ onMounted(async () => {
 const updateGageList = async() => {
   uiGageList.value = await fetchHindcastGageList();
 }
+
+const runningJobInList = computed(() => {
+  if (hindcastRuns.value?.length) {
+    return hindcastRuns.value.some(run => run.hindcast_status.includes('Submitted') || run.hindcast_status.includes('Running'));
+  }
+  return false;
+})
 
 const onHindcastRowSelect = async (event: DataTableRowClickEvent) => {
   const rowData = event.data as HindcastJob;

@@ -24,7 +24,7 @@
           <JobFilterDialog id="JobFilterDialog" job-type="Forecast" :disable-all="false" 
             :show-modules="false" :show-archived="false"
             :totalSize="forecastRunListTotalSize" :totalPages="forecastRunListTotalPages"
-            v-model:currentPage="forecastRunListCurrentPage"
+            v-model:currentPage="forecastRunListCurrentPage" :running-job-in-list="runningJobInList"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
             @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
@@ -288,6 +288,7 @@ const onRowDblClick = (event: any) => {
 
 onMounted(async () => {
   isLoading.value = true;
+  forecastRuns.value = [];
   forecastJobId.value = undefined;
   calibrationRunForForecast.value = undefined;
   userCalibrationRunData.value = undefined;
@@ -323,6 +324,13 @@ onMounted(async () => {
 const updateGageList = async() => {
   uiGageList.value = await fetchForecastGageList();
 }
+
+const runningJobInList = computed(() => {
+  if (forecastRuns.value?.length) {
+    return forecastRuns.value.some(run => run.forecast_status.includes('Submitted') || run.forecast_status.includes('Running'));
+  }
+  return false;
+})
 
 const onForecastRowSelect = async (event: DataTableRowClickEvent) => {
   const rowData = event.data as ForecastJob;

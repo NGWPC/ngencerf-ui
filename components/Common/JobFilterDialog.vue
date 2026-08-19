@@ -181,6 +181,15 @@
         </div>
       </div>
     </div>
+    
+    <div v-if="props.runningJobInList">
+      <span v-if="deferRefresh">
+        List will not refresh while you have jobs selected. Clear your selections or click "Refresh List" to see the latest.
+      </span>
+      <span v-else>
+        List refreshed every {{ refreshTime }} seconds when there are running jobs.
+      </span>
+    </div>
   </div>
 </template>
 
@@ -278,6 +287,7 @@ interface Props {
   selectedJobs?: any[];
   allJobIds?: number[];
   visibleJobIds?: number[];
+  runningJobInList?: boolean;
   disableAll?: boolean;
   totalSize?: number;
   totalPages?: number;
@@ -300,6 +310,7 @@ const props = withDefaults(defineProps<Props>(), {
   selectedJobs: () => [],
   allJobIds: () => [],
   visibleJobIds: () => [],
+  runningJobInList: false,
   disableAll: false,
   totalSize: 0,
   totalPages: 1,
@@ -415,6 +426,31 @@ const refreshJobList = () => {
   // when changing any filter, reset current page to 1
   emit('update:currentPage', 1);
   emit("RefreshJobList");
+  createRefreshInterval();
+}
+
+const refreshTime = 30;
+const refreshInterval = ref<ReturnType<typeof setInterval>>();
+const deferRefresh = ref<boolean>(false);
+
+const createRefreshInterval = () => {
+  console.log('props.runningJobInList:',props.runningJobInList);
+  if (refreshInterval.value) {
+    clearInterval(refreshInterval.value);
+  }
+  refreshInterval.value = setInterval(() => {
+    console.log('props.runningJobInList:',props.runningJobInList);
+    if (props.runningJobInList) {
+      if (props.selectedJobs.length === 0) {
+        refreshJobList();
+      } else {
+        deferRefresh.value = true;
+      }
+    } else if (refreshInterval.value) {
+      clearInterval(refreshInterval.value);
+      refreshInterval.value = undefined;
+    }
+  }, refreshTime * 1000);
 }
 
 const selectedJobs = ref<any[]>([]);
@@ -452,6 +488,10 @@ const deselectallJobIds = () => {
 
 watch(selectedJobs, (jobs) => {
   emit('update:selectedJobs', jobs)
+  if (selectedJobs.value.length === 0 && deferRefresh.value) {
+    deferRefresh.value = false;
+    refreshJobList();
+  }
 })
 
 const selectedJobIds = computed(() => {
@@ -768,6 +808,8 @@ onMounted(() => {
     nextTick(async () => {
       refreshJobList();
       preFilterList.value = {};
+      // if there is a running job in the list, refresh it every 30 seconds
+      createRefreshInterval();
     });
   }
 })
@@ -775,6 +817,10 @@ onMounted(() => {
 onUnmounted(() => {
   resetFilters(false);
   clearGageList();
+  if (refreshInterval.value) {
+    clearInterval(refreshInterval.value);
+    refreshInterval.value = undefined;
+  }
 })
 
 </script>

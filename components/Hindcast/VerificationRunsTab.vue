@@ -23,7 +23,7 @@
           <JobFilterDialog id="JobFilterDialog" job-type="Verification" :disable-all="false" 
             :show-modules="false" :show-archived="false"
             :totalSize="verificationRunListTotalSize" :totalPages="verificationRunListTotalPages"
-            v-model:currentPage="verificationRunListCurrentPage"
+            v-model:currentPage="verificationRunListCurrentPage" :running-job-in-list="runningJobInList"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
             @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
@@ -218,6 +218,7 @@ const onRowDblClick = (event: any) => {
 
 onMounted(() => {
   isLoading.value = true;
+  verificationJobs.value = [];
 
   hilightTab(HindcastTabs.tab_verificationJobs);
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
@@ -239,6 +240,13 @@ onMounted(() => {
 const updateGageList = async() => {
   uiGageList.value = await fetchVerificationGageList();
 }
+
+const runningJobInList = computed(() => {
+  if (verificationJobs.value?.length) {
+    return verificationJobs.value.some(run => run.status.includes('Submitted') || run.status.includes('Running'));
+  }
+  return false;
+})
 
 const onVerificationRowSelect = async (event: DataTableRowClickEvent) => {
   const rowData = event.data as VerificationJob;

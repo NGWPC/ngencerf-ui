@@ -27,8 +27,8 @@
           <div id="CalTable" class="w-max mx-auto">
             <JobFilterDialog id="JobFilterDialog" 
               :totalSize="calibrationRunListTotalSize" :totalPages="calibrationRunListTotalPages"
-              v-model:currentPage="calibrationRunListCurrentPage" 
-              @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
+              v-model:currentPage="calibrationRunListCurrentPage" :running-job-in-list="runningJobInList"
+              @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()"
               :showBulkActions="showBulkActions" v-model:selected-jobs="selectedCalibrationRuns" 
               :all-job-ids="allCalibrationRunIds" :visible-job-ids="visibleCalibrationRunIds"
               :delete-jobs="deleteCalibrationRun" :archive-jobs="archiveCalibrationRun" :lock-jobs="lockCalibrationRun"
@@ -484,6 +484,13 @@ const updateGageList = async() => {
   uiGageList.value = await fetchGageList();
 }
 
+const runningJobInList = computed(() => {
+  if (userCalibrationJobsListData.value?.length) {
+    return userCalibrationJobsListData.value.some(run => run.status.includes('Submitted') || run.status.includes('Running'));
+  }
+  return false;
+})
+
 const showBulkActions = computed(() => {
   // let JobFilterDialogue know based on our job list what bulk actions to allow
   // always include the placeholder option
@@ -762,7 +769,6 @@ watch(calibrationDownloadJobID, () => {
     calibrationDownloadJobID.value = null;
   }
 });
-
 </script>
 
 <style lang="scss" scoped>
