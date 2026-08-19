@@ -434,12 +434,10 @@ const refreshInterval = ref<ReturnType<typeof setInterval>>();
 const deferRefresh = ref<boolean>(false);
 
 const createRefreshInterval = () => {
-  console.log('props.runningJobInList:',props.runningJobInList);
   if (refreshInterval.value) {
     clearInterval(refreshInterval.value);
   }
   refreshInterval.value = setInterval(() => {
-    console.log('props.runningJobInList:',props.runningJobInList);
     if (props.runningJobInList) {
       if (props.selectedJobs.length === 0) {
         refreshJobList();
