@@ -8,7 +8,7 @@
         <DataTable id="cr-detail-list" :value="computedCalibrationRunDetailDataList" scrollable scroll-height="250px"
           @row-select="onDetailTableRowSelect" @row-unselect="onTableRowUnselect" 
           @row-dblclick="onRowDblClick($event)" @rowContextmenu="onDetailRowContextMenu" table-style="min-width: 50rem"
-          selectionMode="single" class="boxed" ref="calibrationRunDetailTable"
+          selectionMode="single" :metaKeySelection="false" class="boxed" ref="calibrationRunDetailTable"
           v-model:selection="selectedCalibrationByIterationDetailRow"
           :rowClass="( {validation_run_id} ) => validation_run_id > 0 ? 'disabled-row' : ''">
           <ColumnGroup type="header">
@@ -41,7 +41,7 @@
             :model="parameterIteration"></ContextMenu>
           <DataTable class="dtable boxed" :value="computedtuningParametersDataList" scrollable scroll-height="200px"
             @row-select="onParameterTableRowSelect" @row-unselect="onTableRowUnselect" 
-            @row-dblclick="onRowDblClick($event)" @rowContextmenu="onParameterRowContextMenu" selectionMode="single"
+            @row-dblclick="onRowDblClick($event)" @rowContextmenu="onParameterRowContextMenu" selectionMode="single" :metaKeySelection="false"
             ref="tuningParametersTable" v-model:selection="selectedCalibrationByIterationParameterRow"
             :rowClass="( {validation_run_id} ) => validation_run_id > 0 ? 'disabled-row' : ''">
             <ColumnGroup type="header">

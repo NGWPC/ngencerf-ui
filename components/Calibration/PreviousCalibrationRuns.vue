@@ -52,7 +52,7 @@
             <DataTable id="Datatable" :value="userCalibrationJobsListData" 
               scrollable scroll-height="400px" table-style="min-width: 50rem; z-index: 1" scrollY="true"
               v-model:sortField="calibrationRunListSort.field" v-model:sortOrder="calibrationRunListSort.direction"
-              v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="true" dataKey="calibration_run_id" 
+              v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="false" dataKey="calibration_run_id" 
               v-model:contextMenuSelection="contextMenuSelection" contextMenu @rowContextmenu="onRowContextMenu"
               @row-dblclick="onRowDblClick($event)" :rowStyle="rowStyle" >
 
@@ -577,12 +577,12 @@ const onRowDblClick = (e: any) => {
     })
     return;
   }
-  openSelectedCalibrationRun(data)
+  openSelectedCalibrationRun(data);
 }
 
-const openSelectedCalibrationRun = async () => {
+const openSelectedCalibrationRun = async (data: any) => {
   isLoading.value = true;
-  calibrationJobId.value = selectedCalibrationRuns.value[0]?.calibration_run_id;
+  calibrationJobId.value = data.value?.calibration_run_id;
   queryUserCalibrationRunData().then(queryResponse => {
     if (queryResponse?.status === 200) {
       userCalibrationRunData.value = queryResponse?._data;

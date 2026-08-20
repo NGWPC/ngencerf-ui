@@ -24,7 +24,8 @@
           <JobFilterDialog id="JobFilterDialog" job-type="Hindcast" :disable-all="false" 
             :show-modules="false" :show-archived="false"
             :totalSize="hindcastRunListTotalSize" :totalPages="hindcastRunListTotalPages"
-            v-model:currentPage="hindcastRunListCurrentPage" :running-job-in-list="runningJobInList"
+            v-model:currentPage="hindcastRunListCurrentPage" 
+            v-model:selectedJobs="selectedHindcastJobAsArray" :running-job-in-list="runningJobInList"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
             @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
@@ -45,7 +46,7 @@
           <DataTable id="HindcastRuns" :value="hindcastRuns" 
             scrollable scroll-height="400px" table-style="min-width: 50rem"
             v-model:sortField="hindcastRunListSort.field" v-model:sortOrder="hindcastRunListSort.direction"
-            v-model:selection="selectedHindcastJob" selectionMode="single" :rowStyle="rowStyle"
+            v-model:selection="selectedHindcastJob" selectionMode="single" :metaKeySelection="false" :rowStyle="rowStyle"
             @rowSelect="onHindcastRowSelect" @rowUnselect="onHindcastRowUnSelect" @rowContextmenu="onRowContextMenu"
             @row-dblclick="onRowDblClick($event)" class="boxed">
             <Column :pt="ptColumn" field="hindcast_run_id" sortable>
@@ -336,6 +337,13 @@ const updateGageList = async() => {
   uiGageList.value = await fetchHindcastGageList();
 }
 
+const selectedHindcastJobAsArray = computed(() => {
+  if (selectedHindcastJob.value) {
+    return [selectedHindcastJob.value];
+  }
+  return [];
+})
+
 const runningJobInList = computed(() => {
   if (hindcastRuns.value?.length) {
     return hindcastRuns.value.some(run => run.hindcast_status.includes('Submitted') || run.hindcast_status.includes('Running'));
@@ -484,6 +492,7 @@ const toggleMessagesGroup = () => {
  */
 const refreshJobList = async () => {
   isLoading.value = true;
+  selectedHindcastJob.value = undefined;
   await getHindcastJobs();
   isLoading.value = false;
 }
