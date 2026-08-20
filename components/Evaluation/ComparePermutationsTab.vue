@@ -28,7 +28,7 @@
               <ContextMenu :pt="{ root: { id: ' cp-context-menu' } }" class="bg-white" ref="cpContextMenu"
                 :model="cmCompareRun"></ContextMenu>
               <DataTable id="performanceMetricsTable" class="pt-2" :value="performanceMetricsData" fixedHeader=true 
-                  scrollable scroll-height="500px" :multi-sort="true" selectionMode="single"
+                  scrollable scroll-height="500px" :multi-sort="true" selectionMode="single" :metaKeySelection="false"
                   v-model:selection="selectedDataRow" @rowContextmenu="onRowCpContextMenu">
                 <Column v-for="(col, colIndex) in performanceMetricsColumns" :key="colIndex" :header="col.header"
                   :field="col.field"></Column>
@@ -45,7 +45,7 @@
               </Button>
               <div v-if="table.title" class="mt-2 mb-1 float-left tableTitle font-bold">{{ table.title }}</div>
               <DataTable class="clear-both" :id="'plotTableHTML-' + index " :value="table.table_data" fixedHeader=true 
-                  scrollable scroll-height="500px" :multi-sort="true" selectionMode="single"
+                  scrollable scroll-height="500px" :multi-sort="true" selectionMode="single" :metaKeySelection="false"
                   v-model:selection="selectedDataRow" @rowContextmenu="onRowCpContextMenu">
                   <Column v-for="col of table.columns" :key="col.value" :field="col.value" :header="col.header"
                       :sortable="true" :pt="col.value === 'job_name' ? ptColumnText : (col.value === 'calibration_run_id' ? ptColumnId : ptColumn)"></Column>

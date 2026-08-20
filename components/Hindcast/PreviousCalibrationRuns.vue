@@ -50,7 +50,7 @@
           <DataTable id="CalibrationRunForHindcastTable" :value="calibrationRunsForHindcast" 
             scrollable scroll-height="400px" :rowStyle="rowStyle" table-style="min-width: 50rem"
             v-model:sortField="calibrationRunsForHindcastListSort.field" v-model:sortOrder="calibrationRunsForHindcastListSort.direction"
-            v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="true" 
+            v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="false" 
             v-model:contextMenuSelection="contextMenuSelection" contextMenu @rowContextmenu="onRowContextMenu"
             @rowSelect="onCalibrationRunForHindcastRowSelect" @rowUnselect="onCalibrationRunForHindcastRowUnSelect"
             @row-dblclick="onRowDblClick($event)" dataKey="calibration_run_id" class="boxed">
@@ -441,6 +441,7 @@ watch(calibrationRunsForHindcastListCurrentPage, () => {
 
 const refreshJobList = async () => {
   isLoading.value = true;
+  selectedCalibrationRuns.value = undefined;
   await getCalibrationJobsForHindcast();
   visibleCalibrationRunIds.value = calibrationRunsForHindcast.value.map(job => job.calibration_run_id);
   if (calibrationRunsForHindcastListTotalPages.value > 1) {

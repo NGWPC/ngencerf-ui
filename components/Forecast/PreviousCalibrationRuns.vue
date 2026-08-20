@@ -50,7 +50,7 @@
           <DataTable id="CalibrationRunForForecastTable" :value="calibrationRunsForForecast" 
             scrollable scroll-height="400px" :rowStyle="rowStyle" table-style="min-width: 50rem"
             v-model:sortField="calibrationRunsForForecastListSort.field" v-model:sortOrder="calibrationRunsForForecastListSort.direction"
-            v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="true" 
+            v-model:selection="selectedCalibrationRuns" selectionMode="multiple" :metaKeySelection="false" 
             v-model:contextMenuSelection="contextMenuSelection" contextMenu @rowContextmenu="onRowContextMenu"
             @rowSelect="onCalibrationRunForForecastRowSelect" @rowUnselect="onCalibrationRunForForecastRowUnSelect"
             @row-dblclick="onRowDblClick($event)" dataKey="calibration_run_id" class="boxed">
@@ -441,6 +441,7 @@ watch(calibrationRunsForForecastListCurrentPage, () => {
 
 const refreshJobList = async () => {
   isLoading.value = true;
+  selectedCalibrationRuns.value = undefined;
   await getCalibrationJobsForForecast();
   visibleCalibrationRunIds.value = calibrationRunsForForecast.value.map(job => job.calibration_run_id);
   if (calibrationRunsForForecastListTotalPages.value > 1) {

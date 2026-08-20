@@ -23,7 +23,8 @@
           <JobFilterDialog id="JobFilterDialog" job-type="Verification" :disable-all="false" 
             :show-modules="false" :show-archived="false"
             :totalSize="verificationRunListTotalSize" :totalPages="verificationRunListTotalPages"
-            v-model:currentPage="verificationRunListCurrentPage"
+            v-model:currentPage="verificationRunListCurrentPage" 
+            v-model:selectedJobs="selectedVerificationJobAsArray" :running-job-in-list="runningJobInList"
             @RefreshJobList="refreshJobList()" @ResetFilters="resetFilters()" 
             @UpdateGageList="updateGageList()" ref="jobFilterRef" />
 
@@ -44,7 +45,7 @@
           <DataTable id="VerificationJobTable" table-style="min-width: 50rem" scrollable scroll-height="400px"
             :value="verificationJobs"
             v-model:sortField="verificationRunListSort.field" v-model:sortOrder="verificationRunListSort.direction"
-            v-model:selection="selectedVerificationJob" selectionMode="single" :rowStyle="rowStyle"
+            v-model:selection="selectedVerificationJob" selectionMode="single" :metaKeySelection="false" :rowStyle="rowStyle"
             @rowSelect="onVerificationRowSelect" @rowUnselect="onVerificationRowUnSelect"
             @rowContextmenu="onRowContextMenu" @row-dblclick="onRowDblClick($event)"class="boxed">
             <Column :pt="ptColumn" field="verification_run_id" sortable>
@@ -193,6 +194,7 @@ watch(verificationRunListCurrentPage, () => {
  */
 const refreshJobList = async () => {
   isLoading.value = true;
+  selectedVerificationJob.value = undefined;
   await getVerificationJobs();
   isLoading.value = false;
 }
@@ -218,6 +220,7 @@ const onRowDblClick = (event: any) => {
 
 onMounted(() => {
   isLoading.value = true;
+  verificationJobs.value = [];
 
   hilightTab(HindcastTabs.tab_verificationJobs);
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
@@ -239,6 +242,20 @@ onMounted(() => {
 const updateGageList = async() => {
   uiGageList.value = await fetchVerificationGageList();
 }
+
+const selectedVerificationJobAsArray = computed(() => {
+  if (selectedVerificationJob.value) {
+    return [selectedVerificationJob.value];
+  }
+  return [];
+})
+
+const runningJobInList = computed(() => {
+  if (verificationJobs.value?.length) {
+    return verificationJobs.value.some(run => run.status.includes('Submitted') || run.status.includes('Running'));
+  }
+  return false;
+})
 
 const onVerificationRowSelect = async (event: DataTableRowClickEvent) => {
   const rowData = event.data as VerificationJob;
