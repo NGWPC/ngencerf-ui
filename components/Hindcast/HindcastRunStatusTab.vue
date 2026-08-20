@@ -323,7 +323,7 @@ onMounted(async () => {
   
   // get calibration job data if we don't already have it
   calibrationJobId.value = calibrationRunForHindcast?.value?.calibration_run_id;
-  if (!userCalibrationRunData.value) {
+  if (!userCalibrationRunData.value || userCalibrationRunData?.value?.calibration_run_id !== calibrationJobId.value) {
     isLoading.value = true;
     await fetchUserCalibrationRunData();
     isLoading.value = false;
