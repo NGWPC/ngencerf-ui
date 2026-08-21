@@ -4,7 +4,7 @@
         <div id="TopBar">&nbsp;</div>
         <div class="grid grid-cols-12 gap-1" style="height: 80px">
             <div v-if="isUserLoggedIn()" id="PgmName" class="col-span-2 mt-6">
-                <NuxtLink id="MainMenuLandingPage" to="LandingPage">
+                <NuxtLink id="MainMenuLandingPage" to="LandingPage" :class="{disabled: isLoading}">
                   ngenCERF
                 </NuxtLink>
             </div>
@@ -14,25 +14,25 @@
             <div id="Col2" class="col-span-8">
 
                 <ul v-show="userLoggedIn && location.name !== 'Login'" id="MainMenu">
-                    <li aria-label="Calibration" title="Calibration">
+                    <li aria-label="Calibration" title="Calibration" :class="{disabled: isLoading}">
                       <NuxtLink id="MainMenuCalibration" :class="location.name === 'Calibration' ? 'isActive' : ''"
                         to="calibration">
                         Calibration
                       </NuxtLink>
                     </li>
-                    <li aria-label="Evaluation" title="Evaluation">
+                    <li aria-label="Evaluation" title="Evaluation" :class="{disabled: isLoading}">
                       <NuxtLink id="MainMenuEvaluation" :class="location.name === 'Evaluation' ? 'isActive' : ''"
                         to="evaluation">
                         Evaluation
                       </NuxtLink>
                     </li>
-                    <li aria-label="Forecast" title="Forecast">
+                    <li aria-label="Forecast" title="Forecast" :class="{disabled: isLoading}">
                       <NuxtLink id="MainMenuForecast" :class="location.name === 'Forecast' ? 'isActive' : ''"
                         to="forecast">
                         Forecast
                       </NuxtLink>
                     </li>
-                    <li aria-label="Hindcast" title="Hindcast">
+                    <li aria-label="Hindcast" title="Hindcast" :class="{disabled: isLoading}">
                       <NuxtLink id="MainMenuHindcast" :class="location.name === 'Hindcast' ? 'isActive' : ''"
                         to="hindcast">
                         Hindcast
@@ -51,7 +51,8 @@
 
                     <div class="col-span-1">
                         <div v-show="!uMenu && userLoggedIn && location.name !== 'Login'" id="UserCircle"
-                            class="float-right userInitials" @contextmenu="onImageRightClick" @click="onImageRightClick"
+                            class="float-right userInitials" :class="{disabled: isLoading}"
+                            @contextmenu="onImageRightClick" @click="onImageRightClick"
                             aria-label="User Menu" title="User Menu">
                             {{ userInitials }}<i class="pi pi-angle-down"></i>
                             <ContextMenu ref="userContextMenu" :model="userItems" :autoZIndex="true" />
@@ -255,7 +256,7 @@ const props = defineProps({
   }
 });
 
-const { popupActive } = storeToRefs(generalStore());
+const { isLoading, popupActive } = storeToRefs(generalStore());
 
 const emit = defineEmits(["logoutEvent"]);
 
@@ -613,6 +614,10 @@ const showTabNavDialog = (body: string[]) => {
             color: #fff;
             background-color: global.$ngwcp_primary1;
         }
+    }
+    
+    li.disabled {
+        opacity: 0.5;
     }
 }
 
