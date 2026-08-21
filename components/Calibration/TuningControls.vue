@@ -339,7 +339,6 @@ import { makeProtectedApiCall } from '@/composables/UserAuth';
 import { useBackendConfig } from "@/composables/UseBackendConfig";
 import { ifEDSErrorsExist } from "@/utils/TuningControlsHelpers";
 import { formatDateForRunOnString } from "@/utils/TimeHelpers";
-import { hilightTab } from '@/composables/TabHilight';
 
 import FileUploadDialog from "../Common/FileUploadDialog.vue";
 
@@ -548,10 +547,6 @@ onMounted(async () => {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'No Calibration Job ID', detail: 'No calibration job ID found. Please go back to the Calibration Runs tab and select a job.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
   }
-  
-  nextTick(() => {
-    hilightTab(CalibrationTabs.tab_tuningControls);
-  });
 
   isLoading.value = false;
 });

@@ -107,7 +107,6 @@ import LogDisplay from "../Common/LogDisplay.vue";
 
 import type { ToastMessageOptions } from "primevue/toast";
 import { ToastTimeout } from "@/composables/NgencerfEnums";
-import { hilightTab } from '@/composables/TabHilight';
 import { useDialog } from 'primevue/usedialog';
 import { storeToRefs } from "pinia";
 
@@ -174,7 +173,6 @@ const props = defineProps({
 const isMounted = ref(false);
 
 onMounted(async() => {
-  hilightTab(HindcastTabs.tab_verificationRunStatus);
   isMounted.value = true;
 
   clearInterval(verificationStatusCheckingInterval.value);

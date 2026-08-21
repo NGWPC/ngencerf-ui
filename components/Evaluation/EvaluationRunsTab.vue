@@ -334,7 +334,6 @@ import JobFilterDialog from "@/components/Common/JobFilterDialog.vue"
 import Paging from "../Common/Paging.vue";
 
 import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
-import { hilightTab } from '@/composables/TabHilight';
 import { EvaluationTabs } from "@/composables/NgencerfEnums";
 
 const { 
@@ -472,7 +471,6 @@ const selectedCalibrationValidationRun = ref<CalibrationValidationJobData>();
 const jobName = "Job Name";
 
 onMounted(async() => {
-  hilightTab(EvaluationTabs.tab_calibrationRuns);
   includeArchivedJobs.value = false;
   resetFilters();
 
@@ -569,6 +567,7 @@ const refreshJobList = async () => {
   isLoading.value = true;
   // changing filters clears previous selections
   selectedCalibrationRuns.value = undefined;
+  calibrationJobId.value = undefined;
   await fetchUserValidatedCalibrationJobsListData();
   visibleCalibrationRunIds.value = userEvaluationRunListData.value.map(job => job.calibration_run_id);
   if (evaluationRunListTotalPages.value > 1) {

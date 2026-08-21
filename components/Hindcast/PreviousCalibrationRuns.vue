@@ -223,7 +223,6 @@ import JobFilterDialog from "@/components/Common/JobFilterDialog.vue"
 import Paging from "../Common/Paging.vue";
 
 import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
-import { hilightTab } from '@/composables/TabHilight';
 import { HindcastTabs } from "@/composables/NgencerfEnums";
 
 const { 
@@ -402,8 +401,7 @@ onMounted(async () => {
 
   //reset Run/Status store in case we have running intervals
   hardResetHindcastStore();
-
-  hilightTab(HindcastTabs.tab_calibrationRuns);
+  
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
   if (ele) { ele.scrollTo(0, 0); }
 

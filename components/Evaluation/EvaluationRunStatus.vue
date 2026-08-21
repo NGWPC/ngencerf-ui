@@ -148,7 +148,6 @@ import { useEvaluationSupplementalDataStore } from "@/stores/evaluation/Evaluati
 import { useLogStore } from '@/stores/common/LogStore';
 
 import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
-import { hilightTab } from '@/composables/TabHilight';
 import { useDialog } from 'primevue/usedialog';
 
 const toast = useToast();
@@ -184,7 +183,6 @@ const {
 const isMounted = ref(false);
 
 onMounted(async () => {
-  hilightTab(EvaluationTabs.tab_runStatus);
   isMounted.value = true;
 
   runStatusTabVisible.value = true;

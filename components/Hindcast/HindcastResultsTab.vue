@@ -183,8 +183,6 @@ import { useUserDataStore } from '@/stores/common/UserDataStore';
 import { useHindcastStore } from '@/stores/hindcast/HindcastStore';
 import { useLogStore } from '@/stores/common/LogStore';
 
-import { hilightTab } from '@/composables/TabHilight';
-
 import { convertISOStringOrDateToDateTime, formatDateTicks } from '@/utils/TimeHelpers';
 import * as Plot from "@observablehq/plot";
 import { normalizeStyle } from 'vue';
@@ -294,8 +292,6 @@ onMounted(async () => {
   toast.removeAllGroups();
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
   if (ele) { ele.scrollTo(0, 0); }
-
-  hilightTab(HindcastTabs.tab_hindcastResults);
   
   await populateLogListOptions([{ name: 'hindcast plot', display_name: 'Streamflow Time Series' }]);
   selectedLogCategory.value = 'hindcast plot';

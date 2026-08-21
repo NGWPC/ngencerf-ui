@@ -225,7 +225,6 @@ import { generalStore } from "~/stores/common/GeneralStore";
 import MoveNextPrevDialog from "../Common/MoveNextPrevDialog.vue";
 
 import { formatDateForRunOnString } from "@/utils/TimeHelpers";
-import { hilightTab } from '@/composables/TabHilight';
 import { isCalibrationJobStatusSavedOrReady } from "@/utils/CommonHelpers";
 
 const dialog = useDialog();
@@ -307,10 +306,6 @@ onMounted(async() => {
     showMetricThresholdEvent.value = true;
     uiThresholdEvent.value = userCalibrationRunData.value?.threshold_event;
   }
-
-  nextTick(() => {
-    hilightTab(CalibrationTabs.tab_optimizationMetrics);
-  });
 
   isLoading.value = false;
 })

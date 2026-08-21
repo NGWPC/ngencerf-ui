@@ -78,8 +78,6 @@ import { useUserDataStore } from '@/stores/common/UserDataStore';
 
 import MessagesGroup from "../Common/MessagesGroup.vue";
 
-import { hilightTab } from '@/composables/TabHilight';
-
 import * as Plot from "@observablehq/plot";
 
 const evaluationCalibrationRunStore = useEvaluationCalibrationRunStore();
@@ -153,8 +151,6 @@ onMounted(() => {
     isComparePermutationsLoading.value = true;
     selectedPlotName.value = '';
     nextTick(async () => {
-        hilightTab(EvaluationTabs.tab_compare);
-
         const response = await queryGetPlotNamesForComparison();
         if (response.ok) {
           plotNames.value = response;
