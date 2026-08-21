@@ -213,7 +213,9 @@ const {
   hindcastRunListEndRow,
   hindcastRunListSort,
   selectedHindcastJob,
-  hindcastJobStatus
+  hindcastJobStatus,
+  intervalCycle,
+  numIterations
 } = storeToRefs(HindcastStore);
 
 const {
@@ -304,6 +306,8 @@ onMounted(async () => {
   selectedHindcastJob.value = undefined;
   hindcastJobStatus.value = undefined; 
   hindcastRunListCurrentPage.value = 1;
+  intervalCycle.value = undefined;
+  numIterations.value = undefined;
 
   //reset Run/Status store in case we have running intervals
   hardResetHindcastStore();
