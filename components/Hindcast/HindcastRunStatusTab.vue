@@ -575,6 +575,7 @@ onUnmounted(() => {
   isMounted.value = false;
   runButtonDisabled.value = true;
   cancelButtonDisabled.value = true;
+  hardResetHindcastStore();
   logListOptions.value = [];
   hindcastJobStatus.value = undefined;
   coldStartJobStatus.value = undefined;

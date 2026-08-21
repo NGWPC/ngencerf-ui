@@ -750,17 +750,10 @@ export const useHindcastStore = defineStore('HindcastStore', () => {
    * Hard Reset Hindcast Store
    */
   const hardResetHindcastStore = (): void => {
-    hindcastJobId.value = undefined;
-    coldStartDate.value = undefined;
-    cycleDate.value = undefined;
-    coldStartJobId.value = undefined;
-    intervalCycle.value = undefined;
-    numIterations.value = undefined;
     hindcastJobStatus.value = "";
     coldStartJobStatus.value = "";
     elapsedTime.value = undefined;
     submitTime.value = undefined;
-    hindcastPlot.value = undefined;
 
     if (elapsedTimeIntervalId.value) {
       clearInterval(elapsedTimeIntervalId.value);
