@@ -103,7 +103,7 @@
           </div>
           <div class="pl-5" style="width: 100%;">
             <span v-for="failure_message in failureMessages">
-              {{ failure_message.message }}<br/>
+              {{ failure_message }}<br/>
             </span>
           </div>
         </div>
@@ -480,7 +480,12 @@ onMounted(async () => {
   });
   if (userCalibrationRunData?.value && getStatusResponse.status === 200) {
     userCalibrationRunData.value.status = getStatusResponse._data.status;
-    failureMessages.value = getStatusResponse._data.failure_messages ?? undefined;
+    if (getStatusResponse._data?.failure_messages) {
+      failureMessages.value = getStatusResponse._data.failure_messages.flatMap(failure_message => [
+        ...(failure_message.message ? [failure_message.message] : []),
+        ...(failure_message.errors ?? [])
+      ]);
+    }
     if (getStatusResponse._data.warnings) {
       toast.removeAllGroups();
       getStatusResponse._data.warnings.forEach((err: any) => {
@@ -590,7 +595,12 @@ const startRun = async () => {
       if (userCalibrationRunData?.value?.calibration_run_id === runCalibrationResponse?._data?.calibration_run_id) {
         if (runCalibrationResponse?._data?.status) {
           userCalibrationRunData.value.status = runCalibrationResponse?._data.status;
-          failureMessages.value = runCalibrationResponse._data.failure_messages ?? undefined;
+          if (runCalibrationResponse._data?.failure_messages) {
+            failureMessages.value = runCalibrationResponse._data.failure_messages.flatMap(failure_message => [
+              ...(failure_message.message ? [failure_message.message] : []),
+              ...(failure_message.errors ?? [])
+            ]);
+          }
         } else {
           const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: 'Could not get Calibration status from server', life: ToastTimeout.timeoutError };
           toast.add(tMsg); addToastRecord(tMsg);
@@ -620,7 +630,12 @@ const startRun = async () => {
       
       if (getStatusResponse?._data?.status) {
         userCalibrationRunData.value.status = getStatusResponse._data.status;
-        failureMessages.value = getStatusResponse._data.failure_messages ?? undefined;
+        if (getStatusResponse._data?.failure_messages) {
+          failureMessages.value = getStatusResponse._data.failure_messages.flatMap(failure_message => [
+            ...(failure_message.message ? [failure_message.message] : []),
+            ...(failure_message.errors ?? [])
+          ]);
+        }
       } else {
         const errorMessages: string[] = useApiErrorResponsePreprocess(getStatusResponse);
         errorMessages.forEach((msg: string) => {
@@ -780,7 +795,12 @@ watch(overallCalibrationValidationStatus, async (newCalibrationStatus, oldCalibr
               }
             }
             userCalibrationRunData.value.status = getStatusResponse._data.status;
-            failureMessages.value = getStatusResponse._data.failure_messages && undefined;
+            if (getStatusResponse._data?.failure_messages) {
+              failureMessages.value = getStatusResponse._data.failure_messages.flatMap(failure_message => [
+                ...(failure_message.message ? [failure_message.message] : []),
+                ...(failure_message.errors ?? [])
+              ]);
+            }
           } else {
             clearInterval(calibrationStatusIntervalId.value);
             const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Unable to get Calibration Job Status', life: ToastTimeout.timeoutWarn };
@@ -1105,6 +1125,7 @@ onUnmounted(() => {
   validationBestStatus.value = undefined;
   validControlAndValidBestStatus.value = undefined;
   submitTimeDate.value = undefined;
+  failureMessages.value = undefined;
   clearInterval(elapsedTimeIntervalId.value);
   clearInterval(calibrationStatusIntervalId.value);
   clearInterval(validationsStatusIntervalId.value);

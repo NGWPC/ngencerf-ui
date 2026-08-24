@@ -247,7 +247,12 @@ export const useHindcastStore = defineStore('HindcastStore', () => {
         hindcastConfigurationName.value = getStatusResponse?._data?.configuration;
         hindcastJobStatus.value = getStatusResponse?._data?.status;
         coldStartJobStatus.value = getStatusResponse?._data?.cold_start_run?.status;
-        failureMessages.value = getStatusResponse?._data?.failure_messages;
+        if (getStatusResponse._data?.failure_messages) {
+          failureMessages.value = getStatusResponse._data.failure_messages.flatMap(failure_message => [
+            ...(failure_message.message ? [failure_message.message] : []),
+            ...(failure_message.errors ?? [])
+          ]);
+        }
 
         if (!cycleDate.value && getStatusResponse?._data?.cycle_date) {
           cycleDate.value = getStatusResponse._data.cycle_date;

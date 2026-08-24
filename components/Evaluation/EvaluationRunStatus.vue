@@ -109,7 +109,7 @@
         </div>
         <div class="pl-5" style="width: 100%;">
           <span v-for="failure_message in failureMessages">
-            {{ failure_message.message }}<br/>
+            {{ failure_message }}<br/>
           </span>
         </div>
       </div>
@@ -228,7 +228,12 @@ const startRun = async () => {
         return;
       }
       validationStatus.value = response?._data?.status;
-      failureMessages.value = response?._data?.failure_messages ?? undefined;
+      if (response._data?.failure_messages) {
+        failureMessages.value = response._data.failure_messages.flatMap(failure_message => [
+          ...(failure_message.message ? [failure_message.message] : []),
+          ...(failure_message.errors ?? [])
+        ]);
+      }
       iterationValidationRunId.value = displayValidationId.value = response?._data.validation_run_id;
       startTime.value = response?._data?.submit_date;
       populateLogListOptions();
@@ -282,7 +287,12 @@ const cancelRun = async () => {
   executeCancelIterationValidationRun().then(response => {
     if (response.status === 200) {
       validationStatus.value = response?._data.status;
-      failureMessages.value = response?._data?.failure_messages ?? undefined;
+      if (response._data?.failure_messages) {
+        failureMessages.value = response._data.failure_messages.flatMap(failure_message => [
+          ...(failure_message.message ? [failure_message.message] : []),
+          ...(failure_message.errors ?? [])
+        ]);
+      }
       clearInterval(validationStatusCheckingIntervalId.value);
       clearInterval(validationRunningTimeIntervalId.value);
       validationStatusCheckingIntervalId.value = undefined;

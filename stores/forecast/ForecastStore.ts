@@ -245,7 +245,12 @@ export const useForecastStore = defineStore('ForecastStore', () => {
         forecastConfigurationName.value = getStatusResponse?._data?.configuration;
         forecastJobStatus.value = getStatusResponse?._data?.status;
         coldStartJobStatus.value = getStatusResponse?._data?.cold_start_run?.status;
-        failureMessages.value = getStatusResponse?._data?.failure_messages;
+        if (getStatusResponse._data?.failure_messages) {
+          failureMessages.value = getStatusResponse._data.failure_messages.flatMap(failure_message => [
+            ...(failure_message.message ? [failure_message.message] : []),
+            ...(failure_message.errors ?? [])
+          ]);
+        }
 
         if (getStatusResponse?._data?.cold_start_run?.submit_date) {
           submitTimeDate.value = new Date(getStatusResponse?._data?.cold_start_run.submit_date as string);
