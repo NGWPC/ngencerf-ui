@@ -187,6 +187,9 @@ onUnmounted(() => {
   verificationPlotNames.value = [];
   verificationPlotFileUrl.value = undefined;
   logListOptions.value = [];
+  elapsedTime.value = undefined;
+  submitTimeDate.value = undefined;
+  submitTime.value = undefined;
   resetUserLogRefs();
 })
 
