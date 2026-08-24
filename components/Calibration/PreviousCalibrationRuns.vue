@@ -562,6 +562,7 @@ const binaryValueBodyTemplate = (rowData: any) => {
 };
 
 const onRowDblClick = (e: any) => {
+  isLoading.value = true;
   const data = ref<any>();
   data.value = e.data;
   if (data.value.is_archived) {
