@@ -92,8 +92,6 @@ import { useEvaluationAltIterationStore } from '@/stores/evaluation/EvaluationAl
 import { generalStore } from '@/stores/common/GeneralStore';
 import { useEvaluationRunStatusStore } from '@/stores/evaluation/EvaluationRunStatusStore';
 
-import { hilightTab } from '@/composables/TabHilight';
-
 const { addToastRecord } = generalStore();
 const toast = useToast();
 
@@ -139,8 +137,6 @@ const parameterContextMenu = ref(); // parameter context menu
 const parameterIteration = ref<DataTableContextMenuOption[]>([]);
 
 onMounted(() => {
-  hilightTab(EvaluationTabs.tab_selectAltIteration);
-
   fetchUserCalibrationRunData();
   
   hardResetEvaluationRunStatusStore();

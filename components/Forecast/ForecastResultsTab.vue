@@ -171,8 +171,6 @@ import { useUserDataStore } from '@/stores/common/UserDataStore';
 import { useForecastStore } from '@/stores/forecast/ForecastStore';
 import { useLogStore } from '@/stores/common/LogStore';
 
-import { hilightTab } from '@/composables/TabHilight';
-
 import { convertISOStringOrDateToDateTime, formatDateTicks } from '@/utils/TimeHelpers';
 import * as Plot from "@observablehq/plot";
 
@@ -274,8 +272,6 @@ onMounted(async () => {
   toast.removeAllGroups();
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
   if (ele) { ele.scrollTo(0, 0); }
-
-  hilightTab(ForecastTabs.tab_forecastResults);
   
   await populateLogListOptions([{ name: 'forecast plot', display_name: 'Streamflow Time Series' }]);
   selectedLogCategory.value = 'forecast plot';

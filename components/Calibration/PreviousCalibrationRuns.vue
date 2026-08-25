@@ -306,8 +306,6 @@ const {
   getCalibrationJobZip 
 } = useCalibrationJobStore();
 
-import { hilightTab } from '@/composables/TabHilight';
-
 const props = defineProps({
   callGoToTab: {
     type: Function,
@@ -422,8 +420,6 @@ const buildContextMenu = computed(() => {
 
 onMounted(async () => {
   if (getMenuIndex() === 1) { // Prevents calling get_calibration_jobs if we are not on the Calibration menu
-    hilightTab(CalibrationTabs.tab_calibrationRuns);
-
     resetFilters();
 
     selectedBulkJobAction.value = 0;
@@ -566,6 +562,7 @@ const binaryValueBodyTemplate = (rowData: any) => {
 };
 
 const onRowDblClick = (e: any) => {
+  isLoading.value = true;
   const data = ref<any>();
   data.value = e.data;
   if (data.value.is_archived) {

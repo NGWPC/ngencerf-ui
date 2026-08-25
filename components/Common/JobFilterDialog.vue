@@ -550,7 +550,7 @@ const updateGageList = () => {
 
 const showMultiOps = ref<boolean>(false);
 const disableAll = computed(() => {
-  return props.disableAll || showMultiOps.value;
+  return props.disableAll || isLoading.value || showMultiOps.value;
 })
 
 const actionType = ref<number>()

@@ -177,7 +177,6 @@ import FileUploadDialog from "../Common/FileUploadDialog.vue";
 
 import { isCalibrationJobStatusSavedOrReady } from "@/utils/CommonHelpers";
 import { formatDateForRunOnString } from "@/utils/TimeHelpers";
-import { hilightTab } from '@/composables/TabHilight';
 import {
   useProcessCalibrationGageSavedResponse, useApiErrorResponsePreprocess,
   useApiResponseToastSeverityCode, useApiResponseToastSeverityLife
@@ -265,7 +264,6 @@ onMounted(async() => {
     await loadGageTabStaticData();
   }
   nextTick(() => {
-    hilightTab(CalibrationTabs.tab_headwaterBasinGage);
     toast.removeAllGroups();
     let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
     if (ele) { ele.scrollTo(0, 0); }

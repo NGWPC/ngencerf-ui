@@ -190,7 +190,6 @@ import { generalStore } from "@/stores/common/GeneralStore";
 import { useUserDataStore } from "@/stores/common/UserDataStore";
 
 import { formatISOStringOrDateToYYYYMMDDHHMM } from '@/utils/TimeHelpers';
-import { hilightTab } from '@/composables/TabHilight';
 
 import type { DataTableRowClickEvent } from "primevue/datatable";
 import MessagesGroup from "@/components/Common/MessagesGroup.vue";
@@ -314,8 +313,7 @@ onMounted(async () => {
 
   //reset any previously selected verification data
   resetSelectedVerificationJobData();
-
-  hilightTab(HindcastTabs.tab_hindcastRuns);
+  
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
   if (ele) { ele.scrollTo(0, 0); }
 

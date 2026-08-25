@@ -132,10 +132,7 @@ const {
 const verificationPlotDefault = ref<string>('Select an option');
 const verificationPlotFileUrl = ref<string | undefined>();
 
-import { hilightTab } from '@/composables/TabHilight';
 onMounted(async() => {
-  hilightTab(HindcastTabs.tab_verificationResults);
-
   getVerificationStatus().then((response) => {
     if ( response._data.status ) {
       verificationJobStatus.value = response._data.status;

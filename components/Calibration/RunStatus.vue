@@ -262,8 +262,6 @@ import { ValidationPlotNames } from "@/composables/NgencerfEnums";
 import { isCalibrationJobStatusSavedOrReady, isValidDate, isNotNullOrUndefined } from '@/utils/CommonHelpers';
 import { formatDateForRunOnString, calculateElapsedTime } from '@/utils/TimeHelpers';
 
-import { hilightTab } from '@/composables/TabHilight';
-
 const userDataStore = useUserDataStore();
 
 const toast = useToast();
@@ -496,7 +494,6 @@ onMounted(async () => {
   validationBestAchieved.value.isBest = false;
 
   nextTick(async () => {
-    hilightTab(CalibrationTabs.tab_runStatus);
     if (userCalibrationRunData.value) {
       stopCriteria.value = userCalibrationRunData.value?.stop_criteria;
 

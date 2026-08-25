@@ -277,7 +277,7 @@
           <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
             <div class="col-span-1 mr-6 h-8" @click="saveTuningData()">
               <Button class="font-normal ngenButtonDiv-green" title="Save" aria-label="Save Button"
-                :disabled="isLoading || tuningStore_data_loading">
+                :disabled="isLoading">
                 Save
               </Button>
             </div>
@@ -290,7 +290,7 @@
           <span v-if="userCalibrationRunData && isCalibrationJobStatusSavedOrReady(userCalibrationRunData.status)">
             <div class="col-span-1 mr-3">
               <Button v-if="tuningDataHasChanged || calibratableParametersHaveChanged" class="ngenButtonDiv-yellow" title="Revert All Changes"
-                @click="restoreTab()" aria-label="Revert All Changes" :disabled="isLoading || tuningStore_data_loading">Revert</Button>
+                @click="restoreTab()" aria-label="Revert All Changes" :disabled="isLoading">Revert</Button>
             </div>
           </span>
           <span v-else>
@@ -299,18 +299,18 @@
           <div class="col-span-4">&nbsp;</div>
           <div class="col-span-1">
             <Button class="ngenButtonDiv ml-6 font-normal h-8 float-right" title="Previous Tab Button"
-              aria-label="Previous Tab Button" @click="goPrevTab()" :disabled="isLoading || tuningStore_data_loading">Prev</Button>
+              aria-label="Previous Tab Button" @click="goPrevTab()" :disabled="isLoading">Prev</Button>
           </div>
           <div class="col-span-1 mr-4">
             <Button class="ngenButtonDiv ml-6 font-normal h-8" title="Next Tab Button" aria-label="Next Tab Button"
-              @click="goNextTab()" :disabled="isLoading || tuningStore_data_loading">Next</Button>
+              @click="goNextTab()" :disabled="isLoading">Next</Button>
           </div>
         </div>
       </div>
     </div>
   </div>
   <DynamicDialog />
-  <div class="waitgif" v-if="isLoading || tuningStore_data_loading">
+  <div class="waitgif" v-if="isLoading">
     <img alt="Please wait..." src="@/assets/styles/img/wait.gif" />
   </div>
 </template>
@@ -339,7 +339,6 @@ import { makeProtectedApiCall } from '@/composables/UserAuth';
 import { useBackendConfig } from "@/composables/UseBackendConfig";
 import { ifEDSErrorsExist } from "@/utils/TuningControlsHelpers";
 import { formatDateForRunOnString } from "@/utils/TimeHelpers";
-import { hilightTab } from '@/composables/TabHilight';
 
 import FileUploadDialog from "../Common/FileUploadDialog.vue";
 
@@ -548,10 +547,6 @@ onMounted(async () => {
     const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'No Calibration Job ID', detail: 'No calibration job ID found. Please go back to the Calibration Runs tab and select a job.', life: ToastTimeout.timeoutWarn };
     toast.add(tMsg); addToastRecord(tMsg);
   }
-  
-  nextTick(() => {
-    hilightTab(CalibrationTabs.tab_tuningControls);
-  });
 
   isLoading.value = false;
 });
@@ -607,6 +602,10 @@ const handleCalSimStartUpdate = (value: any) => {
   if (!value) return;
   calSimStartTime.value = DateTime.fromJSDate(normalizeToUtcMidnight(value), { zone: 'utc' });
 };
+
+watch(() => tuningStore_data_loading.value, (loading_status) => {
+  isLoading.value = loading_status;
+});
 
 watch([calSimStartTime, warmupDuration, calibrationDuration, validationWindowGap, validationWindow, validationDuration], (newValues, oldValues) => {
   if (
