@@ -56,7 +56,7 @@
                     <th scope="row" class="text-right"><label for="DisplayOptions">Display</label></th>
                     <td class="pl-3">
                       <Select id="DisplayOptions" class="p-select" v-model="selectedPlotName" 
-                        :options="plotList" option-label="name" optionValue="name">
+                        :options="plotList" option-label="display_name" optionValue="name">
                       </Select>
                     </td>
                   </tr>
@@ -347,7 +347,7 @@ const populatePlotAndLogListOptions = async (include_plots: boolean=true) => {
     userCalibrationRunData?.value?.calibration_run_id > 0 &&
     !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.value?.status)
   ) {
-    const nextPlotList = [{ name: plotListDefault.value, display_name: '' }];
+    const nextPlotList = [{ name: '', display_name: plotListDefault.value }];
     const nextPlotListOptions: any[] = [];
     const nextLogListOptions: any[] = [];
     const nextLogLists: DynamicObject = {};
@@ -393,8 +393,8 @@ const populatePlotAndLogListOptions = async (include_plots: boolean=true) => {
 
     Object.keys(nextLogLists).forEach((key) => {
       nextLogListOptions.push({
-        name: capitalCase(key) + ' Logs',
-        display_name: ''
+        name: key,
+        display_name: capitalCase(key) + ' Logs',
       });
     });
 
@@ -417,7 +417,7 @@ const populatePlotAndLogListOptions = async (include_plots: boolean=true) => {
       !currentPlotSelection ||
       !nextPlotList.some((obj) => obj.name === currentPlotSelection)
     ) {
-      selectedPlotName.value = plotListDefault.value;
+      selectedPlotName.value = '';
     }
 
     if (currentLogCategory && nextLogLists[currentLogCategory]) {
@@ -433,6 +433,11 @@ const populatePlotAndLogListOptions = async (include_plots: boolean=true) => {
     } else {
       selectedLogList.value = [];
       selectedLogName.value = '';
+    }
+
+    if ((!selectedPlotName.value || selectedPlotName.value === '') && logListOptions.value.length > 0) {
+      // start with first log if logs are available and nothing is already selected
+      selectedPlotName.value = logListOptions.value[0].name;
     }
   }
 };
@@ -768,6 +773,11 @@ watch(overallCalibrationValidationStatus, async (newCalibrationStatus, oldCalibr
           if (!elapsedTimeIntervalId.value) {
             createElapsedTimeInterval();
           }
+        } else if (getStatusResponse._data?.failure_messages) {
+          failureMessages.value = getStatusResponse._data.failure_messages.flatMap(failure_message => [
+            ...(failure_message.message ? [failure_message.message] : []),
+            ...(failure_message.errors ?? [])
+          ]);
         }
       } else {
         const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Error', detail: 'submit_date from server could not be converted to a Date object. Calibration job status is: ' + calibrationStatus.value, life: ToastTimeout.timeoutError };
@@ -912,7 +922,7 @@ watch(overallCalibrationValidationStatus, async (newCalibrationStatus, oldCalibr
 
 // Handle selectedPlotName changes
 watch(selectedPlotName, async () => {
-  if (selectedPlotName.value && selectedPlotName.value !== plotListDefault.value) {
+  if (selectedPlotName.value && selectedPlotName.value !== '') {
     let plotNotAvailableMessage: string = selectedPlotName.value?.toString() + ' plot is not yet available.';
 
     // provide custom message if missing selected plot is a validation plot
@@ -920,7 +930,7 @@ watch(selectedPlotName, async () => {
       plotNotAvailableMessage = selectedPlotName.value?.toString() + ' plot is not available until after validation is complete';
     }
 
-    if (selectedPlotName.value.includes(" Logs") && selectedPlotName.value.replace(" Logs", "").toLowerCase() in logLists.value) {
+    if (selectedPlotName.value != '' && selectedPlotName.value in logLists.value) {
       // selectedPlotName is a log 
       // reset all of our plot refs except for selectedPlotName
       resetUserPlotRefs(['selectedPlotName']);
@@ -969,7 +979,7 @@ watch(iteration, async () => {
   if (iteration.value !== undefined && iteration.value >= 0 && !isLoading.value) {
     // populate plotListOptions from iteration 1 onwards, in case a plot becomes available that wasn't before
     await populatePlotAndLogListOptions();
-    if (selectedPlotName.value && selectedPlotName.value != plotListDefault.value && !(selectedPlotName.value.includes(" Logs") && selectedPlotName.value.replace(" Logs", "").toLowerCase() in logLists.value)) {
+    if (selectedPlotName.value && selectedPlotName.value != '' && !(selectedPlotName.value.includes(" Logs") && selectedPlotName.value.replace(" Logs", "").toLowerCase() in logLists.value)) {
       let plotNotAvailableMessage: string = selectedPlotName.value?.toString() + ' plot is not yet available';
 
       // provide custom message if missing selected plot is a validation plot
@@ -1024,7 +1034,7 @@ const resetUserPlotRefs = (exceptions: any): void => {
 // Handle selectedLogCategory changes
 watch(selectedLogCategory, async () => {
   if (selectedLogCategory.value != '') {
-  selectedLogList.value = logLists.value[selectedLogCategory.value];
+    selectedLogList.value = logLists.value[selectedLogCategory.value];
     selectedLogName.value = '';
     nextTick(() => {
       // start with the first log
