@@ -562,7 +562,6 @@ const binaryValueBodyTemplate = (rowData: any) => {
 };
 
 const onRowDblClick = (e: any) => {
-  isLoading.value = true;
   const data = ref<any>();
   data.value = e.data;
   if (data.value.is_archived) {
@@ -580,7 +579,8 @@ const onRowDblClick = (e: any) => {
 const openSelectedCalibrationRun = async (data: any) => {
   calibrationJobId.value = data ? data.value?.calibration_run_id : selectedCalibrationRuns.value[0]?.calibration_run_id;
   isLoading.value = true;
-  queryUserCalibrationRunData().then(queryResponse => {
+  try {
+    const queryResponse = await queryUserCalibrationRunData();
     if (queryResponse?.status === 200) {
       userCalibrationRunData.value = queryResponse?._data;
       if (props.callGoToTab) {
@@ -612,8 +612,13 @@ const openSelectedCalibrationRun = async (data: any) => {
       const tMsg: ToastMessageOptions = { severity: "error", summary: 'Load Calibration Job Failed.', detail: tDetail, life: ToastTimeout.timeoutError };
       toast.add(tMsg); addToastRecord(tMsg);
     }
-  });
-  isLoading.value = false;
+  } catch (error) {
+    let tDetail = "Unable to Retrieve Calibration Job Data";
+    const tMsg: ToastMessageOptions = { severity: "error", summary: 'Load Calibration Job Failed.', detail: tDetail, life: ToastTimeout.timeoutError };
+    toast.add(tMsg); addToastRecord(tMsg);
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 const viewCalibrationDetails = async () => {
@@ -693,21 +698,25 @@ const createNewCalibration = async () => {
   });
 }
 
-const cloneSelectedCalibrationRun = () => {
+const cloneSelectedCalibrationRun = async() => {
   isLoading.value = true;
   const selectedRunId = selectedCalibrationRuns.value[0]?.calibration_run_id;
-  cloneCalibrationRun(selectedRunId).then(async (response) => {
+  try {
+    const response = await cloneCalibrationRun(selectedRunId);
     if (response.status === 200) {
       await fetchUserCalibrationJobsListData();
-      isLoading.value = false;
     } else {
-      isLoading.value = false;
       useApiErrorResponsePreprocess(response).forEach(message => {
         const tMsg: ToastMessageOptions = { severity: useApiResponseToastSeverityCode(response?.status), summary: 'Clone Calibration Job ' + selectedRunId + 'Failed.', detail: message, life: useApiResponseToastSeverityLife(response?.status) };
         toast.add(tMsg); addToastRecord(tMsg);
       });
     }
-  });
+  } catch (error) {
+    const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Clone Calibration Job ' + selectedRunId + 'Failed.', life: ToastTimeout.timeoutError };
+    toast.add(tMsg); addToastRecord(tMsg);
+  } finally {
+    isLoading.value = false;
+  }
   selectedCalibrationRuns.value = undefined;
 };
 
