@@ -15,7 +15,7 @@
         <div>
           <h1 class="mt-10 mb-6 text-3xl font-bold inline-block">Calibration Jobs</h1>
           <Button class="ngenButtonDiv ml-8" @click="createNewCalibration" aria-label="New Calibration Job"
-            title="New Calibration Job">New</Button>
+            title="New Calibration Job" :disabled="isLoading">New</Button>
           <br />
           <p class="prompt-txt mb-2" style="margin-top:-10px;">
             Double click on a row to open, or right click for more options. Click "New" button for a fresh setup.
@@ -578,8 +578,8 @@ const onRowDblClick = (e: any) => {
 }
 
 const openSelectedCalibrationRun = async (data: any) => {
+  calibrationJobId.value = data ? data.value?.calibration_run_id : selectedCalibrationRuns.value[0]?.calibration_run_id;
   isLoading.value = true;
-  calibrationJobId.value = data.value?.calibration_run_id;
   queryUserCalibrationRunData().then(queryResponse => {
     if (queryResponse?.status === 200) {
       userCalibrationRunData.value = queryResponse?._data;
