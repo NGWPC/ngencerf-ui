@@ -979,26 +979,6 @@ watch(iteration, async () => {
   if (iteration.value !== undefined && iteration.value >= 0 && !isLoading.value) {
     // populate plotListOptions from iteration 1 onwards, in case a plot becomes available that wasn't before
     await populatePlotAndLogListOptions();
-    if (selectedPlotName.value && selectedPlotName.value != '' && !(selectedPlotName.value.includes(" Logs") && selectedPlotName.value.replace(" Logs", "").toLowerCase() in logLists.value)) {
-      let plotNotAvailableMessage: string = selectedPlotName.value?.toString() + ' plot is not yet available';
-
-      // provide custom message if missing selected plot is a validation plot
-      if (ValidationPlotNames.includes(selectedPlotName.value as string)) {
-        plotNotAvailableMessage = selectedPlotName.value?.toString() + ' plot is not available until after validation is complete';
-      }
-      // get selected plot file name and url from server
-      const response: any = await queryGetPlot(selectedPlotName.value); // store this in RunStatusStore
-
-      if (response?._data?.plot_file_path && response?._data?.plot_url) {
-        selectedPlotFilename.value = response?._data?.plot_file_path;
-        selectedPlotFileUrl.value = response?._data?.plot_url;
-      } else {
-        selectedPlotFilename.value = "";
-        selectedPlotFileUrl.value = "";
-        const tMsg: ToastMessageOptions = { severity: 'warn', summary: 'Warning', detail: plotNotAvailableMessage, life: ToastTimeout.timeoutWarn };
-        toast.add(tMsg); addToastRecord(tMsg);
-      }
-    }
   }
 });
 
