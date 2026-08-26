@@ -929,7 +929,7 @@ watch(selectedPlotName, async () => {
     if (ValidationPlotNames.includes(selectedPlotName.value as string)) {
       plotNotAvailableMessage = selectedPlotName.value?.toString() + ' plot is not available until after validation is complete';
     }
-
+    
     if (selectedPlotName.value != '' && selectedPlotName.value in logLists.value) {
       // selectedPlotName is a log 
       // reset all of our plot refs except for selectedPlotName
