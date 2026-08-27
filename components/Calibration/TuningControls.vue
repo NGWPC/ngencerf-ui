@@ -863,13 +863,10 @@ const addCalibrationTuningParameter = () => {
     const isParameterAlreadyInTable = userSelectedCalibrationTuningParameters?.value?.find(param => param.name === parameter.name);
 
     // add parameter to table if it is not already in the table
-    if (!parameter) {
-      const tMsg: ToastMessageOptions = { severity: 'error', summary: 'Parameter not found', detail: selectedParameter.value + ' is not available. Please double check your Formulation.', life: ToastTimeout.timeoutError };
-      toast.add(tMsg); addToastRecord(tMsg);
-    } else if (isParameterAlreadyInTable) {
+    if (isParameterAlreadyInTable) {
       const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Parameter already added', detail: selectedParameter.value + ' has already been added.', life: ToastTimeout.timeoutError };
       toast.add(tMsg); addToastRecord(tMsg);
-    } else {
+    } else if (parameter) {
       userSelectedCalibrationTuningParameters?.value?.push({
         name: parameter.name,
         minimum: parameter.minimum,
@@ -884,9 +881,6 @@ const addCalibrationTuningParameter = () => {
       // scroll to the bottom of the page and table
       scrollToBottom();
     }
-  } else {
-    const tMsg: ToastMessageOptions = { severity: 'error', summary: 'No parameter selected', detail: 'Select a parameter before clicking the "Add" button.', life: ToastTimeout.timeoutError };
-    toast.add(tMsg); addToastRecord(tMsg);
   }
 };
 
