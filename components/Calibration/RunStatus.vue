@@ -51,7 +51,7 @@
                       </span>
                     </td>
                   </tr>
-                  <tr v-show="plotList.length > 1" height="32px" aria-label="Select Plot or Log Name" 
+                  <tr v-show="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status) && plotList.length > 1" height="32px" aria-label="Select Plot or Log Name" 
                     title="Select Plot or Log Name">
                     <th scope="row" class="text-right"><label for="DisplayOptions">Display</label></th>
                     <td class="pl-3">
@@ -447,6 +447,7 @@ const isMounted = ref(false);
 onMounted(async () => {
   isLoading.value = true;
   isMounted.value = true;
+  plotList.value = [];
 
   toast.removeAllGroups();
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
