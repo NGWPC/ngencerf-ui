@@ -448,6 +448,12 @@ onMounted(async () => {
   isLoading.value = true;
   isMounted.value = true;
   plotList.value = [];
+  clearInterval(elapsedTimeIntervalId.value);
+  clearInterval(calibrationStatusIntervalId.value);
+  clearInterval(validationsStatusIntervalId.value);
+  elapsedTimeIntervalId.value = undefined;
+  calibrationStatusIntervalId.value = undefined;
+  validationsStatusIntervalId.value = undefined;
 
   toast.removeAllGroups();
   let ele = document.getElementById("MainLeftDataArea") as HTMLElement;
