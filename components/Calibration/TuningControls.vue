@@ -178,7 +178,7 @@
               <div id="UploadParams" class="inline-block ml-3 mt-3" @click="addCalibrationTuningParameter">
                 <Button class="ngenButtonDiv-alt" aria-label="Add Selected Calibratable Parameter Button"
                   title="Add Selected Calibratable Parameter Button"
-                  :disabled="!isFormulationDataSaved() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">Add</Button>
+                  :disabled="!selectedParameter || !isFormulationDataSaved() || !isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">Add</Button>
               </div>
             </div>
           </div>
@@ -187,7 +187,7 @@
             <Button class="c-blue font-normal underline absolute bottom-[-5px] right-3 text-lg"
               @click="clearUserSelectedCalibrationTuningParameters()" aria-label="Clear Calibratable Parameters"
               title="Clear Calibratable Parameters"
-              :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">Clear</Button>
+              :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">Clear Table</Button>
           </div>
         </div>
       </div>
@@ -858,25 +858,30 @@ async function saveUserTuningParamsFiles(formData: FormData) {
  * Add selected calibration tuning parameter to the table when Add / Update button is clicked
  */
 const addCalibrationTuningParameter = () => {
-  const parameter = calibrationTuningParameters?.value?.find(param => param.output === selectedParameter.value);
-  const isParameterAlreadyInTable = userSelectedCalibrationTuningParameters?.value?.find(param => param.name === parameter.name);
+  if (selectedParameter.value) {
+    const parameter = calibrationTuningParameters?.value?.find(param => param.output === selectedParameter.value);
+    const isParameterAlreadyInTable = userSelectedCalibrationTuningParameters?.value?.find(param => param.name === parameter.name);
 
-  // add parameter to table if it is not already in the table
-  if (!isParameterAlreadyInTable && parameter) {
-    userSelectedCalibrationTuningParameters?.value?.push({
-      name: parameter.name,
-      minimum: parameter.minimum,
-      maximum: parameter.maximum,
-      initial_value: parameter.initial_value,
-      module: parameter.module,
-    });
+    // add parameter to table if it is not already in the table
+    if (isParameterAlreadyInTable) {
+      const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Parameter already added', detail: selectedParameter.value + ' has already been added.', life: ToastTimeout.timeoutError };
+      toast.add(tMsg); addToastRecord(tMsg);
+    } else if (parameter) {
+      userSelectedCalibrationTuningParameters?.value?.push({
+        name: parameter.name,
+        minimum: parameter.minimum,
+        maximum: parameter.maximum,
+        initial_value: parameter.initial_value,
+        module: parameter.module,
+      });
+
+      // note that calibratable parameters have changed
+      calibratableParametersHaveChanged.value = true;
+
+      // scroll to the bottom of the page and table
+      scrollToBottom();
+    }
   }
-
-  // note that calibratable parameters have changed
-  calibratableParametersHaveChanged.value = true;
-
-  // scroll to the bottom of the page and table
-  scrollToBottom();
 };
 
 /**
