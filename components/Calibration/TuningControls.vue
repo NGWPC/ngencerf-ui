@@ -187,7 +187,7 @@
             <Button class="c-blue font-normal underline absolute bottom-[-5px] right-3 text-lg"
               @click="clearUserSelectedCalibrationTuningParameters()" aria-label="Clear Calibratable Parameters"
               title="Clear Calibratable Parameters"
-              :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">Clear</Button>
+              :disabled="!isCalibrationJobStatusSavedOrReady(userCalibrationRunData?.status)">Clear Table</Button>
           </div>
         </div>
       </div>
