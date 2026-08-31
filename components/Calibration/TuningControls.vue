@@ -866,6 +866,7 @@ const addCalibrationTuningParameter = () => {
     if (isParameterAlreadyInTable) {
       const tMsg: ToastMessageOptions = { severity: 'info', summary: 'Parameter already added', detail: selectedParameter.value + ' has already been added.', life: ToastTimeout.timeoutError };
       toast.add(tMsg); addToastRecord(tMsg);
+      selectedParameter.value = undefined;
     } else if (parameter) {
       userSelectedCalibrationTuningParameters?.value?.push({
         name: parameter.name,
