@@ -36,8 +36,8 @@ env:
   NODE_VERSION: '24.16.0'
   # per-lane base images: development-pw builds on rockylinux, every other ref
   # on the node bookworm image (keep the node tag in sync with NODE_VERSION)
-  BASE_IMAGE_DEV: node:24.16.0-bookworm-slim
-  BASE_IMAGE_PW: rockylinux:9.3
+  BASE_IMAGE_DEV: node:24.16.0-bookworm-slim@sha256:2c87ef9bd3c6a3bd4b472b4bec2ce9d16354b0c574f736c476489d09f560a203
+  BASE_IMAGE_PW: rockylinux:9.3@sha256:d7be1c094cc5845ee815d4632fe377514ee6ebcf8efaed6892889657e5ddaaa6
 
 jobs:
   # set variables to use in other jobs
@@ -123,7 +123,15 @@ jobs:
               BASE_NAME="${BASE_IMAGE_DEV}"
             fi
           fi
-          BASE_INSPECT=$(skopeo inspect --override-os linux --override-arch amd64 "docker://${BASE_NAME}" 2>/dev/null || echo '{}')
+          # skopeo rejects tag@digest references; when the base is pinned by
+          # digest, inspect it as name@digest (drop the :tag on the last path component)
+          SKOPEO_REF="${BASE_NAME}"
+          if [[ "${BASE_NAME}" == *@* ]]; then
+            repo="${BASE_NAME%%@*}"; digest="${BASE_NAME##*@}"
+            case "${repo##*/}" in *:*) repo="${repo%:*}";; esac
+            SKOPEO_REF="${repo}@${digest}"
+          fi
+          BASE_INSPECT=$(skopeo inspect --override-os linux --override-arch amd64 "docker://${SKOPEO_REF}" 2>/dev/null || echo '{}')
           BASE_DIGEST=$(echo "$BASE_INSPECT" | jq -r '.Digest // "unknown"')
           BASE_REVISION=$(echo "$BASE_INSPECT" | jq -r '.Labels["org.opencontainers.image.revision"] // "unknown"')
 

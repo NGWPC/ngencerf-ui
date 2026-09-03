@@ -17,8 +17,15 @@ ARG IMAGE_NAMESPACE=ngwpc
 #
 # Pin NODE_VERSION for reproducible builds. Update deliberately when adopting
 # a newer supported Node.js release.
+#
+# The base is also pinned by digest so it cannot change underneath the same
+# tag. The digest is what gets pulled; the tag stays for readability. It is the
+# multi-arch index digest, so builds still resolve the right platform. Refresh
+# NODE_VERSION and NODE_IMAGE_DIGEST together:
+#   docker buildx imagetools inspect node:<version>-bookworm-slim
 ARG NODE_VERSION=24.16.0
-ARG BASE_IMAGE=node:${NODE_VERSION}-bookworm-slim
+ARG NODE_IMAGE_DIGEST=sha256:2c87ef9bd3c6a3bd4b472b4bec2ce9d16354b0c574f736c476489d09f560a203
+ARG BASE_IMAGE=node:${NODE_VERSION}-bookworm-slim@${NODE_IMAGE_DIGEST}
 
 ############################################################################
 # Application image
