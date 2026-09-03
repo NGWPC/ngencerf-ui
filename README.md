@@ -141,7 +141,8 @@ The Node and npm versions are pinned in four places — keep them in sync:
 
 - [`.nvmrc`](.nvmrc)
 - [`package.json`](package.json) — `engines.node`
-- [`Dockerfile`](Dockerfile) — `NODE_VERSION`, `NPM_VERSION`
+- [`Dockerfile`](Dockerfile) — `NODE_VERSION`, `NPM_VERSION`, and `NODE_IMAGE_DIGEST` (the base image is pinned
+  by digest; refresh it with `docker buildx imagetools inspect node:<version>-bookworm-slim`)
 - [`.github/workflows/cicd.yml`](.github/workflows/cicd.yml) — `NODE_VERSION`
 
 Prefer a Node **LTS** release. After bumping, re-verify from clean as in step 3, and rebuild the Docker
