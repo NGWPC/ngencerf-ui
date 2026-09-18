@@ -24,10 +24,10 @@ For Ubuntu 24.04+ (Noble) or RHEL 8/9, Podman 4.9+ is recommended.
 Build the image directly using the existing `Dockerfile`. Following NOAA-OWP/WRES conventions, use `--format docker` to ensure standard OCI/Docker compatibility:
 
 ```bash
-podman build --format docker -t local/ngencerf-ui:podman-test .
+podman build --ulimit nofile=65535:65535 --format docker -t local/ngencerf-ui:podman-test .
 ```
 
-*Note: The Dockerfile uses BuildKit syntax (`# syntax=docker/dockerfile:1.4`) and `--mount=type=cache` for apt and npm cache. Modern Podman (via Buildah $\ge$ 1.24) natively resolves these cache mounts locally without requiring a Docker daemon.*
+*Note: The Dockerfile uses BuildKit syntax (`# syntax=docker/dockerfile:1.4`) and `--mount=type=cache` for apt and npm cache. Modern Podman (via Buildah $\ge$ 1.24) natively resolves these cache mounts locally without requiring a Docker daemon. The `--ulimit nofile=65535:65535` flag ensures Vite and PostCSS have sufficient file descriptors when bundling assets during `npm run build`.*
 
 ---
 

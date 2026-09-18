@@ -45,10 +45,13 @@ jobs:
         id: build
         run: |
           set -euo pipefail
+          ulimit -n 65535 || true
           IMAGE_TAG="localhost/ngencerf-ui:podman-test"
 
           echo "Building ${IMAGE_TAG} using existing Dockerfile with --format docker..."
           podman build \
+            --ulimit nofile=65535:65535 \
+            --build-arg NGENCERF_BASE_URL="" \
             --format docker \
             -f Dockerfile \
             -t "${IMAGE_TAG}" \
