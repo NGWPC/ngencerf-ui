@@ -33,10 +33,11 @@ podman build --ulimit nofile=65535:65535 --format docker -t local/ngencerf-ui:po
 
 ## Smoke Verification
 
-### 1. Test Entrypoint & npm CLI
+### 1. Test Entrypoint & Node/npm CLI
 ```bash
-podman run --rm local/ngencerf-ui:podman-test --help
-# Expected: prints npm help output (exit code 0)
+podman run --rm local/ngencerf-ui:podman-test --version
+podman run --rm --entrypoint node local/ngencerf-ui:podman-test --version
+# Expected: prints npm and Node versions (e.g. 11.13.0, v24.16.0) and exits 0
 ```
 
 ### 2. Verify Compiled Nitro Server Bundle

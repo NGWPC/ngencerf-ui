@@ -63,8 +63,9 @@ jobs:
         run: |
           set -euo pipefail
           echo "Verifying entrypoint and npm CLI..."
-          podman run --rm "${IMAGE_LOCAL}" --help
-          echo "Probe 1 Passed: Entrypoint npm CLI executable."
+          podman run --rm "${IMAGE_LOCAL}" --version
+          podman run --rm --entrypoint node "${IMAGE_LOCAL}" --version
+          echo "Probe 1 Passed: Entrypoint npm CLI and Node runtime executable."
 
       - name: Smoke Probe 2 - Compiled Nitro Server Bundle Verification
         run: |
